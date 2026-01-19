@@ -5,7 +5,7 @@ import type { SessionData } from "./types";
 import { handleGetSessions, handleGetSessionById, handleGetMostRecent, handleGetAnalytics, handleGetSummary, handleValidate, handleGetOpenCodeInfo } from "./routes";
 import { handleWSOpen, handleWSMessage, handleWSClose, cleanup } from "./websocket";
 import { FileManager } from "./fileManager";
-import { SessionAnalyzer } from "./sessionAnalyzer";
+import { Sessions } from "./sessions";
 
 const PORT = parseInt(process.env.PORT || "3000");
 
@@ -85,8 +85,8 @@ async function handleAPI(req: Request, url: URL): Promise<Response> {
 }
 
 async function initializeAnalyzer(): Promise<void> {
-  const analyzer = new SessionAnalyzer();
-  await analyzer.init();
+  const sessions = new Sessions();
+  await sessions.init();
 }
 
 const server = serve({

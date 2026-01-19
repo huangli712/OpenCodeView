@@ -7,9 +7,9 @@ import type {
   ModelBreakdown,
   ProjectBreakdown
 } from "./types";
-import { CostCalculator } from "./costCalculator";
+import { CostCalculator } from "./cost";
 
-export class SessionAnalyzer {
+export class Sessions {
   private costCalculator: CostCalculator;
 
   constructor() {

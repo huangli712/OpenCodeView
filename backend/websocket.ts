@@ -1,6 +1,6 @@
 import type { SessionData, LiveSessionStatus } from "./types";
 import { FileManager } from "./fileManager";
-import { SessionAnalyzer } from "./sessionAnalyzer";
+import { Sessions } from "./sessions";
 import { lstatSync } from "node:fs";
 
 interface WSMessage {
@@ -92,10 +92,10 @@ export function handleWSClose(ws: WebSocket): void {
 }
 
 async function sendInitialData(ws: WebSocket, session: SessionData): Promise<void> {
-  const analyzer = new SessionAnalyzer();
+  const analyzer = new Sessions();
   await analyzer.init();
 
-  const cost = await analyzer.costCalculator.calculateSessionCost(session);
+  const cost = await sessions.costCalculator.calculateSessionCost(session);
   const duration = analyzer.getDurationHours(session);
   const projectName = analyzer.getProjectName(session);
   const burnRate = analyzer.calculateBurnRate(session);
@@ -176,10 +176,10 @@ function stopWatching(): void {
 }
 
 async function getSessionStatusData(session: SessionData): Promise<LiveSessionStatus> {
-  const analyzer = new SessionAnalyzer();
+  const analyzer = new Sessions();
   await analyzer.init();
 
-  const cost = await analyzer.costCalculator.calculateSessionCost(session);
+  const cost = await sessions.costCalculator.calculateSessionCost(session);
   const duration = analyzer.getDurationHours(session);
   const projectName = analyzer.getProjectName(session);
   const burnRate = analyzer.calculateBurnRate(session);

@@ -1,11 +1,11 @@
 import type { SessionData, SessionSummary } from "./types";
 import { FileManager } from "./fileManager";
-import { SessionAnalyzer } from "./sessionAnalyzer";
+import { Sessions } from "./sessions";
 import path from "node:path";
 import { existsSync, readdirSync } from "node:fs";
 
 const fileManager = new FileManager();
-const analyzer = new SessionAnalyzer();
+const analyzer = new Sessions();
 
 export async function handleGetSessions(req: Request, url: URL): Promise<Response> {
   const limit = parseInt(url.searchParams.get("limit") || "50");
@@ -49,7 +49,7 @@ export async function handleGetSessionById(req: Request, url: URL): Promise<Resp
     }, { status: 404 });
   }
 
-  const cost = await analyzer.costCalculator.calculateSessionCost(session);
+  const cost = await sessions.costCalculator.calculateSessionCost(session);
   const duration = analyzer.getDurationHours(session);
   const projectName = analyzer.getProjectName(session);
 
@@ -79,7 +79,7 @@ export async function handleGetMostRecent(req: Request): Promise<Response> {
 
   await analyzer.init();
 
-  const cost = await analyzer.costCalculator.calculateSessionCost(session);
+  const cost = await sessions.costCalculator.calculateSessionCost(session);
   const duration = analyzer.getDurationHours(session);
   const projectName = analyzer.getProjectName(session);
   const burnRate = analyzer.calculateBurnRate(session);
