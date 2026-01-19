@@ -1,6 +1,8 @@
 # OpenCodeView
 
-A tool for monitoring OpenCode AI sessions using Bun + TypeScript + HTML/CSS
+**Version: 0.1.0**
+
+OpenCode is an AI coding assistant that provides intelligent code suggestions and automation. OpenCodeView, inspired by Shlomob's ocmonitor-share project, is a web-based monitoring tool that helps you track and analyze your OpenCode usage, including session history, token consumption, and cost estimation. This project is built with Bun, TypeScript, HTML, and CSS.
 
 ## 📊 Features
 
@@ -22,9 +24,17 @@ If you haven't installed Bun yet:
 curl -fsSL https://bun.sh/install | bash
 ```
 
-### 2. Install OpenCodeView
+### 2. Download OpenCodeView
 
 ```bash
+# Clone the repository from GitHub
+git clone https://github.com/huangli712/OpenCodeView.git
+```
+
+### 3. Install OpenCodeView
+
+```bash
+# Navigate to the project directory
 cd OpenCodeView
 
 # Execute the startup script
@@ -34,6 +44,7 @@ cd OpenCodeView
 Or
 
 ```bash
+# Navigate to the project directory
 cd OpenCodeView
 
 # Install dependences
@@ -43,7 +54,7 @@ bun install
 bun run dev
 ```
 
-### 3. Access OpenCodeView
+### 4. Access OpenCodeView
 
 Open in your browser: **http://localhost:3000**
 
