@@ -22,27 +22,28 @@ If you haven't installed Bun yet:
 curl -fsSL https://bun.sh/install | bash
 ```
 
-### 2. Install Dependencies
+### 2. Install OpenCodeView
 
 ```bash
 cd OpenCodeView
-bun install
-```
 
-### 3. Start Server
-
-```bash
-# Development mode (with hot reload)
-bun run dev
-
-# Or run directly
-bun server.ts
-
-# Or use the startup script
+# Execute the startup script
 ./start.sh
 ```
 
-### 4. Access Application
+Or
+
+```bash
+cd OpenCodeView
+
+# Install dependences
+bun install
+
+# Development mode (with hot reload)
+bun run dev
+```
+
+### 3. Access OpenCodeView
 
 Open in your browser: **http://localhost:3000**
 
@@ -52,4 +53,4 @@ MIT License
 
 ## 🤝 Contributing
 
-Welcome to submit Issues and Pull Requests!
+Welcome to submit Issues and pull requests!
