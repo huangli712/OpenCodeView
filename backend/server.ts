@@ -15,7 +15,7 @@ async function handleStatic(req: Request, url: URL): Promise<Response> {
     pathname = "/index.html";
   }
 
-  const filePath = path.join(process.cwd(), "frontend", "public", pathname);
+  const filePath = path.join(process.cwd(), "frontend", pathname);
   const file = Bun.file(filePath);
 
   try {
