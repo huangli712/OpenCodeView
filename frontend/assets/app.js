@@ -296,7 +296,7 @@ class OpenCodeView {
       </div>
 
       <footer class="app-footer">
-        <span>Built with OpenCodeView</span>
+        <span>Built with OpenCodeView v0.1.0</span>
         <span class="footer-time">${new Date().toLocaleString()}</span>
       </footer>
     `;
@@ -368,10 +368,10 @@ class OpenCodeView {
         <div class="token-breakdown">
           <div class="token-bar">
             <div class="token-segment">
-              <div class="token-segment-label">Input</div>
-              <div class="token-segment-value">${this.formatNumber(session.totalTokens?.input || 0)}</div>
+              <div class="token-segment-label input-text">Input</div>
+              <div class="token-segment-value input-text">${this.formatNumber(session.totalTokens?.input || 0)}</div>
               <div class="token-segment-bar">
-                <div class="token-segment-fill input" style="width: ${((session.totalTokens?.input || 0) / totalTokens * 100).toFixed(1)}%"></div>
+                <div class="token-segment-fill input-fill" style="width: ${((session.totalTokens?.input || 0) / totalTokens * 100).toFixed(1)}%"></div>
               </div>
             </div>
             <div class="token-segment">

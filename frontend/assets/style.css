@@ -5,6 +5,7 @@
   --success: #10b981;
   --warning: #f59e0b;
   --danger: #ef4444;
+  --danger-light: #f87171;
   --bg: #f8fafc;
   --surface: #ffffff;
   --surface-alt: #f1f5f9;
@@ -62,7 +63,7 @@ body {
   color: var(--text-light);
   text-decoration: none;
   border-radius: 8px;
-  font-weight: 600;
+  font-weight: 500;
   transition: all 0.2s ease;
   position: relative;
 }
@@ -154,7 +155,7 @@ body {
 .summary-card .label {
   color: var(--text-light);
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 400;
   margin-bottom: 0.5rem;
 }
 
@@ -186,6 +187,7 @@ body {
 
 .models-section .section-title {
   margin-bottom: 1rem;
+  font-weight: 400;
 }
 
 .models-grid {
@@ -215,7 +217,7 @@ body {
 }
 
 .model-name {
-  font-weight: 500;
+  font-weight: 400;
   color: var(--text);
 }
 
@@ -227,10 +229,11 @@ body {
   justify-content: space-between;
   align-items: center;
   color: var(--text-light);
-  font-size: 0.875rem;
+  font-size: 1rem;
 }
 
 .footer-time {
+  font-size: 1rem;
   opacity: 0.7;
 }
 
@@ -308,7 +311,7 @@ body {
 
 .stat-label {
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 400;
   color: var(--text-light);
   margin-bottom: 0.25rem;
 }
@@ -316,7 +319,7 @@ body {
 .stat-value {
   font-size: 1.125rem;
   font-weight: 600;
-  color: var(--text);
+  color: var(--success);
 }
 
 .token-breakdown {
@@ -340,7 +343,7 @@ body {
 
 .token-segment-label {
   font-size: 0.75rem;
-  color: var(--text-light);
+  color: var(--danger-light);
 }
 
 .token-segment-bar {
@@ -357,7 +360,11 @@ body {
 }
 
 .token-segment-fill.input {
-  background: var(--primary);
+  background: var(--danger-light);
+}
+
+.input-text {
+  color: var(--danger-light);
 }
 
 .token-segment-fill.output {
