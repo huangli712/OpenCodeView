@@ -1,5 +1,5 @@
 import type { SessionData, SessionSummary } from "./types";
-import { FileManager } from "./fileManager";
+import { FileManager } from "./fileutil";
 import { Sessions } from "./sessions";
 import path from "node:path";
 import { existsSync, readdirSync } from "node:fs";

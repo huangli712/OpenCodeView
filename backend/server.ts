@@ -4,7 +4,7 @@ import type { SessionData } from "./types";
 
 import { handleGetSessions, handleGetSessionById, handleGetMostRecent, handleGetAnalytics, handleGetSummary, handleValidate, handleGetOpenCodeInfo } from "./routes";
 import { handleWSOpen, handleWSMessage, handleWSClose, cleanup } from "./websocket";
-import { FileManager } from "./fileManager";
+import { FileManager } from "./fileutil";
 import { Sessions } from "./sessions";
 
 const PORT = parseInt(process.env.PORT || "3000");

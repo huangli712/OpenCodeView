@@ -1,5 +1,5 @@
 import type { SessionData, LiveSessionStatus } from "./types";
-import { FileManager } from "./fileManager";
+import { FileManager } from "./fileutil";
 import { Sessions } from "./sessions";
 import { lstatSync } from "node:fs";
 

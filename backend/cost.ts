@@ -1,5 +1,5 @@
 import type { TokenUsage, InteractionFile, SessionData, PricingData } from "./types";
-import { FileManager } from "./fileManager";
+import { FileManager } from "./fileutil";
 
 export class CostCalculator {
   private pricingData: PricingData;
