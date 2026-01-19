@@ -206,32 +206,7 @@ const OPENCODE_STORAGE_PATH = "/your/custom/path";
 
 1. Check if `config/models.json` exists
 2. Verify model IDs match configuration file
-3. Update model pricing data
-
-## 📊 Comparison to Python ocmonitor
-
-| Feature | Python | OpenCodeView |
-|----------|---------|-------------|
-| Runtime | Python 3.7+ | Bun + TypeScript |
-| Dependencies | click, rich, pydantic | No external dependencies |
-| Performance | Standard | Fast 2-5x speedup |
-| Interface | CLI | Modernized Web UI |
-| Real-time updates | No | WebSocket |
-| Dev experience | Standard | Hot reload |
-| Cross-platform | Yes | Yes |
-
-## 🔄 Development
-
-```bash
-# Development mode (with hot reload)
-bun --watch backend/server.ts
-
-# Type checking
-bun run build
-
-# Check all files
-bun --print "import.meta.paths" | xargs ls
-```
+  3. Update model pricing data
 
 ## 📄 License
 
