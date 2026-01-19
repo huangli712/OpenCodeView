@@ -58,8 +58,8 @@ export async function handleGetSessionById(req: Request, url: URL): Promise<Resp
     }, { status: 400 });
   }
 
-  const sessions = await fileManager.loadAllSessions();
-  const session = sessions.find(s => s.sessionId === sessionId);
+  const allSessions = await fileManager.loadAllSessions();
+  const session = allSessions.find(s => s.sessionId === sessionId);
 
   if (!session) {
     return Response.json({
@@ -68,7 +68,7 @@ export async function handleGetSessionById(req: Request, url: URL): Promise<Resp
     }, { status: 404 });
   }
 
-  const cost = await sessions.costCalculator.calculateSessionCost(session);
+  const cost = await analyzer.costCalculator.calculateSessionCost(session);
   const duration = analyzer.getDurationHours(session);
   const projectName = analyzer.getProjectName(session);
 
@@ -98,7 +98,7 @@ export async function handleGetMostRecent(req: Request): Promise<Response> {
 
   await analyzer.init();
 
-  const cost = await sessions.costCalculator.calculateSessionCost(session);
+  const cost = await analyzer.costCalculator.calculateSessionCost(session);
   const duration = analyzer.getDurationHours(session);
   const projectName = analyzer.getProjectName(session);
   const burnRate = analyzer.calculateBurnRate(session);
