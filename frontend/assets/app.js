@@ -42,6 +42,11 @@ class OpenCodeView {
     window.addEventListener("beforeunload", () => {
       this.cleanup();
     });
+
+    window.addEventListener("hashchange", () => {
+      const hash = window.location.hash.slice(1) || "dashboard";
+      this.switchTab(hash);
+    });
   }
 
   setupAboutModal() {
@@ -187,7 +192,7 @@ class OpenCodeView {
 
     document.querySelectorAll(".nav-link").forEach(el => {
       el.classList.remove("active");
-      if ((el).dataset.tab === tab) {
+      if (el.dataset.tab === tab) {
         el.classList.add("active");
       }
     });
@@ -677,9 +682,13 @@ class OpenCodeView {
       if (result.success) {
         const app = document.getElementById("app");
         app.innerHTML = `
-          <button class="btn btn-secondary" onclick="location.hash='#sessions'" style="margin-bottom: 1rem;">← Back to List</button>
+          <button id="back-to-list-button" class="btn btn-secondary back-to-list">← Back to List</button>
           ${this.renderSessionDetails(result.data)}
         `;
+
+        document.getElementById("back-to-list-button").onclick = async () => {
+          await this.loadSessions();
+        };
       } else {
         this.showToast("Loading Session Details Failed", result.error || "Unknown Error", "error");
       }
