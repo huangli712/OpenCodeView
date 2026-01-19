@@ -58,6 +58,10 @@ bun run dev
 
 Open in your browser: **http://localhost:3000**
 
+### 5. Explore More
+
+For comprehensive documentation, please see [GUIDE.md](./GUIDE.md).
+
 ## 📄 License
 
 MIT License
