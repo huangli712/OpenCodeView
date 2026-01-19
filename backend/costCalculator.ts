@@ -1,0 +1,53 @@
+import type { TokenUsage, InteractionFile, SessionData, PricingData } from "./types";
+import { FileManager } from "./fileManager";
+
+export class CostCalculator {
+  private pricingData: PricingData;
+
+  constructor() {
+    this.pricingData = {};
+  }
+
+  async init(): Promise<void> {
+    const fileManager = new FileManager();
+    this.pricingData = await fileManager.loadPricing();
+  }
+
+  calculateInteractionCost(interaction: InteractionFile): number {
+    const pricing = this.pricingData[interaction.modelId];
+
+    if (!pricing) {
+      return 0;
+    }
+
+    const million = 1_000_000;
+    const tokens = interaction.tokens;
+
+    return (
+      (tokens.input / million) * pricing.input +
+      (tokens.output / million) * pricing.output +
+      (tokens.cache_write / million) * (pricing.cacheWrite || 0) +
+      (tokens.cache_read / million) * (pricing.cacheRead || 0)
+    );
+  }
+
+  calculateSessionCost(session: SessionData): number {
+    let total = 0;
+
+    for (const file of session.files) {
+      total += this.calculateInteractionCost(file);
+    }
+
+    return total;
+  }
+
+  async calculateSessionsCost(sessions: SessionData[]): Promise<number> {
+    let total = 0;
+
+    for (const session of sessions) {
+      total += this.calculateSessionCost(session);
+    }
+
+    return total;
+  }
+}

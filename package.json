@@ -1,0 +1,17 @@
+{
+  "name": "open-code-view",
+  "version": "1.0.0",
+  "description": "OpenCode Monitor with Bun + TypeScript + HTML/CSS",
+  "type": "module",
+  "scripts": {
+    "dev": "bun --watch backend/server.ts",
+    "start": "bun backend/server.ts",
+    "build": "bun build frontend/app.ts",
+    "serve": "bun server.ts"
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+    "bun-types": "latest"
+  }
+}
