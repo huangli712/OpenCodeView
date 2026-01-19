@@ -7,6 +7,8 @@ class OpenCodeView {
     this.refreshInterval = null;
     this.handlePaginationClick = async () => {};
     this.handleSessionCardClick = async () => {};
+    this.currentOffset = 0;
+    this.currentLimit = 10;
 
     this.setupEventListeners();
   }
@@ -307,7 +309,10 @@ class OpenCodeView {
     `;
   }
 
-  async loadSessions(limit = 20, offset = 0) {
+  async loadSessions(limit = 10, offset = 0) {
+    this.currentOffset = offset;
+    this.currentLimit = limit;
+
     const response = await fetch(`${this.apiBase}/sessions?limit=${limit}&offset=${offset}`);
     const result = await response.json();
 
@@ -687,7 +692,7 @@ class OpenCodeView {
         `;
 
         document.getElementById("back-to-list-button").onclick = async () => {
-          await this.loadSessions();
+          await this.loadSessions(this.currentLimit, this.currentOffset);
         };
       } else {
         this.showToast("Loading Session Details Failed", result.error || "Unknown Error", "error");
