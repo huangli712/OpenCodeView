@@ -1,47 +1,47 @@
 #!/usr/bin/env bash
-# OpenCodeView 启动脚本
+# OpenCodeView startup script
 
 set -e
 
 cd "$(dirname "$0")"
 
-echo "🚀 启动 OpenCodeView..."
+echo "🚀 Starting OpenCodeView..."
 
 if ! command -v bun &> /dev/null; then
-    echo "❌ 错误: Bun 未安装"
+    echo "❌ Error: Bun not installed"
     echo ""
-    echo "请先安装 Bun："
+    echo "Please install Bun first:"
     echo "  curl -fsSL https://bun.sh/install | bash"
     exit 1
 fi
 
 if [ ! -f "package.json" ]; then
-    echo "❌ 错误: 未找到 package.json"
-    echo "请确保在 OpenCodeView 根目录运行此脚本"
+    echo "❌ Error: package.json not found"
+    echo "Please ensure you run this script from the OpenCodeView root directory"
     exit 1
 fi
 
-echo "📦 安装依赖..."
+echo "📦 Installing dependencies..."
 bun install
 
 echo ""
-echo "🔧 验证 OpenCode 存储路径..."
+echo "🔧 Verifying OpenCode storage path..."
 if [ ! -d "~/.local/share/opencode/storage/message" ] && [ ! -d "~/.opencode/storage/message" ]; then
-    echo "⚠️  警告: 未找到 OpenCode 存储目录"
-    echo "   预期路径："
+    echo "⚠️ Warning: OpenCode storage directory not found"
+    echo "   Expected paths:"
     echo "   - ~/.local/share/opencode/storage/message"
     echo "   - ~/.opencode/storage/message"
     echo ""
-    echo "如果路径不同，请修改 backend/fileManager.ts 中的 OPENCODE_STORAGE_PATH"
+    echo "If the path is different, please modify OPENCODE_STORAGE_PATH in backend/fileutil.ts"
 fi
 
 echo ""
-echo "✅ 启动开发服务器..."
+echo "✅ Starting development server..."
 echo ""
-echo "📁 应用地址: http://localhost:3000"
-echo "📖 文档: 查看 README.md"
+echo "📁 Application URL: http://localhost:3000"
+echo "📖 Documentation: See README.md"
 echo ""
-echo "按 Ctrl+C 停止服务器"
+echo "Press Ctrl+C to stop the server"
 echo ""
 
 bun run dev
