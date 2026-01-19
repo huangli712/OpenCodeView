@@ -343,7 +343,7 @@ body {
 
 .token-segment-label {
   font-size: 0.75rem;
-  color: var(--danger-light);
+  color: var(--success);
 }
 
 .token-segment-bar {
@@ -359,12 +359,12 @@ body {
   transition: width 0.3s ease;
 }
 
-.token-segment-fill.input {
-  background: var(--danger-light);
-}
-
 .input-text {
   color: var(--danger-light);
+}
+
+.token-segment-fill.input {
+  background: var(--success);
 }
 
 .token-segment-fill.output {
@@ -372,13 +372,13 @@ body {
 }
 
 .token-segment-fill.cache {
-  background: var(--secondary);
+  background: var(--success);
 }
 
 .token-segment-value {
   font-size: 1.25rem;
   font-weight: 600;
-  color: var(--danger-light);
+  color: var(--success);
 }
 
 .data-table {
