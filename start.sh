@@ -36,7 +36,7 @@ if [ ! -d "~/.local/share/opencode/storage/message" ] && [ ! -d "~/.opencode/sto
 fi
 
 echo ""
-echo "✅ Starting development server..."
+echo "✅ Starting OpenCodeView server..."
 echo ""
 echo "📁 Application URL: http://localhost:3000"
 echo "📖 Documentation: See README.md"
