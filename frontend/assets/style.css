@@ -378,6 +378,7 @@ body {
 .token-segment-value {
   font-size: 1.25rem;
   font-weight: 600;
+  color: var(--danger-light);
 }
 
 .data-table {
