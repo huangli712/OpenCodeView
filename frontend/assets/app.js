@@ -345,7 +345,7 @@ class OpenCodeView {
     return `
       <div class="session-card" data-session-id="${session.sessionId}">
         <div class="session-header">
-          <div class="session-title"><span class="session-number">${index}.</span> ${this.truncate(session.sessionId, 50)}</div>
+          <div class="session-title" style="display: flex; gap: 0;">${index} / ${this.truncate(session.sessionId, 50)}</div>
           <div class="session-meta">
             <span class="badge badge-secondary">${session.files.length} interactions</span>
             <span class="badge badge-secondary">$${session.totalCost?.toFixed(2)}</span>
