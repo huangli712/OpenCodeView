@@ -657,7 +657,7 @@ class OpenCodeView {
       if (target.classList.contains("btn") && target.dataset.offset) {
         e.preventDefault();
         const offset = parseInt(target.dataset.offset);
-        await this.loadSessions(20, offset);
+        await this.loadSessions(this.currentLimit, offset);
       }
     };
 
