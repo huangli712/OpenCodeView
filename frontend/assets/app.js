@@ -414,7 +414,7 @@ class OpenCodeView {
         <span class="page-info">Showing ${offset + 1}-${Math.min(offset + limit, total)} of ${total}</span>
         <div class="pagination-buttons">
           ${offset > 0 ? `<button class="btn btn-secondary" data-offset="${offset - limit}">← Previous</button>` : ""}
-          ${hasMore ? `<button class="btn btn-primary" data-offset="${offset + limit}">Next →</button>` : ""}
+          ${hasMore ? `<button class="btn btn-secondary" data-offset="${offset + limit}">Next →</button>` : ""}
         </div>
       </div>
     `;
@@ -730,9 +730,12 @@ class OpenCodeView {
         </div>
 
         <h3 class="section-title" style="margin-top: 2rem;">Models Used</h3>
-        <div class="model-list">
+        <div class="models-grid">
           ${session.modelsUsed.map(model => `
-            <div class="model-tag">${model}</div>
+            <div class="model-card">
+              <span class="model-icon">🤖</span>
+              <span class="model-name">${model}</span>
+            </div>
           `).join("")}
         </div>
       </div>
