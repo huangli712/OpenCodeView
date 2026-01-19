@@ -16,9 +16,26 @@ export async function handleGetSessions(req: Request, url: URL): Promise<Respons
 
   const summary = await analyzer.generateSessionsSummary(sessions);
 
+  // Add computed fields (projectName, startTime, durationHours, totalCost) to each session
+  const sessionsWithComputedData = await Promise.all(
+    paginated.map(async (session) => {
+      const startTime = analyzer.getStartTime(session);
+      const durationHours = analyzer.getDurationHours(session);
+      const totalCost = await analyzer.costCalculator.calculateSessionCost(session);
+
+      return {
+        ...session,
+        projectName: analyzer.getProjectName(session),
+        startTime: startTime ? startTime.getTime() : null,
+        durationHours,
+        totalCost
+      };
+    })
+  );
+
   return Response.json({
     success: true,
-    data: paginated,
+    data: sessionsWithComputedData,
     summary,
     pagination: {
       offset,
