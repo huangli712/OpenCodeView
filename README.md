@@ -1,5 +1,7 @@
 # OpenCodeView - OpenCode AI Monitor
 
+**Version: 0.1.0**
+
 A tool for monitoring OpenCode AI sessions using Bun + TypeScript + HTML/CSS
 
 ## 📊 Features
@@ -232,18 +234,6 @@ bun run build
 # Check all files
 bun --print "import.meta.paths" | xargs ls
 ```
-
-## 🔄 Changelog
-
-### v1.0.0 (2025-01-19)
-- ✅ Initial release with complete Python ocmonitor feature parity
-- ✅ Bun + TypeScript + HTML/CSS tech stack
-- ✅ WebSocket live monitoring
-- ✅ Modernized responsive web interface
-- ✅ Complete type safety
-- ✅ WebSocket real-time monitoring
-- ✅ Modernized Web UI
-- ✅ Complete type safety
 
 ## 📄 License
 
