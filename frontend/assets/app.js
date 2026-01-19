@@ -327,9 +327,11 @@ class OpenCodeView {
       return;
     }
 
+    const { offset } = pagination;
+
     app.innerHTML = `
       <div class="session-list">
-        ${sessions.map(session => this.renderSessionCard(session)).join("")}
+        ${sessions.map((session, index) => this.renderSessionCard(session, offset + index + 1)).join("")}
       </div>
       ${this.renderPagination(pagination)}
     `;
@@ -337,13 +339,13 @@ class OpenCodeView {
     this.setupPaginationEvents();
   }
 
-  renderSessionCard(session) {
+  renderSessionCard(session, index) {
     const totalTokens = session.totalTokens?.total || 0;
 
     return `
       <div class="session-card" data-session-id="${session.sessionId}">
         <div class="session-header">
-          <div class="session-title">${this.truncate(session.sessionId, 50)}</div>
+          <div class="session-title"><span class="session-number">${index}.</span> ${this.truncate(session.sessionId, 50)}</div>
           <div class="session-meta">
             <span class="badge badge-secondary">${session.files.length} interactions</span>
             <span class="badge badge-secondary">$${session.totalCost?.toFixed(2)}</span>
@@ -399,9 +401,11 @@ class OpenCodeView {
 
     return `
       <div class="pagination">
-        ${offset > 0 ? `<button class="btn btn-secondary" data-offset="${offset - limit}">← Previous</button>` : ""}
         <span class="page-info">Showing ${offset + 1}-${Math.min(offset + limit, total)} of ${total}</span>
-        ${hasMore ? `<button class="btn btn-primary" data-offset="${offset + limit}">Next →</button>` : ""}
+        <div class="pagination-buttons">
+          ${offset > 0 ? `<button class="btn btn-secondary" data-offset="${offset - limit}">← Previous</button>` : ""}
+          ${hasMore ? `<button class="btn btn-primary" data-offset="${offset + limit}">Next →</button>` : ""}
+        </div>
       </div>
     `;
   }

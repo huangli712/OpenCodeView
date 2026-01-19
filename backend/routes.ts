@@ -11,12 +11,14 @@ export async function handleGetSessions(req: Request, url: URL): Promise<Respons
   const limit = parseInt(url.searchParams.get("limit") || "50");
   const offset = parseInt(url.searchParams.get("offset") || "0");
 
-  const sessions = await fileManager.loadAllSessions(limit + offset);
-  const paginated = sessions.slice(offset, offset + limit);
+  const allSessions = await fileManager.loadAllSessions();
+  const total = allSessions.length;
 
-  const summary = await analyzer.generateSessionsSummary(sessions);
+  const paginatedSessions = await fileManager.loadAllSessions(limit + offset);
+  const paginated = paginatedSessions.slice(offset, offset + limit);
 
-  // Add computed fields (projectName, startTime, durationHours, totalCost) to each session
+  const summary = await analyzer.generateSessionsSummary(paginatedSessions);
+
   const sessionsWithComputedData = await Promise.all(
     paginated.map(async (session) => {
       const startTime = analyzer.getStartTime(session);
@@ -40,8 +42,8 @@ export async function handleGetSessions(req: Request, url: URL): Promise<Respons
     pagination: {
       offset,
       limit,
-      total: sessions.length,
-      hasMore: offset + limit < sessions.length
+      total,
+      hasMore: offset + limit < total
     }
   });
 }

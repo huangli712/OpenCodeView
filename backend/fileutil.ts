@@ -210,14 +210,39 @@ export class FileManager {
   }
 
   async loadAllSessions(limit?: number): Promise<SessionData[]> {
-    const sessionPaths = await this.findSessions(limit);
-    const sessions: SessionData[] = [];
+    if (!limit) {
+      const sessionPaths = await this.findSessions();
+      const sessions: SessionData[] = [];
 
-    for (const sessionPath of sessionPaths) {
-      const session = await this.loadSession(sessionPath);
-      if (session) {
-        sessions.push(session);
+      for (const sessionPath of sessionPaths) {
+        const session = await this.loadSession(sessionPath);
+        if (session) {
+          sessions.push(session);
+        }
       }
+
+      return sessions;
+    }
+
+    const sessions: SessionData[] = [];
+    let pathsToCheck = limit * 3;
+    const maxPaths = 1000;
+
+    while (sessions.length < limit && pathsToCheck <= maxPaths) {
+      const sessionPaths = await this.findSessions(pathsToCheck);
+
+      for (let i = sessions.length; i < sessionPaths.length && sessions.length < limit; i++) {
+        const session = await this.loadSession(sessionPaths[i]);
+        if (session) {
+          sessions.push(session);
+        }
+      }
+
+      if (sessionPaths.length < pathsToCheck) {
+        break;
+      }
+
+      pathsToCheck *= 2;
     }
 
     return sessions;
