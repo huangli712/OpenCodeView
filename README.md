@@ -1,6 +1,4 @@
-# OpenCodeView - OpenCode AI Monitor
-
-**Version: 0.1.0**
+# OpenCodeView
 
 A tool for monitoring OpenCode AI sessions using Bun + TypeScript + HTML/CSS
 
