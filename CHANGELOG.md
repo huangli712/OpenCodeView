@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.4.3 (2026-01-21)
+- Added PRT file modal viewer - click type to view full PRT file content
+- Fixed PRT file type display parsing errors for complex types
+- Removed synthetic field from PRTInfo interface
+- Added rawData field to store complete PRT file data
+- Simplified PRT modal to show raw JSON content
+- Changed PRT type color from blue to green
+- Removed square brackets from PRT type display
+
 ## v0.4.2 (2026-01-20)
 - Added PRT files display in message cards
 - Backend: Added PART_STORAGE_PATH constant and loadPRTFiles() method
