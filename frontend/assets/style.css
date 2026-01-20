@@ -349,31 +349,27 @@ body {
 }
 
 .token-segment-fill {
-  height: 100%;
-  border-radius: 4px;
-  transition: width 0.3s ease;
-}
-
-.input-text {
-  color: var(--danger-light);
+   height: 100%;
+   border-radius: 4px;
+   transition: width 0.3s ease;
 }
 
 .token-segment-fill.input {
-  background: var(--success);
+   background: var(--success);
 }
 
 .token-segment-fill.output {
-  background: var(--success);
+   background: var(--success);
 }
 
 .token-segment-fill.cache {
-  background: var(--success);
+   background: var(--success);
 }
 
 .token-segment-value {
-  font-size: 1.00rem;
-  font-weight: 600;
-  color: var(--success);
+   font-size: 1.00rem;
+   font-weight: 600;
+   color: var(--success);
 }
 
 .data-table {

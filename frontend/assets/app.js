@@ -37,7 +37,7 @@ class OpenCodeView {
       this.setupPRTModal();
     });
 
-    document.querySelectorAll("[data-tab]").forEach(tab => {
+    document.querySelectorAll("[data-tab]").forEach((tab) => {
       tab.addEventListener("click", (e) => {
         e.preventDefault();
         this.switchTab(tab.dataset.tab || "dashboard");
@@ -107,7 +107,9 @@ class OpenCodeView {
     const title = document.getElementById("prt-modal-title");
     const content = document.getElementById("prt-modal-content");
 
-    if (!modal || !title || !content) return;
+    if (!modal || !title || !content) {
+      return;
+    }
 
     title.textContent = prtData.id;
 
@@ -120,16 +122,11 @@ class OpenCodeView {
     modal.classList.add("active");
   }
 
-  formatLabel(key) {
-    return key
-      .replace(/([A-Z])/g, ' $1')
-      .replace(/^./, str => str.toUpperCase())
-      .trim();
-  }
-
   async loadOpenCodeInfo() {
     const content = document.getElementById("about-content");
-    if (!content) return;
+    if (!content) {
+      return;
+    }
 
     try {
       const response = await fetch(`${this.apiBase}/opencode`);
@@ -147,22 +144,19 @@ class OpenCodeView {
 
   renderOpenCodeInfo(data) {
     const path = (p) => `<div class="about-item"><label>Path</label><span class="exists">${p}</span></div>`;
-    const count = (n, exists) => `<div class="about-item"><label>Count</label><span class="exists">${n}</span></div>`;
-    const status = (exists) => `<span class="${exists ? 'exists' : 'not-exists'}">${exists ? 'Yes' : 'No'}</span>`;
+    const count = (n) => `<div class="about-item"><label>Count</label><span class="exists">${n}</span></div>`;
 
     let mcpHtml = "";
     if (data.mcp.exists) {
       mcpHtml = `
         <div class="about-grid">
           ${path(data.mcp.path)}
-          ${count(data.mcp.serverCount, true)}
+          ${count(data.mcp.serverCount)}
         </div>
         <div style="margin-top: 0.75rem;">
           <label style="font-size: 0.75rem; color: var(--text-light); text-transform: uppercase;">MCP Servers</label>
           <div style="margin-top: 0.5rem;">
-            ${data.mcp.servers.length > 0
-              ? data.mcp.servers.map(s => `<span class="mcp-server-tag">${s}</span>`).join("")
-              : '<span class="not-exists">No MCP servers configured</span>'}
+            ${data.mcp.servers.length > 0 ? data.mcp.servers.map((s) => `<span class="mcp-server-tag">${s}</span>`).join("") : '<span class="not-exists">No MCP servers configured</span>'}
           </div>
         </div>
       `;
@@ -180,7 +174,7 @@ class OpenCodeView {
         <div class="about-grid">
           <div class="about-item">
             <label>Version</label>
-            <span class="${data.version !== 'Unknown' ? 'exists' : 'not-exists'}">${data.version}</span>
+            <span class="${data.version !== "Unknown" ? "exists" : "not-exists"}">${data.version}</span>
           </div>
         </div>
       </div>
@@ -189,7 +183,7 @@ class OpenCodeView {
         <h3>📁 Storage</h3>
         <div class="about-grid">
           ${path(data.storagePath)}
-          ${count(data.sessionCount, data.hasOpenCode)}
+          ${count(data.sessionCount)}
         </div>
       </div>
 
@@ -209,7 +203,7 @@ class OpenCodeView {
         <h3>🧠 Skills</h3>
         <div class="about-grid">
           ${path(data.skills.path)}
-          ${count(data.skills.count, data.skills.exists)}
+          ${count(data.skills.count)}
         </div>
       </div>
 
@@ -217,18 +211,20 @@ class OpenCodeView {
         <h3>🔌 Plugins</h3>
         <div class="about-grid">
           ${path(data.plugins.path)}
-          ${count(data.plugins.count, data.plugins.exists)}
+          ${count(data.plugins.count)}
         </div>
       </div>
     `;
   }
 
   async switchTab(tab) {
-    if (this.currentTab === tab) return;
+    if (this.currentTab === tab) {
+      return;
+    }
 
     this.currentTab = tab;
 
-    document.querySelectorAll(".nav-link").forEach(el => {
+    document.querySelectorAll(".nav-link").forEach((el) => {
       el.classList.remove("active");
       if (el.dataset.tab === tab) {
         el.classList.add("active");
@@ -271,9 +267,7 @@ class OpenCodeView {
   }
 
   async loadDashboard() {
-    const [summaryRes] = await Promise.all([
-      fetch(`${this.apiBase}/summary`)
-    ]);
+    const [summaryRes] = await Promise.all([fetch(`${this.apiBase}/summary`)]);
 
     const summary = await summaryRes.json();
 
@@ -329,7 +323,7 @@ class OpenCodeView {
       <div class="models-section">
         <h3 class="section-title">Models Used</h3>
         <div class="models-grid">
-          ${summary.modelsUsed.map(model => `
+          ${summary.modelsUsed.map((model) => `
             <div class="model-card">
               <span class="model-icon">🤖</span>
               <span class="model-name">${model}</span>
@@ -470,7 +464,7 @@ class OpenCodeView {
     `;
   }
 
-   async loadAnalytics(type) {
+  async loadAnalytics(type) {
     const response = await fetch(`${this.apiBase}/analytics?type=${type}`);
     const result = await response.json();
 
@@ -525,11 +519,11 @@ class OpenCodeView {
   }
 
   renderCharts(data, type) {
-    const labels = data.map(row => row.date || row.week || row.month);
-    const costs = data.map(row => row.cost);
-    const tokens = data.map(row => row.tokens);
-    const sessions = data.map(row => row.sessions);
-    const interactions = data.map(row => row.interactions);
+    const labels = data.map((row) => row.date || row.week || row.month);
+    const costs = data.map((row) => row.cost);
+    const tokens = data.map((row) => row.tokens);
+    const sessions = data.map((row) => row.sessions);
+    const interactions = data.map((row) => row.interactions);
 
     const chartOptions = {
       responsive: true,
@@ -543,7 +537,7 @@ class OpenCodeView {
         y: {
           beginAtZero: true,
           grid: {
-            color: 'rgba(0, 0, 0, 0.05)'
+            color: "rgba(0, 0, 0, 0.05)"
           }
         },
         x: {
@@ -669,7 +663,7 @@ class OpenCodeView {
             </tr>
           </thead>
           <tbody>
-            ${data.map(row => `
+            ${data.map((row) => `
               <tr>
                 <td>${row.date || row.week || row.month}</td>
                 <td>${this.formatNumber(row.sessions)}</td>
@@ -694,7 +688,7 @@ class OpenCodeView {
             </tr>
           </thead>
           <tbody>
-            ${data.map(row => `
+            ${data.map((row) => `
               <tr>
                 <td><span class="model-tag">${row.modelId}</span></td>
                 <td>${this.formatNumber(row.sessions)}</td>
@@ -720,7 +714,7 @@ class OpenCodeView {
             </tr>
           </thead>
           <tbody>
-            ${data.map(row => `
+            ${data.map((row) => `
               <tr>
                 <td><strong>${row.projectName}</strong></td>
                 <td>${this.formatNumber(row.sessions)}</td>
@@ -735,10 +729,10 @@ class OpenCodeView {
       `;
     }
 
-     return "";
-   }
+    return "";
+  }
 
-   showLoading() {
+  showLoading() {
     const app = document.getElementById("app");
 
     app.innerHTML = `
@@ -846,19 +840,13 @@ class OpenCodeView {
 
         this.setupMessagePaginationEvents();
 
-        console.log('Total messages:', result.data.messages?.length);
-
-        // Load PRT files for each message
-        const messageCards = document.querySelectorAll('.message-card');
+        const messageCards = document.querySelectorAll(".message-card");
         for (const card of messageCards) {
-          const messageId = card.querySelector('.message-id')?.textContent.replace('ID: ', '');
+          const messageId = card.querySelector(".message-id")?.textContent.replace("ID: ", "");
           if (messageId) {
-            const messageData = result.data.messages?.find(m => m.id === messageId);
+            const messageData = result.data.messages?.find((m) => m.id === messageId);
             if (messageData) {
-              console.log(`Found message ${messageId}, has prtFiles:`, !!messageData.prtFiles);
               this.updatePRTFilesDisplay(messageData, card);
-            } else {
-              console.warn(`Message data not found for ${messageId}`);
             }
           }
         }
@@ -899,7 +887,7 @@ class OpenCodeView {
 
         <h3 class="section-title" style="margin-top: 2rem;">Models Used</h3>
         <div class="models-grid">
-          ${session.modelsUsed.map(model => `
+          ${session.modelsUsed.map((model) => `
             <div class="model-card">
               <span class="model-icon">🤖</span>
               <span class="model-name">${model}</span>
@@ -920,124 +908,125 @@ class OpenCodeView {
       <div class="message-card ${msg.role}">
         <div class="message-header">
           <div class="message-role">
-            <span class="role-icon">${msg.role === 'user' ? '👤' : '🤖'}</span>
+            <span class="role-icon">${msg.role === "user" ? "👤" : "🤖"}</span>
             <span class="role-text">${this.formatRole(msg.role)}</span>
           </div>
           <div class="message-meta">
             <span class="message-id">ID: ${msg.id}</span>
-            ${msg.timestamp ? `<span class="message-time">${this.formatTimestamp(msg.timestamp)}</span>` : ''}
+            ${msg.timestamp ? `<span class="message-time">${this.formatTimestamp(msg.timestamp)}</span>` : ""}
           </div>
         </div>
 
         <div class="message-info-grid">
-          ${msg.mode ? `<div class="message-info-item"><span class="info-label">Mode:</span><span class="info-value">${msg.mode}</span></div>` : ''}
-          ${msg.agent ? `<div class="message-info-item"><span class="info-label">Agent:</span><span class="info-value">${msg.agent}</span></div>` : ''}
-          ${msg.providerID ? `<div class="message-info-item"><span class="info-label">Provider:</span><span class="info-value">${msg.providerID}</span></div>` : ''}
-          ${msg.modelId ? `<div class="message-info-item"><span class="info-label">Model:</span><span class="info-value">${msg.modelId}</span></div>` : ''}
+          ${msg.mode ? `<div class="message-info-item"><span class="info-label">Mode:</span><span class="info-value">${msg.mode}</span></div>` : ""}
+          ${msg.agent ? `<div class="message-info-item"><span class="info-label">Agent:</span><span class="info-value">${msg.agent}</span></div>` : ""}
+          ${msg.providerID ? `<div class="message-info-item"><span class="info-label">Provider:</span><span class="info-value">${msg.providerID}</span></div>` : ""}
+          ${msg.modelId ? `<div class="message-info-item"><span class="info-label">Model:</span><span class="info-value">${msg.modelId}</span></div>` : ""}
           <div class="message-info-item"><span class="info-label">Tokens:</span><span class="info-value">${this.formatNumber(msg.tokens || 0)}</span></div>
-          ${msg.cost !== undefined && msg.cost !== null ? `<div class="message-info-item"><span class="info-label">Cost:</span><span class="info-value">$${msg.cost.toFixed(2)}</span></div>` : ''}
-         </div>
+          ${msg.cost !== undefined && msg.cost !== null ? `<div class="message-info-item"><span class="info-label">Cost:</span><span class="info-value">$${msg.cost.toFixed(2)}</span></div>` : ""}
+        </div>
 
-         <div class="prt-files-section">
-           <div class="prt-files-header">
-             <span class="prt-files-title">PRT Files</span>
-             <span class="prt-files-count" id="prt-count-${msg.id}">0 files</span>
-           </div>
-           <div class="prt-files-content" id="prt-content-${msg.id}">
-             <div class="loading"><div class="spinner"></div><p>Loading...</p></div>
-           </div>
-         </div>
+        <div class="prt-files-section">
+          <div class="prt-files-header">
+            <span class="prt-files-title">PRT Files</span>
+            <span class="prt-files-count" id="prt-count-${msg.id}">0 files</span>
+          </div>
+          <div class="prt-files-content" id="prt-content-${msg.id}">
+            <div class="loading"><div class="spinner"></div><p>Loading...</p></div>
+          </div>
+        </div>
 
-         ${msg.title ? `
-           <div class="message-content">
-             <div class="message-title">${this.escapeHtml(msg.title)}</div>
-             ${msg.fileCount ? `<div class="message-files">${msg.fileCount} file(s) modified</div>` : ''}
-             ${msg.diffCount ? `<div class="message-diffs">${this.formatNumber(msg.diffCount)} line changes</div>` : ''}
-           </div>
-         ` : ''}
-       </div>
-     `).join('');
-   }
+        ${msg.title ? `
+          <div class="message-content">
+            <div class="message-title">${this.escapeHtml(msg.title)}</div>
+            ${msg.fileCount ? `<div class="message-files">${msg.fileCount} file(s) modified</div>` : ""}
+            ${msg.diffCount ? `<div class="message-diffs">${this.formatNumber(msg.diffCount)} line changes</div>` : ""}
+          </div>
+        ` : ""}
+      </div>
+    `).join("");
+  }
 
-     updatePRTFilesDisplay(messageData, cardElement) {
-     const messageId = messageData.id;
-     const countSpan = cardElement.querySelector(`#prt-count-${messageId}`);
-     const contentDiv = cardElement.querySelector(`#prt-content-${messageId}`);
+  updatePRTFilesDisplay(messageData, cardElement) {
+    const messageId = messageData.id;
+    const countSpan = cardElement.querySelector(`#prt-count-${messageId}`);
+    const contentDiv = cardElement.querySelector(`#prt-content-${messageId}`);
 
-     if (countSpan) {
-       if (messageData.prtFiles && messageData.prtFiles.length > 0) {
-         countSpan.textContent = `${messageData.prtFiles.length} file${messageData.prtFiles.length > 1 ? 's' : ''}`;
-       } else {
-         countSpan.textContent = '0 files';
-       }
-     }
+    if (countSpan) {
+      if (messageData.prtFiles && messageData.prtFiles.length > 0) {
+        countSpan.textContent = `${messageData.prtFiles.length} file${messageData.prtFiles.length > 1 ? "s" : ""}`;
+      } else {
+        countSpan.textContent = "0 files";
+      }
+    }
 
-     if (contentDiv) {
-       if (messageData.prtFiles && messageData.prtFiles.length > 0) {
-         contentDiv.innerHTML = messageData.prtFiles.map(prt => {
-           let typeStr = 'unknown';
+    if (contentDiv) {
+      if (messageData.prtFiles && messageData.prtFiles.length > 0) {
+        contentDiv.innerHTML = messageData.prtFiles.map((prt) => {
+          let typeStr = "unknown";
 
-           if (prt.type !== null && prt.type !== undefined) {
-             if (typeof prt.type === 'string') {
-               typeStr = prt.type.length > 50 ? prt.type.substring(0, 50) + '...' : prt.type;
-             } else if (typeof prt.type === 'object') {
-               typeStr = JSON.stringify(prt.type);
-             } else {
-               typeStr = String(prt.type);
-             }
-           }
+          if (prt.type !== null && prt.type !== undefined) {
+            if (typeof prt.type === "string") {
+              typeStr = prt.type.length > 50 ? prt.type.substring(0, 50) + "..." : prt.type;
+            } else if (typeof prt.type === "object") {
+              typeStr = JSON.stringify(prt.type);
+            } else {
+              typeStr = String(prt.type);
+            }
+          }
 
-           return `
-           <div class="prt-file-item" data-prt-id="${prt.id}">
-              <span class="prt-file-type" title="${this.escapeHtml(String(prt.type))}">${this.escapeHtml(typeStr)}</span>
-              <span class="prt-file-id">${prt.id}</span>
-            </div>
-          `;
-         }).join('');
+          return `
+            <div class="prt-file-item" data-prt-id="${prt.id}">
+               <span class="prt-file-type" title="${this.escapeHtml(String(prt.type))}">${this.escapeHtml(typeStr)}</span>
+               <span class="prt-file-id">${prt.id}</span>
+             </div>
+           `;
+        }).join("");
 
-         // Add click event listeners to PRT type elements
-         contentDiv.querySelectorAll('.prt-file-type').forEach(typeEl => {
-           typeEl.addEventListener('click', (e) => {
-             e.stopPropagation();
-             const prtId = typeEl.closest('.prt-file-item')?.dataset.prtId;
-             if (prtId) {
-               const prtData = messageData.prtFiles.find(p => p.id === prtId);
-               if (prtData) {
-                 this.showPRTModal(prtData);
-               }
-             }
-           });
-         });
-       } else {
-         contentDiv.innerHTML = '<div class="prt-empty">No PRT files</div>';
-       }
-     }
-   }
+        contentDiv.querySelectorAll(".prt-file-type").forEach((typeEl) => {
+          typeEl.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const prtId = typeEl.closest(".prt-file-item")?.dataset.prtId;
+            if (prtId) {
+              const prtData = messageData.prtFiles.find((p) => p.id === prtId);
+              if (prtData) {
+                this.showPRTModal(prtData);
+              }
+            }
+          });
+        });
+      } else {
+        contentDiv.innerHTML = '<div class="prt-empty">No PRT files</div>';
+      }
+    }
+  }
 
-   formatRole(role) {
+  formatRole(role) {
     const roleMap = {
-      'user': 'User',
-      'assistant': 'Assistant',
-      'system': 'System'
+      "user": "User",
+      "assistant": "Assistant",
+      "system": "System"
     };
     return roleMap[role] || role;
   }
 
   formatTimestamp(timestamp) {
-    if (!timestamp) return '';
+    if (!timestamp) {
+      return "";
+    }
     const date = new Date(timestamp);
-    return date.toLocaleString('zh-CN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
+    return date.toLocaleString("zh-CN", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit"
     });
   }
 
   escapeHtml(text) {
-    const div = document.createElement('div');
+    const div = document.createElement("div");
     div.textContent = text;
     return div.innerHTML;
   }
@@ -1065,14 +1054,20 @@ class OpenCodeView {
     }
 
     const parts = [];
-    if (h > 0) parts.push(`${h} hours`);
-    if (m > 0) parts.push(`${m} minutes`);
+    if (h > 0) {
+      parts.push(`${h} hours`);
+    }
+    if (m > 0) {
+      parts.push(`${m} minutes`);
+    }
 
     return parts.join(" ");
   }
 
   truncate(str, length) {
-    if (str.length <= length) return str;
+    if (str.length <= length) {
+      return str;
+    }
     return str.slice(0, length - 3) + "...";
   }
 

@@ -8,7 +8,7 @@ const OPENCODE_STORAGE_PATH = (() => {
   const paths = [
     path.join(home, ".local", "share", "opencode", "storage", "message"),
     path.join(home, ".opencode", "storage", "message"),
-    path.join(home, ".config", "opencode", "storage", "message"),
+    path.join(home, ".config", "opencode", "storage", "message")
   ];
 
   for (const p of paths) {
@@ -27,7 +27,7 @@ const PART_STORAGE_PATH = (() => {
   const paths = [
     path.join(home, ".local", "share", "opencode", "storage", "part"),
     path.join(home, ".opencode", "storage", "part"),
-    path.join(home, ".config", "opencode", "storage", "part"),
+    path.join(home, ".config", "opencode", "storage", "part")
   ];
 
   for (const p of paths) {
@@ -61,21 +61,21 @@ export class FileManager {
 
       if (existsSync(OPENCODE_STORAGE_PATH)) {
         const entries = readdirSync(OPENCODE_STORAGE_PATH, { withFileTypes: true });
-        
+
         for (const entry of entries) {
           if (entry.isDirectory() && isSessionDir(entry.name)) {
             sessions.push(path.join(OPENCODE_STORAGE_PATH, entry.name));
           }
+        }
       }
-    }
 
-    sessions.sort((a, b) => {
-      const mtA = lstatSync(a).mtimeMs;
-      const mtB = lstatSync(b).mtimeMs;
-      return mtB - mtA;
-    });
+      sessions.sort((a, b) => {
+        const mtA = lstatSync(a).mtimeMs;
+        const mtB = lstatSync(b).mtimeMs;
+        return mtB - mtA;
+      });
 
-    return limit ? sessions.slice(0, limit) : sessions;
+      return limit ? sessions.slice(0, limit) : sessions;
     } catch (error) {
       console.error("Error finding sessions:", error);
       return [];
@@ -96,13 +96,13 @@ export class FileManager {
         }
       }
 
-    files.sort((a, b) => {
-      const mtA = lstatSync(a).mtimeMs;
-      const mtB = lstatSync(b).mtimeMs;
-      return mtB - mtA;
-    });
+      files.sort((a, b) => {
+        const mtA = lstatSync(a).mtimeMs;
+        const mtB = lstatSync(b).mtimeMs;
+        return mtB - mtA;
+      });
 
-    return files;
+      return files;
     } catch (error) {
       console.error(`Error finding JSON files in ${directory}:`, error);
       return [];
@@ -138,7 +138,9 @@ export class FileManager {
   }
 
   parseTimeData(data: any): TimeData | undefined {
-    if (!data.time) return undefined;
+    if (!data.time) {
+      return undefined;
+    }
 
     return {
       created: data.time.created,
@@ -147,8 +149,10 @@ export class FileManager {
   }
 
   extractModelName(modelId: string): string {
-    if (!modelId) return "unknown";
-    
+    if (!modelId) {
+      return "unknown";
+    }
+
     let normalized = modelId.toLowerCase();
 
     normalized = normalized.replace(/-\d{8}$/, "");
@@ -160,7 +164,9 @@ export class FileManager {
 
   async parseInteractionFile(filePath: string, sessionId: string): Promise<InteractionFile | null> {
     const data = await this.loadJSON(filePath);
-    if (!data) return null;
+    if (!data) {
+      return null;
+    }
 
     try {
       const modelId = this.extractModelName(data.modelID || "unknown");
@@ -197,15 +203,15 @@ export class FileManager {
       }
 
       const interactionFiles: InteractionFile[] = [];
-      
+
       for (const filePath of jsonFiles) {
         const interaction = await this.parseInteractionFile(filePath, sessionId);
         if (interaction) {
-          const totalTokens = interaction.tokens.input + 
-                            interaction.tokens.output + 
-                            interaction.tokens.cache_write + 
+          const totalTokens = interaction.tokens.input +
+                            interaction.tokens.output +
+                            interaction.tokens.cache_write +
                             interaction.tokens.cache_read;
-          
+
           if (totalTokens > 0) {
             interactionFiles.push(interaction);
           }
@@ -269,7 +275,7 @@ export class FileManager {
 
   async getMostRecentSession(): Promise<SessionData | null> {
     const sessionPaths = await this.findSessions(1);
-    
+
     if (sessionPaths.length === 0) {
       return null;
     }
@@ -289,7 +295,7 @@ export class FileManager {
     let sessionCount = 0;
     if (existsSync(storagePath)) {
       const entries = readdirSync(storagePath, { withFileTypes: true });
-      sessionCount = entries.filter(e => e.isDirectory() && isSessionDir(e.name)).length;
+      sessionCount = entries.filter((e) => e.isDirectory() && isSessionDir(e.name)).length;
     }
 
     return {
@@ -317,7 +323,7 @@ export class FileManager {
       const prtFiles: PRTInfo[] = [];
 
       for (const entry of entries) {
-        if (entry.isFile() && entry.name.endsWith('.json')) {
+        if (entry.isFile() && entry.name.endsWith(".json")) {
           const filePath = path.join(messagePath, entry.name);
           const content = await this.loadJSON<any>(filePath);
 

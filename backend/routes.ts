@@ -61,7 +61,7 @@ export async function handleGetSessionById(req: Request, url: URL): Promise<Resp
   }
 
   const allSessions = await fileManager.loadAllSessions();
-  const session = allSessions.find(s => s.sessionId === sessionId);
+  const session = allSessions.find((s) => s.sessionId === sessionId);
 
   if (!session) {
     return Response.json({
@@ -156,15 +156,16 @@ export async function handleGetAnalytics(req: Request, url: URL): Promise<Respon
   const sessions = await fileManager.loadAllSessions();
 
   switch (type) {
-    case "daily":
+    case "daily": {
       const daily = await analyzer.createDailyBreakdown(sessions);
       return Response.json({
         success: true,
         type: "daily",
         data: Array.from(daily.entries()).map(([date, stats]) => ({ date, ...stats }))
       });
+    }
 
-    case "weekly":
+    case "weekly": {
       const weekly = await analyzer.createWeeklyBreakdown(sessions, weekStart);
       return Response.json({
         success: true,
@@ -172,36 +173,41 @@ export async function handleGetAnalytics(req: Request, url: URL): Promise<Respon
         weekStart,
         data: Array.from(weekly.entries()).map(([date, stats]) => ({ date, ...stats }))
       });
+    }
 
-    case "monthly":
+    case "monthly": {
       const monthly = await analyzer.createMonthlyBreakdown(sessions);
       return Response.json({
         success: true,
         type: "monthly",
         data: Array.from(monthly.entries()).map(([date, stats]) => ({ date, ...stats }))
       });
+    }
 
-    case "models":
+    case "models": {
       const models = await analyzer.createModelBreakdown(sessions);
       return Response.json({
         success: true,
         type: "models",
         data: Array.from(models.entries()).map(([modelId, stats]) => ({ modelId, ...stats }))
       });
+    }
 
-    case "projects":
+    case "projects": {
       const projects = await analyzer.createProjectBreakdown(sessions);
       return Response.json({
         success: true,
         type: "projects",
         data: Array.from(projects.entries()).map(([name, stats]) => ({ projectName: name, ...stats }))
       });
+    }
 
-    default:
+    default: {
       return Response.json({
         success: false,
         error: `Invalid analytics type: ${type}`
       }, { status: 400 });
+    }
   }
 }
 
@@ -217,7 +223,6 @@ export async function handleGetSummary(req: Request): Promise<Response> {
 }
 
 export async function handleValidate(req: Request): Promise<Response> {
-  const fileManager = new FileManager();
   const path = fileManager.getOpenCodeStoragePath();
   const isValid = await fileManager.validatePath(path);
 
@@ -281,19 +286,26 @@ function formatMessages(session: SessionData): MessageInfo[] {
 }
 
 function getActivityStatus(end: Date | null): "active" | "recent" | "idle" | "inactive" {
-  if (!end) return "unknown";
+  if (!end) {
+    return "unknown";
+  }
 
   const now = new Date();
   const secondsAgo = (now.getTime() - end.getTime()) / 1000;
 
-  if (secondsAgo < 60) return "active";
-  if (secondsAgo < 300) return "recent";
-  if (secondsAgo < 1800) return "idle";
+  if (secondsAgo < 60) {
+    return "active";
+  }
+  if (secondsAgo < 300) {
+    return "recent";
+  }
+  if (secondsAgo < 1800) {
+    return "idle";
+  }
   return "inactive";
 }
 
 export async function handleGetOpenCodeInfo(req: Request): Promise<Response> {
-  const fileManager = new FileManager();
   const info = await fileManager.getOpenCodeInfo();
 
   const home = info.homePath;
@@ -312,7 +324,7 @@ export async function handleGetOpenCodeInfo(req: Request): Promise<Response> {
   if (mcpExists) {
     try {
       const entries = readdirSync(mcpPath);
-      mcpServers = entries.filter(e => e.endsWith(".json")).map(e => e.replace(".json", ""));
+      mcpServers = entries.filter((e) => e.endsWith(".json")).map((e) => e.replace(".json", ""));
     } catch (e) {}
   }
 
@@ -349,7 +361,9 @@ export async function handleGetOpenCodeInfo(req: Request): Promise<Response> {
           const content = await Bun.file(vPath).text();
           const pkg = JSON.parse(content);
           version = pkg.version || version;
-          if (version && version !== "Unknown") break;
+          if (version && version !== "Unknown") {
+            break;
+          }
         } catch (e) {}
       }
     }

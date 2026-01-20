@@ -7,62 +7,62 @@
     <link rel="stylesheet" href="/assets/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   </head>
-<body>
-  <nav class="navbar">
-    <div class="nav-brand">
-      <span class="brand-icon">👁️</span>
-      OpenCodeView
-    </div>
-    <div class="nav-links">
-      <a href="#" data-tab="dashboard" class="nav-link active">Dashboard</a>
-      <a href="#" data-tab="sessions" class="nav-link">Sessions</a>
-      <a href="#" data-tab="daily" class="nav-link">Daily</a>
-      <a href="#" data-tab="weekly" class="nav-link">Weekly</a>
-      <a href="#" data-tab="monthly" class="nav-link">Monthly</a>
-      <a href="#" data-tab="models" class="nav-link">Models</a>
-      <a href="#" data-tab="projects" class="nav-link">Projects</a>
-      <button id="about-btn" class="nav-link about-btn">
-        <span class="about-icon">ℹ️</span>
-        About OpenCode
-      </button>
-    </div>
-  </nav>
+  <body>
+    <nav class="navbar">
+      <div class="nav-brand">
+        <span class="brand-icon">👁️</span>
+        OpenCodeView
+      </div>
+      <div class="nav-links">
+        <a href="#" data-tab="dashboard" class="nav-link active">Dashboard</a>
+        <a href="#" data-tab="sessions" class="nav-link">Sessions</a>
+        <a href="#" data-tab="daily" class="nav-link">Daily</a>
+        <a href="#" data-tab="weekly" class="nav-link">Weekly</a>
+        <a href="#" data-tab="monthly" class="nav-link">Monthly</a>
+        <a href="#" data-tab="models" class="nav-link">Models</a>
+        <a href="#" data-tab="projects" class="nav-link">Projects</a>
+        <button id="about-btn" class="nav-link about-btn">
+          <span class="about-icon">ℹ️</span>
+          About OpenCode
+        </button>
+      </div>
+    </nav>
 
-  <main class="main-content">
-    <div id="app" class="app">
-      <div class="loading">
-        <div class="spinner"></div>
-        <p>Loading...</p>
+    <main class="main-content">
+      <div id="app" class="app">
+        <div class="loading">
+          <div class="spinner"></div>
+          <p>Loading...</p>
+        </div>
+      </div>
+    </main>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <div id="about-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>About OpenCode</h2>
+          <button class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body" id="about-content">
+          <div class="loading">Loading...</div>
+        </div>
       </div>
     </div>
-  </main>
 
-   <div id="toast-container" class="toast-container"></div>
+    <div id="prt-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="prt-modal-title">PRT File</h2>
+          <button class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body" id="prt-modal-content">
+          <div class="loading">Loading...</div>
+        </div>
+      </div>
+    </div>
 
-   <div id="about-modal" class="modal">
-     <div class="modal-content">
-       <div class="modal-header">
-         <h2>About OpenCode</h2>
-         <button class="modal-close">&times;</button>
-       </div>
-       <div class="modal-body" id="about-content">
-         <div class="loading">Loading...</div>
-       </div>
-     </div>
-   </div>
-
-   <div id="prt-modal" class="modal">
-     <div class="modal-content">
-       <div class="modal-header">
-         <h2 id="prt-modal-title">PRT File</h2>
-         <button class="modal-close">&times;</button>
-       </div>
-       <div class="modal-body" id="prt-modal-content">
-         <div class="loading">Loading...</div>
-       </div>
-     </div>
-   </div>
-
-   <script type="module" src="/assets/app.js"></script>
-</body>
+    <script type="module" src="/assets/app.js"></script>
+  </body>
 </html>

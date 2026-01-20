@@ -47,9 +47,11 @@ export class Sessions {
       }
     }
 
-    if (times.length === 0) return null;
+    if (times.length === 0) {
+      return null;
+    }
 
-    return new Date(Math.min(...times.map(t => t.getTime())));
+    return new Date(Math.min(...times.map((t) => t.getTime())));
   }
 
   getEndTime(session: SessionData): Date | null {
@@ -61,16 +63,20 @@ export class Sessions {
       }
     }
 
-    if (times.length === 0) return null;
+    if (times.length === 0) {
+      return null;
+    }
 
-    return new Date(Math.max(...times.map(t => t.getTime())));
+    return new Date(Math.max(...times.map((t) => t.getTime())));
   }
 
   getDurationHours(session: SessionData): number {
     const start = this.getStartTime(session);
     const end = this.getEndTime(session);
 
-    if (!start || !end) return 0;
+    if (!start || !end) {
+      return 0;
+    }
 
     return (end.getTime() - start.getTime()) / (1000 * 60 * 60);
   }
@@ -95,7 +101,7 @@ export class Sessions {
     }
 
     const projectPaths = session.files
-      .map(f => f.projectPath)
+      .map((f) => f.projectPath)
       .filter((p): p is string => !!p);
 
     if (projectPaths.length === 0) {
@@ -170,14 +176,18 @@ export class Sessions {
 
       const start = this.getStartTime(session);
       const end = this.getEndTime(session);
-      if (start) startTimes.push(start);
-      if (end) endTimes.push(end);
+      if (start) {
+        startTimes.push(start);
+      }
+      if (end) {
+        endTimes.push(end);
+      }
     }
 
     let dateRange = "Unknown";
     if (startTimes.length > 0 && endTimes.length > 0) {
-      const earliest = new Date(Math.min(...startTimes.map(t => t.getTime())));
-      const latest = new Date(Math.max(...endTimes.map(t => t.getTime())));
+      const earliest = new Date(Math.min(...startTimes.map((t) => t.getTime())));
+      const latest = new Date(Math.max(...endTimes.map((t) => t.getTime())));
 
       const earliestDate = earliest.toISOString().split("T")[0];
       const latestDate = latest.toISOString().split("T")[0];
@@ -205,7 +215,9 @@ export class Sessions {
 
     for (const session of sessions) {
       const start = this.getStartTime(session);
-      if (!start) continue;
+      if (!start) {
+        continue;
+      }
 
       const dateKey = start.toISOString().split("T")[0];
 
@@ -228,7 +240,7 @@ export class Sessions {
     }
 
     for (const [dateStr, day] of dailyMap) {
-      const sessionsInDay = sessions.filter(s => {
+      const sessionsInDay = sessions.filter((s) => {
         const start = this.getStartTime(s);
         return start && start.toISOString().split("T")[0] === dateStr;
       });
@@ -271,7 +283,7 @@ export class Sessions {
     }
 
     for (const [weekKey, week] of weeklyMap) {
-      const sessionsInWeek = sessions.filter(s => {
+      const sessionsInWeek = sessions.filter((s) => {
         const start = this.getStartTime(s);
         return start && week.days.includes(start.toISOString().split("T")[0]);
       });
@@ -305,7 +317,7 @@ export class Sessions {
     }
 
     for (const [monthKey, month] of monthlyMap) {
-      const sessionsInMonth = sessions.filter(s => {
+      const sessionsInMonth = sessions.filter((s) => {
         const start = this.getStartTime(s);
         return start && start.toISOString().slice(0, 7) === monthKey;
       });
@@ -335,7 +347,7 @@ export class Sessions {
         const model = modelMap.get(modelId)!;
         model.sessions++;
 
-        const modelFiles = session.files.filter(f => f.modelId === modelId);
+        const modelFiles = session.files.filter((f) => f.modelId === modelId);
         model.interactions += modelFiles.length;
 
         for (const file of modelFiles) {
@@ -345,7 +357,7 @@ export class Sessions {
     }
 
     for (const [modelId, model] of modelMap) {
-      const sessionsWithModel = sessions.filter(s => {
+      const sessionsWithModel = sessions.filter((s) => {
         const models = this.getModelsUsed(s);
         return models.includes(modelId);
       });
@@ -387,7 +399,7 @@ export class Sessions {
     }
 
     for (const [projectName, project] of projectMap) {
-      const sessionsInProject = sessions.filter(s => {
+      const sessionsInProject = sessions.filter((s) => {
         return this.getProjectName(s) === projectName;
       });
       project.cost = await this.costCalculator.calculateSessionsCost(sessionsInProject);
@@ -400,15 +412,21 @@ export class Sessions {
     const total = this.computeTotalTokens(session);
     const tokenCount = total.input + total.output + total.cache_write + total.cache_read;
 
-    if (tokenCount === 0) return 0;
+    if (tokenCount === 0) {
+      return 0;
+    }
 
     const start = this.getStartTime(session);
-    if (!start) return 0;
+    if (!start) {
+      return 0;
+    }
 
     const now = new Date();
     const durationSeconds = (now.getTime() - start.getTime()) / 1000;
 
-    if (durationSeconds <= 0) return 0;
+    if (durationSeconds <= 0) {
+      return 0;
+    }
 
     return tokenCount / (durationSeconds / 60);
   }
@@ -420,6 +438,7 @@ export class Sessions {
 
     const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
     const weekNo = Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7));
+
     return weekNo;
   }
 }
