@@ -112,6 +112,19 @@ export interface LiveSessionStatus {
   activityStatus: "active" | "recent" | "idle" | "inactive";
 }
 
+export interface PRTInfo {
+  id: string;
+  type: string;
+  text?: string;
+  synthetic?: boolean;
+  time?: {
+    start?: number;
+    end?: number;
+  };
+  messageID: string;
+  sessionID: string;
+}
+
 export interface MessageInfo {
   id: string;
   role: string;
@@ -125,4 +138,5 @@ export interface MessageInfo {
   title?: string;
   fileCount?: number;
   diffCount?: number;
+  prtFiles?: PRTInfo[];
 }

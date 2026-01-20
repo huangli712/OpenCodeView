@@ -1007,3 +1007,97 @@ body {
     align-items: center;
   }
 }
+
+/* PRT Files Section in Message Cards */
+.prt-files-section {
+  margin-top: 1.5rem;
+  border-top: 1px solid var(--border);
+  padding-top: 1.5rem;
+}
+
+.prt-files-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.prt-files-title {
+  font-weight: 600;
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.prt-files-count {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.prt-files-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.prt-file-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  background: var(--surface-alt);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.prt-file-item:hover {
+  background: var(--border);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px var(--shadow);
+}
+
+.prt-file-item-type {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  background: var(--primary);
+  color: white;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.prt-file-item-id {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.prt-empty {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.prt-error {
+  text-align: center;
+  padding: 2rem;
+  color: #dc2626;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .message-info-grid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
+
+  .message-info-item {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}

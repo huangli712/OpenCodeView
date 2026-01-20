@@ -1,6 +1,6 @@
 import path from "node:path";
 import { existsSync, readdirSync, lstatSync } from "node:fs";
-import type { TokenUsage, TimeData, InteractionFile, SessionData, PricingData } from "./types";
+import type { TokenUsage, TimeData, InteractionFile, SessionData, PricingData, PRTInfo } from "./types";
 
 const OPENCODE_STORAGE_PATH = (() => {
   const home = process.env.HOME || process.env.USERPROFILE || "";
@@ -9,6 +9,25 @@ const OPENCODE_STORAGE_PATH = (() => {
     path.join(home, ".local", "share", "opencode", "storage", "message"),
     path.join(home, ".opencode", "storage", "message"),
     path.join(home, ".config", "opencode", "storage", "message"),
+  ];
+
+  for (const p of paths) {
+    const exists = existsSync(p);
+    if (exists) {
+      return p;
+    }
+  }
+
+  return paths[0];
+})();
+
+const PART_STORAGE_PATH = (() => {
+  const home = process.env.HOME || process.env.USERPROFILE || "";
+
+  const paths = [
+    path.join(home, ".local", "share", "opencode", "storage", "part"),
+    path.join(home, ".opencode", "storage", "part"),
+    path.join(home, ".config", "opencode", "storage", "part"),
   ];
 
   for (const p of paths) {
@@ -284,5 +303,52 @@ export class FileManager {
 
   async validatePath(pathStr: string): Promise<boolean> {
     return existsSync(pathStr);
+  }
+
+  async loadPRTFiles(messageId: string): Promise<PRTInfo[]> {
+    try {
+      const messagePath = path.join(PART_STORAGE_PATH, messageId);
+
+      if (!existsSync(messagePath)) {
+        return [];
+      }
+
+      const entries = readdirSync(messagePath, { withFileTypes: true });
+      const prtFiles: PRTInfo[] = [];
+
+      for (const entry of entries) {
+        if (entry.isFile() && entry.name.endsWith('.json')) {
+          const filePath = path.join(messagePath, entry.name);
+          const content = await this.loadJSON<any>(filePath);
+
+          if (content) {
+            prtFiles.push({
+              id: content.id,
+              type: content.type,
+              text: content.text,
+              synthetic: content.synthetic,
+              time: content.time,
+              messageID: content.messageID,
+              sessionID: content.sessionID
+            });
+          }
+        }
+      }
+
+      prtFiles.sort((a, b) => {
+        const timeA = a.time?.start || 0;
+        const timeB = b.time?.start || 0;
+        return timeA - timeB;
+      });
+
+      return prtFiles;
+    } catch (error) {
+      console.error(`Error loading PRT files for message ${messageId}:`, error);
+      return [];
+    }
+  }
+
+  getPartStoragePath(): string {
+    return PART_STORAGE_PATH;
   }
 }

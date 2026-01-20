@@ -73,11 +73,22 @@ export async function handleGetSessionById(req: Request, url: URL): Promise<Resp
   const cost = await analyzer.costCalculator.calculateSessionCost(session);
   const duration = analyzer.getDurationHours(session);
   const projectName = analyzer.getProjectName(session);
+
   const allMessages = formatMessages(session);
   const totalMessages = allMessages.length;
 
   const paginatedMessages = allMessages.slice(offset, offset + limit);
   const hasMore = offset + limit < totalMessages;
+
+  const messagesWithPRT = await Promise.all(
+    paginatedMessages.map(async (msg) => {
+      const prtFiles = await fileManager.loadPRTFiles(msg.id);
+      return {
+        ...msg,
+        prtFiles
+      };
+    })
+  );
 
   return Response.json({
     success: true,
@@ -89,7 +100,7 @@ export async function handleGetSessionById(req: Request, url: URL): Promise<Resp
       modelsUsed: analyzer.getModelsUsed(session),
       interactionCount: analyzer.getInteractionCount(session),
       displayTitle: analyzer.getDisplayTitle(session),
-      messages: paginatedMessages
+      messages: messagesWithPRT
     },
     pagination: {
       offset,

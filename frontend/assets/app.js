@@ -741,6 +741,23 @@ class OpenCodeView {
         };
 
         this.setupMessagePaginationEvents();
+
+        console.log('Total messages:', result.data.messages?.length);
+
+        // Load PRT files for each message
+        const messageCards = document.querySelectorAll('.message-card');
+        for (const card of messageCards) {
+          const messageId = card.querySelector('.message-id')?.textContent.replace('ID: ', '');
+          if (messageId) {
+            const messageData = result.data.messages?.find(m => m.id === messageId);
+            if (messageData) {
+              console.log(`Found message ${messageId}, has prtFiles:`, !!messageData.prtFiles);
+              this.updatePRTFilesDisplay(messageData, card);
+            } else {
+              console.warn(`Message data not found for ${messageId}`);
+            }
+          }
+        }
       } else {
         this.showToast("Loading Session Details Failed", result.error || "Unknown Error", "error");
       }
@@ -815,20 +832,58 @@ class OpenCodeView {
           ${msg.modelId ? `<div class="message-info-item"><span class="info-label">Model:</span><span class="info-value">${msg.modelId}</span></div>` : ''}
           <div class="message-info-item"><span class="info-label">Tokens:</span><span class="info-value">${this.formatNumber(msg.tokens || 0)}</span></div>
           ${msg.cost !== undefined && msg.cost !== null ? `<div class="message-info-item"><span class="info-label">Cost:</span><span class="info-value">$${msg.cost.toFixed(2)}</span></div>` : ''}
-        </div>
+         </div>
 
-        ${msg.title ? `
-          <div class="message-content">
-            <div class="message-title">${this.escapeHtml(msg.title)}</div>
-            ${msg.fileCount ? `<div class="message-files">${msg.fileCount} file(s) modified</div>` : ''}
-            ${msg.diffCount ? `<div class="message-diffs">${this.formatNumber(msg.diffCount)} line changes</div>` : ''}
-          </div>
-        ` : ''}
-      </div>
-    `).join('');
-  }
+         <div class="prt-files-section">
+           <div class="prt-files-header">
+             <span class="prt-files-title">PRT Files</span>
+             <span class="prt-files-count" id="prt-count-${msg.id}">0 files</span>
+           </div>
+           <div class="prt-files-content" id="prt-content-${msg.id}">
+             <div class="loading"><div class="spinner"></div><p>Loading...</p></div>
+           </div>
+         </div>
 
-  formatRole(role) {
+         ${msg.title ? `
+           <div class="message-content">
+             <div class="message-title">${this.escapeHtml(msg.title)}</div>
+             ${msg.fileCount ? `<div class="message-files">${msg.fileCount} file(s) modified</div>` : ''}
+             ${msg.diffCount ? `<div class="message-diffs">${this.formatNumber(msg.diffCount)} line changes</div>` : ''}
+           </div>
+         ` : ''}
+       </div>
+     `).join('');
+   }
+
+   updatePRTFilesDisplay(messageData, cardElement) {
+     const messageId = messageData.id;
+     const countSpan = cardElement.querySelector(`#prt-count-${messageId}`);
+     const contentDiv = cardElement.querySelector(`#prt-content-${messageId}`);
+
+     console.log(`Updating PRT files for message ${messageId}:`, messageData.prtFiles);
+
+     if (countSpan) {
+       if (messageData.prtFiles && messageData.prtFiles.length > 0) {
+         countSpan.textContent = `${messageData.prtFiles.length} file${messageData.prtFiles.length > 1 ? 's' : ''}`;
+       } else {
+         countSpan.textContent = '0 files';
+       }
+     }
+
+     if (contentDiv) {
+       if (messageData.prtFiles && messageData.prtFiles.length > 0) {
+         contentDiv.innerHTML = messageData.prtFiles.map(prt => `
+           <div class="prt-file-item" data-prt-id="${prt.id}" data-message-id="${messageId}">
+             ${prt.id}
+           </div>
+         `).join('');
+       } else {
+         contentDiv.innerHTML = '<div class="prt-empty">No PRT files</div>';
+       }
+     }
+   }
+
+   formatRole(role) {
     const roleMap = {
       'user': 'User',
       'assistant': 'Assistant',
