@@ -111,3 +111,15 @@ export interface LiveSessionStatus {
   burnRate: number;
   activityStatus: "active" | "recent" | "idle" | "inactive";
 }
+
+export interface MessageInfo {
+  id: string;
+  role: string;
+  modelId?: string;
+  agent?: string;
+  timestamp?: number;
+  tokens?: number;
+  title?: string;
+  fileCount?: number;
+  diffCount?: number;
+}

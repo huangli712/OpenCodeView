@@ -303,7 +303,7 @@ class OpenCodeView {
       </div>
 
       <footer class="app-footer">
-        <span>Built with OpenCodeView v0.2.0</span>
+        <span>Built with OpenCodeView v0.3.0</span>
         <span class="footer-time">${new Date().toLocaleString()}</span>
       </footer>
     `;
@@ -738,8 +738,60 @@ class OpenCodeView {
             </div>
           `).join("")}
         </div>
+
+        <h3 class="section-title" style="margin-top: 2rem;">Messages</h3>
+        <div class="messages-list">
+          ${session.messages ? this.renderMessages(session.messages) : '<div class="empty-state">No messages available</div>'}
+        </div>
       </div>
     `;
+  }
+
+  renderMessages(messages) {
+    return messages.map((msg, index) => `
+      <div class="message-card ${msg.role}">
+        <div class="message-header">
+          <div class="message-role">
+            <span class="role-icon">${msg.role === 'user' ? '👤' : '🤖'}</span>
+            <span class="role-text">${this.formatRole(msg.role)}</span>
+          </div>
+          <div class="message-meta">
+            <span class="message-tokens">${this.formatNumber(msg.tokens || 0)} tokens</span>
+            ${msg.timestamp ? `<span class="message-time">${this.formatTimestamp(msg.timestamp)}</span>` : ''}
+          </div>
+        </div>
+        ${msg.modelId ? `<div class="message-model">Model: ${msg.modelId}</div>` : ''}
+        ${msg.agent ? `<div class="message-agent">Agent: ${msg.agent}</div>` : ''}
+        ${msg.title ? `
+          <div class="message-content">
+            <div class="message-title">${this.escapeHtml(msg.title)}</div>
+            ${msg.fileCount ? `<div class="message-files">${msg.fileCount} file(s) modified</div>` : ''}
+            ${msg.diffCount ? `<div class="message-diffs">${this.formatNumber(msg.diffCount)} line changes</div>` : ''}
+          </div>
+        ` : ''}
+      </div>
+    `).join('');
+  }
+
+  formatRole(role) {
+    const roleMap = {
+      'user': 'User',
+      'assistant': 'Assistant',
+      'system': 'System'
+    };
+    return roleMap[role] || role;
+  }
+
+  formatTimestamp(timestamp) {
+    if (!timestamp) return '';
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
   }
 
   formatNumber(num) {

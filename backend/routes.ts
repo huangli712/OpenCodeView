@@ -1,4 +1,4 @@
-import type { SessionData, SessionSummary } from "./types";
+import type { SessionData, SessionSummary, MessageInfo } from "./types";
 import { FileManager } from "./fileutil";
 import { Sessions } from "./sessions";
 import path from "node:path";
@@ -71,6 +71,7 @@ export async function handleGetSessionById(req: Request, url: URL): Promise<Resp
   const cost = await analyzer.costCalculator.calculateSessionCost(session);
   const duration = analyzer.getDurationHours(session);
   const projectName = analyzer.getProjectName(session);
+  const messages = formatMessages(session);
 
   return Response.json({
     success: true,
@@ -81,7 +82,8 @@ export async function handleGetSessionById(req: Request, url: URL): Promise<Resp
       projectName,
       modelsUsed: analyzer.getModelsUsed(session),
       interactionCount: analyzer.getInteractionCount(session),
-      displayTitle: analyzer.getDisplayTitle(session)
+      displayTitle: analyzer.getDisplayTitle(session),
+      messages
     }
   });
 }
@@ -215,6 +217,40 @@ export async function handleValidate(req: Request): Promise<Response> {
     path,
     hasSessions,
     warnings
+  });
+}
+
+function formatMessages(session: SessionData): MessageInfo[] {
+  return session.files.map((file, index) => {
+    const data = file.rawData;
+    const totalTokens = file.tokens.input +
+                      file.tokens.output +
+                      file.tokens.cache_write +
+                      file.tokens.cache_read;
+
+    let title: string | undefined;
+    let fileCount: number | undefined;
+    let diffCount: number | undefined;
+
+    if (data.role === "user" && data.summary) {
+      title = data.summary.title;
+      if (data.summary.diffs) {
+        fileCount = data.summary.diffs.length;
+        diffCount = data.summary.diffs.reduce((sum, diff) => sum + (diff.additions || 0) + (diff.deletions || 0), 0);
+      }
+    }
+
+    return {
+      id: data.id || `msg_${index}`,
+      role: data.role || "unknown",
+      modelId: data.modelID || data.model?.modelID,
+      agent: data.agent,
+      timestamp: data.time?.created || file.timeData?.created,
+      tokens: totalTokens,
+      title,
+      fileCount,
+      diffCount
+    };
   });
 }
 

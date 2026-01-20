@@ -839,3 +839,123 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* Message List Styles */
+.messages-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.message-card {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 1.5rem;
+  border-left: 4px solid var(--border);
+  transition: all 0.2s ease;
+}
+
+.message-card:hover {
+  box-shadow: 0 2px 8px var(--shadow);
+  transform: translateY(-1px);
+}
+
+.message-card.user {
+  border-left-color: var(--primary);
+}
+
+.message-card.assistant {
+  border-left-color: #4caf50;
+}
+
+.message-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.message-role {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.role-icon {
+  font-size: 1.25rem;
+}
+
+.role-text {
+  text-transform: capitalize;
+}
+
+.message-meta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.message-tokens {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.message-time {
+  display: inline-flex;
+  align-items: center;
+}
+
+.message-model,
+.message-agent {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.message-model {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  background: var(--surface-alt);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.message-content {
+  margin-top: 1rem;
+}
+
+.message-title {
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.75rem;
+  line-height: 1.5;
+}
+
+.message-files,
+.message-diffs {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-top: 0.25rem;
+  display: inline-block;
+  margin-right: 1rem;
+}
+
+@media (max-width: 768px) {
+  .message-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .message-card {
+    padding: 1rem;
+  }
+}

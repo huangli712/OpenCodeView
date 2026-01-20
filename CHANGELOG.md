@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.3.0 (2026-01-20)
+- Added message list display in session details page
+- Messages show role (user/assistant), timestamp, token usage
+- User messages display title and file modification info
+- Assistant messages show model and agent information
+- Enhanced session details with message history view
+- Added message list styling with role-based color coding
+
 ## v0.2.0 (2026-01-20)
 - Fixed sessions panel showing "Unknown" for all projects
 - Fixed "Invalid Date" display for session start times
