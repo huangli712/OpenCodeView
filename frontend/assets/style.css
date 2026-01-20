@@ -11,6 +11,7 @@
   --surface-alt: #f1f5f9;
   --text: #1e293b;
   --text-light: #64748b;
+  --text-secondary: #64748b;
   --border: #e2e8f0;
   --shadow: rgba(0, 0, 0, 0.1);
 }
@@ -1058,14 +1059,20 @@ body {
   box-shadow: 0 2px 4px var(--shadow);
 }
 
-.prt-file-item-type {
+.prt-file-type {
   font-size: 0.75rem;
   padding: 0.25rem 0.5rem;
-  border-radius: 12px;
-  background: var(--primary);
+  border-radius: 4px;
+  background: #3b82f6;
   color: white;
   text-transform: uppercase;
   font-weight: 500;
+  display: inline-block;
+}
+
+.prt-file-bracket {
+  color: var(--text-secondary);
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
 }
 
 .prt-file-item-id {

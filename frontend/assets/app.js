@@ -855,12 +855,10 @@ class OpenCodeView {
      `).join('');
    }
 
-   updatePRTFilesDisplay(messageData, cardElement) {
+    updatePRTFilesDisplay(messageData, cardElement) {
      const messageId = messageData.id;
      const countSpan = cardElement.querySelector(`#prt-count-${messageId}`);
      const contentDiv = cardElement.querySelector(`#prt-content-${messageId}`);
-
-     console.log(`Updating PRT files for message ${messageId}:`, messageData.prtFiles);
 
      if (countSpan) {
        if (messageData.prtFiles && messageData.prtFiles.length > 0) {
@@ -874,9 +872,10 @@ class OpenCodeView {
        if (messageData.prtFiles && messageData.prtFiles.length > 0) {
          contentDiv.innerHTML = messageData.prtFiles.map(prt => `
            <div class="prt-file-item" data-prt-id="${prt.id}" data-message-id="${messageId}">
-             ${prt.id}
-           </div>
-         `).join('');
+              <span class="prt-file-type">${prt.type || 'text'}</span>
+              <span class="prt-file-id">${prt.id}</span>
+            </div>
+          `).join('');
        } else {
          contentDiv.innerHTML = '<div class="prt-empty">No PRT files</div>';
        }
