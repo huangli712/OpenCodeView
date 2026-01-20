@@ -307,7 +307,7 @@ class OpenCodeView {
       </div>
 
       <footer class="app-footer">
-        <span>Built with OpenCodeView v0.4.0</span>
+        <span>Built with OpenCodeView v0.4.1</span>
         <span class="footer-time">${new Date().toLocaleString()}</span>
       </footer>
     `;
@@ -419,6 +419,20 @@ class OpenCodeView {
         <div class="pagination-buttons">
           ${offset > 0 ? `<button class="btn btn-secondary" data-offset="${offset - limit}">← Previous</button>` : ""}
           ${hasMore ? `<button class="btn btn-secondary" data-offset="${offset + limit}">Next →</button>` : ""}
+        </div>
+      </div>
+    `;
+  }
+
+  renderMessagePagination(pagination) {
+    const { offset, limit, total, hasMore } = pagination;
+
+    return `
+      <div class="pagination message-pagination">
+        <span class="page-info">Showing ${offset + 1}-${Math.min(offset + limit, total)} of ${total}</span>
+        <div class="pagination-buttons">
+          ${offset > 0 ? `<button class="btn btn-secondary message-page-btn" data-message-offset="${offset - limit}">← Previous</button>` : ""}
+          ${hasMore ? `<button class="btn btn-secondary message-page-btn" data-message-offset="${offset + limit}">Next →</button>` : ""}
         </div>
       </div>
     `;
@@ -686,9 +700,9 @@ class OpenCodeView {
     this.handleMessagePaginationClick = async (e) => {
       const target = e.target;
 
-      if (target.classList.contains("btn") && target.dataset.offset) {
+      if (target.classList.contains("message-page-btn")) {
         e.preventDefault();
-        const offset = parseInt(target.dataset.offset);
+        const offset = parseInt(target.dataset.messageOffset);
         await this.loadMessages(this.currentMessageLimit, offset);
       }
     };
@@ -719,7 +733,7 @@ class OpenCodeView {
         app.innerHTML = `
           <button id="back-to-list-button" class="btn btn-secondary back-to-list">← Back to List</button>
           ${this.renderSessionDetails(result.data)}
-          ${this.renderPagination(result.pagination)}
+          ${this.renderMessagePagination(result.pagination)}
         `;
 
         document.getElementById("back-to-list-button").onclick = async () => {

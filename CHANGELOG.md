@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.4.1 (2026-01-20)
+- Fixed message pagination conflicting with session pagination
+- Created independent renderMessagePagination() method
+- Added distinct CSS classes for message pagination (message-page-btn)
+- Used data-message-offset attribute instead of data-offset
+- Modified setupMessagePaginationEvents() to only handle message pagination clicks
+- Message pagination now correctly navigates messages, not sessions
+
 ## v0.4.0 (2026-01-20)
 - Added message pagination to session details page
 - Messages display 10 per page with Previous/Next navigation
