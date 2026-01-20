@@ -636,8 +636,8 @@ class OpenCodeView {
         datasets: [{
           label: "Interactions",
           data: interactions,
-          backgroundColor: "rgba(16, 185, 129, 0.8)",
-          borderColor: "rgba(16, 185, 129, 1)",
+          backgroundColor: "rgba(139, 92, 246, 0.8)",
+          borderColor: "rgba(139, 92, 246, 1)",
           borderWidth: 1,
           borderRadius: 4
         }]
