@@ -122,6 +122,13 @@ class OpenCodeView {
     modal.classList.add("active");
   }
 
+  formatLabel(key) {
+    return key
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/^./, str => str.toUpperCase())
+      .trim();
+  }
+
   async loadOpenCodeInfo() {
     const content = document.getElementById("about-content");
     if (!content) return;
