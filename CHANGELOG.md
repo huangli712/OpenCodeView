@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.5.0 (2026-01-21)
+- Added data visualization charts to Daily/Weekly/Monthly analytics
+- Implemented 4 interactive charts: Cost, Tokens, Sessions, Interactions over time
+- Integrated Chart.js library (v4.4.1) for chart rendering
+- Added Monthly tab with monthly statistics view
+- Fixed version number detection in About OpenCode modal (missing await keyword)
+- Changed version detection to use `opencode --version` command with package.json fallback
+- Removed status text from About modal ("OpenCode data found", "MCP directory not found", etc.)
+- Changed PATH and COUNT values color to success green (--success)
+- Split Sessions and Interactions into separate bar charts
+- Moved charts below tables in analytics views
+- Added spacing between tables and charts
+- Updated version to 0.5.0 across all files
+
 ## v0.4.4 (2026-01-21)
 - Removed Live Monitor feature and WebSocket backend module
 - Deleted backend/websocket.ts

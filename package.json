@@ -1,6 +1,6 @@
 {
   "name": "open-code-view",
-  "version": "0.4.4",
+  "version": "0.5.0",
   "description": "OpenCode Monitor with Bun + TypeScript + HTML/CSS",
   "type": "module",
   "scripts": {

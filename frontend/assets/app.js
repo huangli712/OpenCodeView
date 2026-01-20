@@ -146,8 +146,8 @@ class OpenCodeView {
   }
 
   renderOpenCodeInfo(data) {
-    const path = (p) => `<div class="about-item"><label>Path</label><span>${p}</span></div>`;
-    const count = (n, exists) => `<div class="about-item"><label>Count</label><span class="${exists ? 'exists' : 'not-exists'}">${n}</span></div>`;
+    const path = (p) => `<div class="about-item"><label>Path</label><span class="exists">${p}</span></div>`;
+    const count = (n, exists) => `<div class="about-item"><label>Count</label><span class="exists">${n}</span></div>`;
     const status = (exists) => `<span class="${exists ? 'exists' : 'not-exists'}">${exists ? 'Yes' : 'No'}</span>`;
 
     let mcpHtml = "";
@@ -171,9 +171,6 @@ class OpenCodeView {
         <div class="about-grid">
           ${path(data.mcp.path)}
         </div>
-        <div style="margin-top: 0.5rem;">
-          <span class="not-exists">MCP directory not found</span>
-        </div>
       `;
     }
 
@@ -194,16 +191,12 @@ class OpenCodeView {
           ${path(data.storagePath)}
           ${count(data.sessionCount, data.hasOpenCode)}
         </div>
-        <div style="margin-top: 0.5rem;">
-          <span class="${data.hasOpenCode ? 'exists' : 'not-exists'}">${data.hasOpenCode ? 'OpenCode data found' : 'No OpenCode data found'}</span>
-        </div>
       </div>
 
       <div class="about-section">
         <h3>⚙️ Configuration</h3>
         <div class="about-grid">
           ${path(data.configPath)}
-          ${status(data.hasOpenCode)}
         </div>
       </div>
 
@@ -218,9 +211,6 @@ class OpenCodeView {
           ${path(data.skills.path)}
           ${count(data.skills.count, data.skills.exists)}
         </div>
-        <div style="margin-top: 0.5rem;">
-          <span class="${data.skills.exists ? 'exists' : 'not-exists'}">${data.skills.count} skill${data.skills.count !== 1 ? 's' : ''} installed</span>
-        </div>
       </div>
 
       <div class="about-section">
@@ -228,9 +218,6 @@ class OpenCodeView {
         <div class="about-grid">
           ${path(data.plugins.path)}
           ${count(data.plugins.count, data.plugins.exists)}
-        </div>
-        <div style="margin-top: 0.5rem;">
-          <span class="${data.plugins.exists ? 'exists' : 'not-exists'}">${data.plugins.count} plugin${data.plugins.count !== 1 ? 's' : ''} installed</span>
         </div>
       </div>
     `;
@@ -267,6 +254,9 @@ class OpenCodeView {
           break;
         case "weekly":
           await this.loadAnalytics("weekly");
+          break;
+        case "monthly":
+          await this.loadAnalytics("monthly");
           break;
         case "models":
           await this.loadAnalytics("models");
@@ -349,7 +339,7 @@ class OpenCodeView {
       </div>
 
       <footer class="app-footer">
-        <span>Built with OpenCodeView v0.4.4</span>
+        <span>Built with OpenCodeView v0.5.0</span>
         <span class="footer-time">${new Date().toLocaleString()}</span>
       </footer>
     `;
@@ -497,6 +487,7 @@ class OpenCodeView {
     const titles = {
       daily: "Daily Usage",
       weekly: "Weekly Usage",
+      monthly: "Monthly Usage",
       models: "Models Analysis",
       projects: "Projects Analysis"
     };
@@ -504,9 +495,164 @@ class OpenCodeView {
     app.innerHTML = `
       <h2 class="section-title">${titles[type] || "Analysis"}</h2>
       ${this.renderAnalyticsTable(data, type)}
+      ${type === "daily" || type === "weekly" || type === "monthly" ? this.renderAnalyticsChart(data, type) : ""}
     `;
 
     this.setupPaginationEvents();
+
+    if (type === "daily" || type === "weekly" || type === "monthly") {
+      this.renderCharts(data, type);
+    }
+  }
+
+  renderAnalyticsChart(data, type) {
+    return `
+      <div class="charts-container">
+        <div class="chart-card">
+          <canvas id="costChart"></canvas>
+        </div>
+        <div class="chart-card">
+          <canvas id="tokensChart"></canvas>
+        </div>
+        <div class="chart-card">
+          <canvas id="sessionsChart"></canvas>
+        </div>
+        <div class="chart-card">
+          <canvas id="interactionsChart"></canvas>
+        </div>
+      </div>
+    `;
+  }
+
+  renderCharts(data, type) {
+    const labels = data.map(row => row.date || row.week || row.month);
+    const costs = data.map(row => row.cost);
+    const tokens = data.map(row => row.tokens);
+    const sessions = data.map(row => row.sessions);
+    const interactions = data.map(row => row.interactions);
+
+    const chartOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: false
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: {
+            color: 'rgba(0, 0, 0, 0.05)'
+          }
+        },
+        x: {
+          grid: {
+            display: false
+          }
+        }
+      }
+    };
+
+    new Chart(document.getElementById("costChart"), {
+      type: "bar",
+      data: {
+        labels,
+        datasets: [{
+          label: "Cost ($)",
+          data: costs,
+          backgroundColor: "rgba(59, 130, 246, 0.8)",
+          borderColor: "rgba(59, 130, 246, 1)",
+          borderWidth: 1,
+          borderRadius: 4
+        }]
+      },
+      options: {
+        ...chartOptions,
+        plugins: {
+          title: {
+            display: true,
+            text: "Cost Over Time",
+            font: { size: 16, weight: "600" }
+          }
+        }
+      }
+    });
+
+    new Chart(document.getElementById("tokensChart"), {
+      type: "bar",
+      data: {
+        labels,
+        datasets: [{
+          label: "Tokens",
+          data: tokens,
+          backgroundColor: "rgba(16, 185, 129, 0.8)",
+          borderColor: "rgba(16, 185, 129, 1)",
+          borderWidth: 1,
+          borderRadius: 4
+        }]
+      },
+      options: {
+        ...chartOptions,
+        plugins: {
+          title: {
+            display: true,
+            text: "Tokens Over Time",
+            font: { size: 16, weight: "600" }
+          }
+        }
+      }
+    });
+
+    new Chart(document.getElementById("sessionsChart"), {
+      type: "bar",
+      data: {
+        labels,
+        datasets: [{
+          label: "Sessions",
+          data: sessions,
+          backgroundColor: "rgba(245, 158, 11, 0.8)",
+          borderColor: "rgba(245, 158, 11, 1)",
+          borderWidth: 1,
+          borderRadius: 4
+        }]
+      },
+      options: {
+        ...chartOptions,
+        plugins: {
+          title: {
+            display: true,
+            text: "Sessions Over Time",
+            font: { size: 16, weight: "600" }
+          }
+        }
+      }
+    });
+
+    new Chart(document.getElementById("interactionsChart"), {
+      type: "bar",
+      data: {
+        labels,
+        datasets: [{
+          label: "Interactions",
+          data: interactions,
+          backgroundColor: "rgba(16, 185, 129, 0.8)",
+          borderColor: "rgba(16, 185, 129, 1)",
+          borderWidth: 1,
+          borderRadius: 4
+        }]
+      },
+      options: {
+        ...chartOptions,
+        plugins: {
+          title: {
+            display: true,
+            text: "Interactions Over Time",
+            font: { size: 16, weight: "600" }
+          }
+        }
+      }
+    });
   }
 
   renderAnalyticsTable(data, type) {

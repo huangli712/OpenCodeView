@@ -328,27 +328,30 @@ export async function handleGetOpenCodeInfo(req: Request): Promise<Response> {
     } catch (e) {}
   }
 
-  // Try to find OpenCode version
   let version = "Unknown";
-  const versionPaths = [
-    path.join(info.configPath, "package.json"),
-    path.join(info.configPath, "version.txt"),
-    path.join(info.configPath, "VERSION"),
-    path.join(home, ".local", "share", "opencode", "package.json")
-  ];
+  try {
+    const versionOutput = await Bun.$`opencode --version`.quiet().text();
+    if (versionOutput) {
+      const versionMatch = versionOutput.match(/(\d+\.\d+\.\d+)/);
+      if (versionMatch) {
+        version = versionMatch[1];
+      }
+    }
+  } catch (e) {
+    const versionPaths = [
+      path.join(info.configPath, "package.json"),
+      path.join(home, ".local", "share", "opencode", "package.json")
+    ];
 
-  for (const vPath of versionPaths) {
-    if (existsSync(vPath)) {
-      try {
-        if (vPath.endsWith("package.json")) {
-          const content = Bun.file(vPath).text();
+    for (const vPath of versionPaths) {
+      if (existsSync(vPath)) {
+        try {
+          const content = await Bun.file(vPath).text();
           const pkg = JSON.parse(content);
           version = pkg.version || version;
-        } else {
-          version = (await Bun.file(vPath).text()).trim();
-        }
-        if (version && version !== "Unknown") break;
-      } catch (e) {}
+          if (version && version !== "Unknown") break;
+        } catch (e) {}
+      }
     }
   }
 
