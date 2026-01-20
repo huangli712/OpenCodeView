@@ -36,6 +36,7 @@ class OpenCodeView {
     document.addEventListener("DOMContentLoaded", () => {
       this.init();
       this.setupAboutModal();
+      this.setupPRTModal();
     });
 
     document.querySelectorAll("[data-tab]").forEach(tab => {
@@ -80,6 +81,45 @@ class OpenCodeView {
         modal.classList.remove("active");
       }
     });
+  }
+
+  setupPRTModal() {
+    const modal = document.getElementById("prt-modal");
+    const closeBtn = modal?.querySelector(".modal-close");
+
+    closeBtn?.addEventListener("click", () => {
+      modal?.classList.remove("active");
+    });
+
+    modal?.addEventListener("click", (e) => {
+      if (e.target === modal) {
+        modal.classList.remove("active");
+      }
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && modal?.classList.contains("active")) {
+        modal.classList.remove("active");
+      }
+    });
+  }
+
+  showPRTModal(prtData) {
+    const modal = document.getElementById("prt-modal");
+    const title = document.getElementById("prt-modal-title");
+    const content = document.getElementById("prt-modal-content");
+
+    if (!modal || !title || !content) return;
+
+    title.textContent = prtData.id;
+
+    const dataToShow = prtData.rawData || prtData;
+
+    content.innerHTML = `
+      <pre class="prt-modal-text-full">${JSON.stringify(dataToShow, null, 2)}</pre>
+    `;
+
+    modal.classList.add("active");
   }
 
   async loadOpenCodeInfo() {
@@ -855,7 +895,7 @@ class OpenCodeView {
      `).join('');
    }
 
-    updatePRTFilesDisplay(messageData, cardElement) {
+     updatePRTFilesDisplay(messageData, cardElement) {
      const messageId = messageData.id;
      const countSpan = cardElement.querySelector(`#prt-count-${messageId}`);
      const contentDiv = cardElement.querySelector(`#prt-content-${messageId}`);
@@ -870,12 +910,40 @@ class OpenCodeView {
 
      if (contentDiv) {
        if (messageData.prtFiles && messageData.prtFiles.length > 0) {
-         contentDiv.innerHTML = messageData.prtFiles.map(prt => `
-           <div class="prt-file-item" data-prt-id="${prt.id}" data-message-id="${messageId}">
-              <span class="prt-file-type">${prt.type || 'text'}</span>
+         contentDiv.innerHTML = messageData.prtFiles.map(prt => {
+           let typeStr = 'unknown';
+
+           if (prt.type !== null && prt.type !== undefined) {
+             if (typeof prt.type === 'string') {
+               typeStr = prt.type.length > 50 ? prt.type.substring(0, 50) + '...' : prt.type;
+             } else if (typeof prt.type === 'object') {
+               typeStr = JSON.stringify(prt.type);
+             } else {
+               typeStr = String(prt.type);
+             }
+           }
+
+           return `
+           <div class="prt-file-item" data-prt-id="${prt.id}">
+              <span class="prt-file-type" title="${this.escapeHtml(String(prt.type))}">${this.escapeHtml(typeStr)}</span>
               <span class="prt-file-id">${prt.id}</span>
             </div>
-          `).join('');
+          `;
+         }).join('');
+
+         // Add click event listeners to PRT type elements
+         contentDiv.querySelectorAll('.prt-file-type').forEach(typeEl => {
+           typeEl.addEventListener('click', (e) => {
+             e.stopPropagation();
+             const prtId = typeEl.closest('.prt-file-item')?.dataset.prtId;
+             if (prtId) {
+               const prtData = messageData.prtFiles.find(p => p.id === prtId);
+               if (prtData) {
+                 this.showPRTModal(prtData);
+               }
+             }
+           });
+         });
        } else {
          contentDiv.innerHTML = '<div class="prt-empty">No PRT files</div>';
        }

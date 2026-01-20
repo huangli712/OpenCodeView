@@ -326,10 +326,10 @@ export class FileManager {
               id: content.id,
               type: content.type,
               text: content.text,
-              synthetic: content.synthetic,
               time: content.time,
               messageID: content.messageID,
-              sessionID: content.sessionID
+              sessionID: content.sessionID,
+              rawData: content
             });
           }
         }

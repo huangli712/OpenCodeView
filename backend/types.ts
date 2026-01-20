@@ -116,13 +116,13 @@ export interface PRTInfo {
   id: string;
   type: string;
   text?: string;
-  synthetic?: boolean;
   time?: {
     start?: number;
     end?: number;
   };
   messageID: string;
   sessionID: string;
+  rawData?: any;
 }
 
 export interface MessageInfo {
