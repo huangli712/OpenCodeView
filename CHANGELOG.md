@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.3.1 (2026-01-20)
+- Display full message ID instead of truncated
+- Reorder message metadata: Mode, Agent, Provider, Model, Tokens, Cost
+- Show full timestamp with date and time (YYYY/MM/DD HH:mm:ss)
+- Enhanced message info grid layout
+
 ## v0.3.0 (2026-01-20)
 - Added message list display in session details page
 - Messages show role (user/assistant), timestamp, token usage

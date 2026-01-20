@@ -116,9 +116,12 @@ export interface MessageInfo {
   id: string;
   role: string;
   modelId?: string;
+  providerID?: string;
+  mode?: string;
   agent?: string;
   timestamp?: number;
   tokens?: number;
+  cost?: number;
   title?: string;
   fileCount?: number;
   diffCount?: number;

@@ -244,9 +244,12 @@ function formatMessages(session: SessionData): MessageInfo[] {
       id: data.id || `msg_${index}`,
       role: data.role || "unknown",
       modelId: data.modelID || data.model?.modelID,
+      providerID: data.providerID,
+      mode: data.mode,
       agent: data.agent,
       timestamp: data.time?.created || file.timeData?.created,
       tokens: totalTokens,
+      cost: data.cost,
       title,
       fileCount,
       diffCount

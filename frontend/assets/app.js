@@ -303,7 +303,7 @@ class OpenCodeView {
       </div>
 
       <footer class="app-footer">
-        <span>Built with OpenCodeView v0.3.0</span>
+        <span>Built with OpenCodeView v0.3.1</span>
         <span class="footer-time">${new Date().toLocaleString()}</span>
       </footer>
     `;
@@ -756,12 +756,20 @@ class OpenCodeView {
             <span class="role-text">${this.formatRole(msg.role)}</span>
           </div>
           <div class="message-meta">
-            <span class="message-tokens">${this.formatNumber(msg.tokens || 0)} tokens</span>
+            <span class="message-id">ID: ${msg.id}</span>
             ${msg.timestamp ? `<span class="message-time">${this.formatTimestamp(msg.timestamp)}</span>` : ''}
           </div>
         </div>
-        ${msg.modelId ? `<div class="message-model">Model: ${msg.modelId}</div>` : ''}
-        ${msg.agent ? `<div class="message-agent">Agent: ${msg.agent}</div>` : ''}
+
+        <div class="message-info-grid">
+          ${msg.mode ? `<div class="message-info-item"><span class="info-label">Mode:</span><span class="info-value">${msg.mode}</span></div>` : ''}
+          ${msg.agent ? `<div class="message-info-item"><span class="info-label">Agent:</span><span class="info-value">${msg.agent}</span></div>` : ''}
+          ${msg.providerID ? `<div class="message-info-item"><span class="info-label">Provider:</span><span class="info-value">${msg.providerID}</span></div>` : ''}
+          ${msg.modelId ? `<div class="message-info-item"><span class="info-label">Model:</span><span class="info-value">${msg.modelId}</span></div>` : ''}
+          <div class="message-info-item"><span class="info-label">Tokens:</span><span class="info-value">${this.formatNumber(msg.tokens || 0)}</span></div>
+          ${msg.cost !== undefined && msg.cost !== null ? `<div class="message-info-item"><span class="info-label">Cost:</span><span class="info-value">$${msg.cost.toFixed(2)}</span></div>` : ''}
+        </div>
+
         ${msg.title ? `
           <div class="message-content">
             <div class="message-title">${this.escapeHtml(msg.title)}</div>
@@ -785,7 +793,14 @@ class OpenCodeView {
   formatTimestamp(timestamp) {
     if (!timestamp) return '';
     const date = new Date(timestamp);
-    return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+    return date.toLocaleString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
   }
 
   escapeHtml(text) {
