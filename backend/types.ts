@@ -99,19 +99,6 @@ export interface SessionSummary {
   dateRange: string;
 }
 
-export interface LiveSessionStatus {
-  sessionId: string;
-  displayTitle: string;
-  projectName: string;
-  interactionCount: number;
-  totalTokens: number;
-  totalCost: number;
-  modelsUsed: string[];
-  durationHours: number;
-  burnRate: number;
-  activityStatus: "active" | "recent" | "idle" | "inactive";
-}
-
 export interface PRTInfo {
   id: string;
   type: string;

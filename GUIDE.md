@@ -120,12 +120,6 @@ const OPENCODE_STORAGE_PATH = "/your/custom/path";
   - Displays PRT file IDs
   - Shows count of PRT files
 
-### Live Monitor
-- Real-time session updates via WebSocket (Bun runtime limitation - currently unavailable)
-- Current session status indicator
-- Real-time token consumption rate
-- Auto-detect session updates
-
 ### Analysis Reports
 - **Daily** - Daily usage statistics
 - **Weekly** - Weekly usage statistics (configurable start day)

@@ -3,7 +3,6 @@ import path from "node:path";
 import type { SessionData } from "./types";
 
 import { handleGetSessions, handleGetSessionById, handleGetMostRecent, handleGetAnalytics, handleGetSummary, handleValidate, handleGetOpenCodeInfo } from "./routes";
-import { handleWSOpen, handleWSMessage, handleWSClose, cleanup } from "./websocket";
 import { FileManager } from "./fileutil";
 import { Sessions } from "./sessions";
 
@@ -125,14 +124,12 @@ console.log(`📁 OpenCode storage path: ${new FileManager().getOpenCodeStorageP
 
 process.on("SIGINT", () => {
   console.log("\n👋 Shutting down gracefully...");
-  cleanup();
   server.stop();
   process.exit(0);
 });
 
 process.on("SIGTERM", () => {
   console.log("\n👋 Shutting down gracefully...");
-  cleanup();
   server.stop();
   process.exit(0);
 });

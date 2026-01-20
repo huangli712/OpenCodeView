@@ -1,7 +1,6 @@
 class OpenCodeView {
   constructor() {
     this.apiBase = "/api";
-    this.ws = null;
     this.currentTab = "dashboard";
     this.currentData = null;
     this.refreshInterval = null;
@@ -19,7 +18,6 @@ class OpenCodeView {
 
   async init() {
     await this.loadDashboard();
-    this.setupWebSocket();
     this.updateFooterTime();
     setInterval(() => this.updateFooterTime(), 1000);
     this.setupAboutModal();
@@ -264,9 +262,6 @@ class OpenCodeView {
         case "sessions":
           await this.loadSessions();
           break;
-        case "live":
-          await this.loadLiveMonitor();
-          break;
         case "daily":
           await this.loadAnalytics("daily");
           break;
@@ -485,74 +480,7 @@ class OpenCodeView {
     `;
   }
 
-  async loadLiveMonitor() {
-    const app = document.getElementById("app");
-
-    app.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">🔌</div>
-        <h3>Live Monitor暂not可用</h3>
-        <p>Bun runtime当agoversionnotsupport WebSocket feature</p>
-      </div>
-    `;
-  }
-
-  renderLiveDashboard(data) {
-    const app = document.getElementById("app");
-
-    app.innerHTML = `
-      <div class="live-dashboard">
-        <div class="live-header">
-          <div>
-            <div class="live-title">${data.displayTitle}</div>
-            <div class="session-meta">
-              <span class="badge badge-secondary">${data.sessionId}</span>
-            </div>
-          </div>
-          <div class="live-status">
-            <div class="status-dot ${data.activityStatus}"></div>
-            <div class="status-text">${this.getActivityStatusText(data.activityStatus)}</div>
-          </div>
-        </div>
-
-        <div class="live-grid">
-          <div class="live-card">
-            <div class="live-card-label">Interactions</div>
-            <div class="live-card-value">${this.formatNumber(data.interactionCount)}</div>
-          </div>
-          <div class="live-card">
-            <div class="live-card-label">Total Tokens</div>
-            <div class="live-card-value">${this.formatNumber(data.totalTokens)}</div>
-          </div>
-          <div class="live-card warning">
-            <div class="live-card-label">Total Cost</div>
-            <div class="live-card-value">$${data.totalCost.toFixed(2)}</div>
-          </div>
-          <div class="live-card">
-            <div class="live-card-label">Duration</div>
-            <div class="live-card-value">${this.formatDuration(data.durationHours)}</div>
-          </div>
-        </div>
-
-        <div class="live-grid">
-          <div class="live-card">
-            <div class="live-card-label">Burn Rate</div>
-            <div class="live-card-value">${data.burnRate.toFixed(1)} tokens/min</div>
-          </div>
-          <div class="live-card">
-            <div class="live-card-label">Project</div>
-            <div class="live-card-value">${data.projectName}</div>
-          </div>
-           <div class="live-card" style="grid-column: span 2;">
-             <div class="live-card-label">Models Used</div>
-             <div class="live-card-value" style="font-size: 1.25rem;">${data.modelsUsed.join(", ")}</div>
-           </div>
-        </div>
-      </div>
-    `;
-  }
-
-  async loadAnalytics(type) {
+   async loadAnalytics(type) {
     const response = await fetch(`${this.apiBase}/analytics?type=${type}`);
     const result = await response.json();
 
@@ -664,24 +592,7 @@ class OpenCodeView {
      return "";
    }
 
-   setupWebSocket() {
-    console.log("WebSocket disabled - Bun runtime does not fully support WebSocket");
-  }
-
-   updateLiveIndicator(connected) {
-    const indicator = document.querySelector(".live-indicator");
-    if (indicator) {
-      if (connected) {
-        indicator.style.background = "var(--success)";
-        indicator.style.animation = "pulse 2s infinite";
-      } else {
-        indicator.style.background = "var(--text-light)";
-        indicator.style.animation = "none";
-      }
-    }
-  }
-
-  showLoading() {
+   showLoading() {
     const app = document.getElementById("app");
 
     app.innerHTML = `
@@ -1019,21 +930,7 @@ class OpenCodeView {
     return str.slice(0, length - 3) + "...";
   }
 
-  getActivityStatusText(status) {
-    const statusMap = {
-      active: "Active",
-      recent: "Recent",
-      idle: "Idle",
-      inactive: "notActive"
-    };
-    return statusMap[status] || status;
-  }
-
   cleanup() {
-    if (this.ws) {
-      this.ws.close();
-    }
-
     if (this.refreshInterval) {
       clearInterval(this.refreshInterval);
     }

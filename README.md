@@ -9,7 +9,6 @@ OpenCode is an AI coding assistant that provides intelligent code suggestions an
 - **Session Analysis** - View detailed statistics of all OpenCode AI sessions
 - **Cost Calculation** - Accurate cost calculation based on token usage
 - **Time Reports** - Daily, weekly, monthly statistics
-- **Live Monitoring** - Real-time session updates via WebSocket
 - **Model Analysis** - Statistics and costs by model
 - **Project Analysis** - Development activity by project
 - **Message Details** - View PRT files associated with each message

@@ -1,15 +1,15 @@
 # Changelog
 
-## v0.4.3 (2026-01-21)
-- Added PRT file modal viewer - click type to view full PRT file content
-- Fixed PRT file type display parsing errors for complex types
-- Removed synthetic field from PRTInfo interface
-- Added rawData field to store complete PRT file data
-- Simplified PRT modal to show raw JSON content
-- Changed PRT type color from blue to green
-- Removed square brackets from PRT type display
+## v0.4.4 (2026-01-21)
+- Removed Live Monitor feature and WebSocket backend module
+- Deleted backend/websocket.ts
+- Removed LiveSessionStatus interface from types.ts
+- Removed Live Monitor tab from frontend
+- Removed loadLiveMonitor and related methods from app.js
+- Removed live-related CSS styles
+- Updated documentation to remove Live Monitor references
 
-## v0.4.2 (2026-01-20)
+## v0.4.3 (2026-01-21)
 - Added PRT files display in message cards
 - Backend: Added PART_STORAGE_PATH constant and loadPRTFiles() method
 - Backend: Added PRTInfo interface to types.ts
