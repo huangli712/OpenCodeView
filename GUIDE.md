@@ -107,9 +107,18 @@ const OPENCODE_STORAGE_PATH = "/your/custom/path";
 
 ### Session List
 - View all historical sessions
-- Paginated browsing (20 per page by default)
+- Paginated browsing (10 per page by default)
 - Click to view session details
 - Token usage visualization breakdown
+
+### Session Details
+- Detailed session information (interactions, cost, duration, models used)
+- Message history with pagination (10 messages per page)
+- Each message displays role, timestamp, model, agent, tokens, cost
+- PRT files displayed for each message
+  - Shows list of PRT files associated with the message
+  - Displays PRT file IDs
+  - Shows count of PRT files
 
 ### Live Monitor
 - Real-time session updates via WebSocket (Bun runtime limitation - currently unavailable)

@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.4.2 (2026-01-20)
+- Added PRT files display in message cards
+- Backend: Added PART_STORAGE_PATH constant and loadPRTFiles() method
+- Backend: Added PRTInfo interface to types.ts
+- Backend: Modified handleGetSessionById to load PRT files for each message
+- Frontend: Added PRT files section to message cards
+- Frontend: Added updatePRTFilesDisplay() method to show PRT files
+- Frontend: Added CSS styling for PRT files display
+- Updated version number to 0.4.2
+
 ## v0.4.1 (2026-01-20)
 - Fixed message pagination conflicting with session pagination
 - Created independent renderMessagePagination() method
