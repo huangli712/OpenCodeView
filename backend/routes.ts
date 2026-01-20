@@ -50,6 +50,8 @@ export async function handleGetSessions(req: Request, url: URL): Promise<Respons
 
 export async function handleGetSessionById(req: Request, url: URL): Promise<Response> {
   const sessionId = url.pathname.split("/").pop();
+  const limit = parseInt(url.searchParams.get("limit") || "50");
+  const offset = parseInt(url.searchParams.get("offset") || "0");
 
   if (!sessionId) {
     return Response.json({
@@ -71,7 +73,11 @@ export async function handleGetSessionById(req: Request, url: URL): Promise<Resp
   const cost = await analyzer.costCalculator.calculateSessionCost(session);
   const duration = analyzer.getDurationHours(session);
   const projectName = analyzer.getProjectName(session);
-  const messages = formatMessages(session);
+  const allMessages = formatMessages(session);
+  const totalMessages = allMessages.length;
+
+  const paginatedMessages = allMessages.slice(offset, offset + limit);
+  const hasMore = offset + limit < totalMessages;
 
   return Response.json({
     success: true,
@@ -83,7 +89,13 @@ export async function handleGetSessionById(req: Request, url: URL): Promise<Resp
       modelsUsed: analyzer.getModelsUsed(session),
       interactionCount: analyzer.getInteractionCount(session),
       displayTitle: analyzer.getDisplayTitle(session),
-      messages
+      messages: paginatedMessages
+    },
+    pagination: {
+      offset,
+      limit,
+      total: totalMessages,
+      hasMore
     }
   });
 }

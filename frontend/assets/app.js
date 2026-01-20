@@ -7,8 +7,12 @@ class OpenCodeView {
     this.refreshInterval = null;
     this.handlePaginationClick = async () => {};
     this.handleSessionCardClick = async () => {};
+    this.handleMessagePaginationClick = async () => {};
     this.currentOffset = 0;
     this.currentLimit = 10;
+    this.currentSessionId = null;
+    this.currentMessageOffset = 0;
+    this.currentMessageLimit = 10;
 
     this.setupEventListeners();
   }
@@ -303,7 +307,7 @@ class OpenCodeView {
       </div>
 
       <footer class="app-footer">
-        <span>Built with OpenCodeView v0.3.1</span>
+        <span>Built with OpenCodeView v0.4.0</span>
         <span class="footer-time">${new Date().toLocaleString()}</span>
       </footer>
     `;
@@ -676,12 +680,38 @@ class OpenCodeView {
     document.addEventListener("click", this.handleSessionCardClick);
   }
 
+  setupMessagePaginationEvents() {
+    document.removeEventListener("click", this.handleMessagePaginationClick);
+
+    this.handleMessagePaginationClick = async (e) => {
+      const target = e.target;
+
+      if (target.classList.contains("btn") && target.dataset.offset) {
+        e.preventDefault();
+        const offset = parseInt(target.dataset.offset);
+        await this.loadMessages(this.currentMessageLimit, offset);
+      }
+    };
+
+    document.addEventListener("click", this.handleMessagePaginationClick);
+  }
+
   handlePaginationClick = async (e) => {};
   handleSessionCardClick = async (e) => {};
+  handleMessagePaginationClick = async (e) => {};
 
   async loadSessionDetails(sessionId) {
+    this.currentSessionId = sessionId;
+    this.currentMessageOffset = 0;
+    await this.loadMessages(10, 0);
+  }
+
+  async loadMessages(limit, offset) {
+    this.currentMessageLimit = limit;
+    this.currentMessageOffset = offset;
+
     try {
-      const response = await fetch(`${this.apiBase}/sessions/${sessionId}`);
+      const response = await fetch(`${this.apiBase}/sessions/${this.currentSessionId}?limit=${limit}&offset=${offset}`);
       const result = await response.json();
 
       if (result.success) {
@@ -689,11 +719,14 @@ class OpenCodeView {
         app.innerHTML = `
           <button id="back-to-list-button" class="btn btn-secondary back-to-list">← Back to List</button>
           ${this.renderSessionDetails(result.data)}
+          ${this.renderPagination(result.pagination)}
         `;
 
         document.getElementById("back-to-list-button").onclick = async () => {
           await this.loadSessions(this.currentLimit, this.currentOffset);
         };
+
+        this.setupMessagePaginationEvents();
       } else {
         this.showToast("Loading Session Details Failed", result.error || "Unknown Error", "error");
       }

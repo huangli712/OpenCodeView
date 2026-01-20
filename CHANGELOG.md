@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.4.0 (2026-01-20)
+- Added message pagination to session details page
+- Messages display 10 per page with Previous/Next navigation
+- Backend /api/sessions/:id supports limit and offset parameters
+- Added message pagination state tracking (currentSessionId, currentMessageOffset, currentMessageLimit)
+- Implemented loadMessages() method with pagination support
+- Added setupMessagePaginationEvents() for message pagination handling
+- Reused existing pagination UI components
+- Pagination info shows message range and total count
+
 ## v0.3.1 (2026-01-20)
 - Display full message ID instead of truncated
 - Reorder message metadata: Mode, Agent, Provider, Model, Tokens, Cost
