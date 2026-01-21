@@ -775,19 +775,14 @@ body {
   color: var(--text-secondary);
 }
 
-.message-tokens {
+.message-tokens,
+.message-time {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
 }
 
-.message-time {
-  display: inline-flex;
-  align-items: center;
-}
-
 .message-model,
-.message-agent {
   font-size: 0.875rem;
   color: var(--text-secondary);
   margin-bottom: 0.5rem;
@@ -1008,26 +1003,6 @@ body {
   flex-direction: column;
   gap: 0.5rem;
   margin-top: 0.5rem;
-}
-
-.prt-modal-content-title {
-  font-weight: 600;
-  color: var(--text);
-  font-size: 0.875rem;
-}
-
-.prt-modal-text {
-  background: var(--surface-alt);
-  padding: 1rem;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  max-height: 400px;
-  overflow-y: auto;
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-  font-size: 0.75rem;
-  line-height: 1.5;
-  white-space: pre-wrap;
-  word-wrap: break-word;
 }
 
 @media (max-width: 768px) {
