@@ -145,13 +145,9 @@ class OpenCodeView {
     let mcpHtml = "";
     if (data.mcp.exists) {
       mcpHtml = `
-        <div class="about-grid">
-          ${path(data.mcp.path)}
-          ${count(data.mcp.serverCount)}
-        </div>
-        <div style="margin-top: 0.75rem;">
-          <label style="font-size: 0.75rem; color: var(--text-light); text-transform: uppercase;">MCP Servers</label>
-          <div style="margin-top: 0.5rem;">
+        <div class="about-mcp-container">
+          <label class="about-mcp-label">MCP Servers</label>
+          <div class="about-mcp-list">
             ${data.mcp.servers.length > 0 ? data.mcp.servers.map((s) => `<span class="mcp-server-tag">${s}</span>`).join("") : '<span class="not-exists">No MCP servers configured</span>'}
           </div>
         </div>
@@ -381,7 +377,7 @@ class OpenCodeView {
     return `
       <div class="session-card" data-session-id="${session.sessionId}">
         <div class="session-header">
-          <div class="session-title" style="display: flex; gap: 0;">${index} / ${this.truncate(session.sessionId, 50)}</div>
+          <div class="session-title-flex">${index} / ${this.truncate(session.sessionId, 50)}</div>
           <div class="session-meta">
             <span class="badge badge-secondary">${session.files.length} interactions</span>
             <span class="badge badge-secondary">$${session.totalCost?.toFixed(2)}</span>
@@ -1382,7 +1378,7 @@ class OpenCodeView {
           </div>
         </div>
 
-        <h3 class="section-title" style="margin-top: 2rem;">Models Used</h3>
+        <h3 class="section-title-spacing">Models Used</h3>
         <div class="models-grid">
           ${session.modelsUsed.map((model) => `
             <div class="model-card">
@@ -1392,7 +1388,7 @@ class OpenCodeView {
           `).join("")}
         </div>
 
-        <h3 class="section-title" style="margin-top: 2rem;">Messages</h3>
+        <h3 class="section-title-spacing">Messages</h3>
         <div class="messages-list">
           ${session.messages ? this.renderMessages(session.messages) : '<div class="empty-state">No messages available</div>'}
         </div>

@@ -266,6 +266,11 @@ body {
   flex-wrap: wrap;
 }
 
+.session-title-flex {
+  display: flex;
+  gap: 0;
+}
+
 .badge {
   padding: 0.25rem 0.75rem;
   border-radius: 9999px;
@@ -283,6 +288,10 @@ body {
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 1rem;
   margin: 1rem 0;
+}
+
+.section-title-spacing {
+  margin-top: 2rem;
 }
 
 .stat-item {
@@ -616,6 +625,20 @@ body {
 .about-item span.not-exists {
   color: var(--text-light);
   font-style: italic;
+}
+
+.about-mcp-label {
+  font-size: 0.75rem;
+  color: var(--text-light);
+  text-transform: uppercase;
+}
+
+.about-mcp-container {
+  margin-top: 0.75rem;
+}
+
+.about-mcp-list {
+  margin-top: 0.5rem;
 }
 
 .pagination {
