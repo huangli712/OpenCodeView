@@ -490,12 +490,17 @@ class OpenCodeView {
       <h2 class="section-title">${titles[type] || "Analysis"}</h2>
       ${this.renderAnalyticsTable(data, type)}
       ${type === "daily" || type === "weekly" || type === "monthly" ? this.renderAnalyticsChart(data, type) : ""}
+      ${type === "models" ? this.renderModelsChart(data, type) : ""}
     `;
 
     this.setupPaginationEvents();
 
     if (type === "daily" || type === "weekly" || type === "monthly") {
       this.renderCharts(data, type);
+    }
+
+    if (type === "models") {
+      this.renderModelsCharts(data, type);
     }
   }
 
@@ -513,6 +518,25 @@ class OpenCodeView {
         </div>
         <div class="chart-card">
           <canvas id="interactionsChart"></canvas>
+        </div>
+      </div>
+    `;
+  }
+
+  renderModelsChart(data, type) {
+    return `
+      <div class="charts-container">
+        <div class="chart-card">
+          <canvas id="modelCostChart"></canvas>
+        </div>
+        <div class="chart-card">
+          <canvas id="modelTokensChart"></canvas>
+        </div>
+        <div class="chart-card">
+          <canvas id="modelSessionsChart"></canvas>
+        </div>
+        <div class="chart-card">
+          <canvas id="modelInteractionsChart"></canvas>
         </div>
       </div>
     `;
@@ -588,6 +612,28 @@ class OpenCodeView {
       },
       options: {
         ...chartOptions,
+        scales: {
+          ...chartOptions.scales,
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: "rgba(0, 0, 0, 0.05)"
+            },
+            ticks: {
+              callback: function(value) {
+                if (value >= 10000) {
+                  return value.toExponential(1);
+                }
+                return value;
+              }
+            }
+          },
+          x: {
+            grid: {
+              display: false
+            }
+          }
+        },
         plugins: {
           title: {
             display: true,
@@ -642,6 +688,159 @@ class OpenCodeView {
           title: {
             display: true,
             text: "Interactions Over Time",
+            font: { size: 16, weight: "600" }
+          }
+        }
+      }
+    });
+  }
+
+  renderModelsCharts(data, type) {
+    const labels = data.map((row) => row.modelId);
+    const costs = data.map((row) => row.cost);
+    const tokens = data.map((row) => row.tokens);
+    const sessions = data.map((row) => row.sessions);
+    const interactions = data.map((row) => row.interactions);
+
+    const chartOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: false
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: {
+            color: "rgba(0, 0, 0, 0.05)"
+          }
+        },
+        x: {
+          grid: {
+            display: false
+          }
+        }
+      }
+    };
+
+    new Chart(document.getElementById("modelCostChart"), {
+      type: "bar",
+      data: {
+        labels,
+        datasets: [{
+          label: "Cost ($)",
+          data: costs,
+          backgroundColor: "rgba(59, 130, 246, 0.8)",
+          borderColor: "rgba(59, 130, 246, 1)",
+          borderWidth: 1,
+          borderRadius: 4
+        }]
+      },
+      options: {
+        ...chartOptions,
+        plugins: {
+          title: {
+            display: true,
+            text: "Cost by Model",
+            font: { size: 16, weight: "600" }
+          }
+        }
+      }
+    });
+
+    new Chart(document.getElementById("modelTokensChart"), {
+      type: "bar",
+      data: {
+        labels,
+        datasets: [{
+          label: "Tokens",
+          data: tokens,
+          backgroundColor: "rgba(16, 185, 129, 0.8)",
+          borderColor: "rgba(16, 185, 129, 1)",
+          borderWidth: 1,
+          borderRadius: 4
+        }]
+      },
+      options: {
+        ...chartOptions,
+        scales: {
+          ...chartOptions.scales,
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: "rgba(0, 0, 0, 0.05)"
+            },
+            ticks: {
+              callback: function(value) {
+                if (value >= 10000) {
+                  return value.toExponential(1);
+                }
+                return value;
+              }
+            }
+          },
+          x: {
+            grid: {
+              display: false
+            }
+          }
+        },
+        plugins: {
+          title: {
+            display: true,
+            text: "Tokens by Model",
+            font: { size: 16, weight: "600" }
+          }
+        }
+      }
+    });
+
+    new Chart(document.getElementById("modelSessionsChart"), {
+      type: "bar",
+      data: {
+        labels,
+        datasets: [{
+          label: "Sessions",
+          data: sessions,
+          backgroundColor: "rgba(245, 158, 11, 0.8)",
+          borderColor: "rgba(245, 158, 11, 1)",
+          borderWidth: 1,
+          borderRadius: 4
+        }]
+      },
+      options: {
+        ...chartOptions,
+        plugins: {
+          title: {
+            display: true,
+            text: "Sessions by Model",
+            font: { size: 16, weight: "600" }
+          }
+        }
+      }
+    });
+
+    new Chart(document.getElementById("modelInteractionsChart"), {
+      type: "bar",
+      data: {
+        labels,
+        datasets: [{
+          label: "Interactions",
+          data: interactions,
+          backgroundColor: "rgba(139, 92, 246, 0.8)",
+          borderColor: "rgba(139, 92, 246, 1)",
+          borderWidth: 1,
+          borderRadius: 4
+        }]
+      },
+      options: {
+        ...chartOptions,
+        plugins: {
+          title: {
+            display: true,
+            text: "Interactions by Model",
             font: { size: 16, weight: "600" }
           }
         }
