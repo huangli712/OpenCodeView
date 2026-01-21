@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.5.1 (2026-01-21)
+- Added bar charts for Models Analysis page
+- Added 4 charts: Cost, Tokens, Sessions, Interactions by model
+- Added bar charts for Projects Analysis page
+- Added 4 charts: Cost, Tokens, Sessions, Interactions by project
+- Sessions charts y-axis now displays only integer values
+- Interactions charts y-axis now displays only integer values
+- Tokens charts use scientific notation for values >= 10000
+- Charts appear below data tables in all analytics views
+- Updated version to 0.5.1 across all files
+
 ## v0.5.0 (2026-01-21)
 - Added data visualization charts to Daily/Weekly/Monthly analytics
 - Implemented 4 interactive charts: Cost, Tokens, Sessions, Interactions over time
