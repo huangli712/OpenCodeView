@@ -1,5 +1,25 @@
 # Changelog
 
+## v0.6.0 (2026-01-21)
+- Refactored frontend into modular architecture
+- Split app.js (1575 lines) into 12 focused modules
+- Created utils/formatters.js for data formatting utilities
+- Created utils/dom.js for DOM helper functions
+- Created api.js for centralized API client
+- Created state.js for application state management
+- Created components/toasts.js for toast notifications
+- Created components/pagination.js for pagination component
+- Created components/charts.js for Chart.js wrapper
+- Created views/dashboard.js for dashboard view
+- Created views/sessions.js for sessions view
+- Created views/analytics.js for analytics view
+- Created views/about.js for about modal
+- Reduced main app.js from 1575 lines to 279 lines (82% reduction)
+- Fixed Chart.js import error - use window.Chart for CDN UMD version
+- Changed all Chinese text to English
+- Changed all locale formats from zh-CN to en-US
+- Updated version to 0.6.0 across all files
+
 ## v0.5.2 (2026-01-21)
 - Removed node:path dependency - use standard JavaScript path functions
 - Refactored frontend - remove unused CSS and duplicate code
