@@ -701,6 +701,23 @@ class OpenCodeView {
       },
       options: {
         ...chartOptions,
+        scales: {
+          ...chartOptions.scales,
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: "rgba(0, 0, 0, 0.05)"
+            },
+            ticks: {
+              precision: 0
+            }
+          },
+          x: {
+            grid: {
+              display: false
+            }
+          }
+        },
         plugins: {
           title: {
             display: true,
@@ -871,6 +888,23 @@ class OpenCodeView {
       },
       options: {
         ...chartOptions,
+        scales: {
+          ...chartOptions.scales,
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: "rgba(0, 0, 0, 0.05)"
+            },
+            ticks: {
+              precision: 0
+            }
+          },
+          x: {
+            grid: {
+              display: false
+            }
+          }
+        },
         plugins: {
           title: {
             display: true,
