@@ -1,5 +1,3 @@
-import { config } from "../config.js";
-
 export class ToastComponent {
   show(message, detail = "", type = "success") {
     const container = document.getElementById("toast-container");
@@ -7,13 +5,29 @@ export class ToastComponent {
 
     const toast = document.createElement("div");
     toast.className = `toast ${type}`;
-    toast.innerHTML = `
-      <div class="toast-message">
-        <strong>${message}</strong>
-        ${detail ? `<br>${detail}` : ""}
-      </div>
-      <button class="toast-close" onclick="this.parentElement.remove()">×</button>
-    `;
+
+    const messageDiv = document.createElement("div");
+    messageDiv.className = "toast-message";
+
+    const messageStrong = document.createElement("strong");
+    messageStrong.textContent = message;
+    messageDiv.appendChild(messageStrong);
+
+    if (detail) {
+      const detailBr = document.createElement("br");
+      const detailText = document.createTextNode(detail);
+      messageDiv.appendChild(detailBr);
+      messageDiv.appendChild(detailText);
+    }
+
+    toast.appendChild(messageDiv);
+
+    const closeBtn = document.createElement("button");
+    closeBtn.className = "toast-close";
+    closeBtn.textContent = "×";
+    closeBtn.addEventListener("click", () => toast.remove());
+
+    toast.appendChild(closeBtn);
 
     container.appendChild(toast);
 

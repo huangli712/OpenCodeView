@@ -1,4 +1,5 @@
 import { formatNumber } from "../utils/formatters.js";
+import { config } from "../config.js";
 
 export class DashboardView {
   constructor(api) {
@@ -64,7 +65,7 @@ export class DashboardView {
 
       <footer class="app-footer">
         <span>Built with OpenCodeView v0.6.0</span>
-        <span class="footer-time">${new Date().toLocaleString("en-US")}</span>
+        <span class="footer-time">${new Date().toLocaleString(config.display.defaultLocale)}</span>
       </footer>
     `;
   }
