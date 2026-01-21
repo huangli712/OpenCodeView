@@ -18,7 +18,7 @@ export class ChartsComponent {
         y: {
           beginAtZero: true,
           grid: {
-            color: "rgba(0, 0, 0, 0.05)"
+            color: config.charts.colors.grid
           }
         },
         x: {
@@ -32,50 +32,53 @@ export class ChartsComponent {
 
   createTimeCharts(data) {
     const labels = data.map(r => r.date || r.week || r.month);
+    const { labels: chartLabels, titles, colors, style } = config.charts;
 
-    this.createChart("costChart", "bar", labels, data.map(r => r.cost),
-      { label: "Cost ($)", color: "rgba(59, 130, 246, 0.8)", title: "Cost Over Time" });
+    this.createChart("costChart", config.charts.defaultType, labels, data.map(r => r.cost),
+      { label: chartLabels.cost, color: colors.cost, title: titles.time.cost });
 
-    this.createChart("tokensChart", "bar", labels, data.map(r => r.tokens),
-      { label: "Tokens", color: "rgba(16, 185, 129, 0.8)", title: "Tokens Over Time", useExponential: true });
+    this.createChart("tokensChart", config.charts.defaultType, labels, data.map(r => r.tokens),
+      { label: chartLabels.tokens, color: colors.tokens, title: titles.time.tokens, useExponential: true });
 
-    this.createChart("sessionsChart", "bar", labels, data.map(r => r.sessions),
-      { label: "Sessions", color: "rgba(245, 158, 11, 0.8)", title: "Sessions Over Time" });
+    this.createChart("sessionsChart", config.charts.defaultType, labels, data.map(r => r.sessions),
+      { label: chartLabels.sessions, color: colors.sessions, title: titles.time.sessions });
 
-    this.createChart("interactionsChart", "bar", labels, data.map(r => r.interactions),
-      { label: "Interactions", color: "rgba(139, 92, 246, 0.8)", title: "Interactions Over Time" });
+    this.createChart("interactionsChart", config.charts.defaultType, labels, data.map(r => r.interactions),
+      { label: chartLabels.interactions, color: colors.interactions, title: titles.time.interactions });
   }
 
   createModelsCharts(data) {
     const labels = data.map(r => r.modelId);
+    const { labels: chartLabels, titles, colors } = config.charts;
 
-    this.createChart("modelCostChart", "bar", labels, data.map(r => r.cost),
-      { label: "Cost ($)", color: "rgba(59, 130, 246, 0.8)", title: "Cost by Model" });
+    this.createChart("modelCostChart", config.charts.defaultType, labels, data.map(r => r.cost),
+      { label: chartLabels.cost, color: colors.cost, title: titles.models.cost });
 
-    this.createChart("modelTokensChart", "bar", labels, data.map(r => r.tokens),
-      { label: "Tokens", color: "rgba(16, 185, 129, 0.8)", title: "Tokens by Model", useExponential: true });
+    this.createChart("modelTokensChart", config.charts.defaultType, labels, data.map(r => r.tokens),
+      { label: chartLabels.tokens, color: colors.tokens, title: titles.models.tokens, useExponential: true });
 
-    this.createChart("modelSessionsChart", "bar", labels, data.map(r => r.sessions),
-      { label: "Sessions", color: "rgba(245, 158, 11, 0.8)", title: "Sessions by Model" });
+    this.createChart("modelSessionsChart", config.charts.defaultType, labels, data.map(r => r.sessions),
+      { label: chartLabels.sessions, color: colors.sessions, title: titles.models.sessions });
 
-    this.createChart("modelInteractionsChart", "bar", labels, data.map(r => r.interactions),
-      { label: "Interactions", color: "rgba(139, 92, 246, 0.8)", title: "Interactions by Model" });
+    this.createChart("modelInteractionsChart", config.charts.defaultType, labels, data.map(r => r.interactions),
+      { label: chartLabels.interactions, color: colors.interactions, title: titles.models.interactions });
   }
 
   createProjectsCharts(data) {
     const labels = data.map(r => r.projectName);
+    const { labels: chartLabels, titles, colors } = config.charts;
 
-    this.createChart("projectCostChart", "bar", labels, data.map(r => r.cost),
-      { label: "Cost ($)", color: "rgba(59, 130, 246, 0.8)", title: "Cost by Project" });
+    this.createChart("projectCostChart", config.charts.defaultType, labels, data.map(r => r.cost),
+      { label: chartLabels.cost, color: colors.cost, title: titles.projects.cost });
 
-    this.createChart("projectTokensChart", "bar", labels, data.map(r => r.tokens),
-      { label: "Tokens", color: "rgba(16, 185, 129, 0.8)", title: "Tokens by Project", useExponential: true });
+    this.createChart("projectTokensChart", config.charts.defaultType, labels, data.map(r => r.tokens),
+      { label: chartLabels.tokens, color: colors.tokens, title: titles.projects.tokens, useExponential: true });
 
-    this.createChart("projectSessionsChart", "bar", labels, data.map(r => r.sessions),
-      { label: "Sessions", color: "rgba(245, 158, 11, 0.8)", title: "Sessions by Project" });
+    this.createChart("projectSessionsChart", config.charts.defaultType, labels, data.map(r => r.sessions),
+      { label: chartLabels.sessions, color: colors.sessions, title: titles.projects.sessions });
 
-    this.createChart("projectInteractionsChart", "bar", labels, data.map(r => r.interactions),
-      { label: "Interactions", color: "rgba(139, 92, 246, 0.8)", title: "Interactions by Project" });
+    this.createChart("projectInteractionsChart", config.charts.defaultType, labels, data.map(r => r.interactions),
+      { label: chartLabels.interactions, color: colors.interactions, title: titles.projects.interactions });
   }
 
   createChart(canvasId, type, labels, data, { label, color, title, useExponential = false }) {
@@ -85,6 +88,8 @@ export class ChartsComponent {
     const existing = this.chartInstances.get(canvasId);
     if (existing) existing.destroy();
 
+    const { style } = config.charts;
+
     const options = {
       ...this.getBaseOptions(),
       plugins: {
@@ -92,7 +97,7 @@ export class ChartsComponent {
         title: {
           display: true,
           text: title,
-          font: { size: 16, weight: "600" }
+          font: style.titleFont
         }
       }
     };
@@ -132,9 +137,9 @@ export class ChartsComponent {
           label,
           data,
           backgroundColor: color,
-          borderColor: color.replace("0.8", "1"),
-          borderWidth: 1,
-          borderRadius: 4
+          borderColor: color.replace("0.8", style.alphaOpaque),
+          borderWidth: style.borderWidth,
+          borderRadius: style.borderRadius
         }]
       },
       options
