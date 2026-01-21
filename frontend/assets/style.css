@@ -775,11 +775,15 @@ body {
   color: var(--text-secondary);
 }
 
-.message-tokens,
 .message-time {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
+}
+
+.message-tokens {
+  display: inline-flex;
+  align-items: center;
 }
 
 .message-model,
