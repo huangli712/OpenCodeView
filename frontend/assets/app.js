@@ -64,30 +64,23 @@ class OpenCodeView {
       await this.loadOpenCodeInfo();
     });
 
-    closeBtn?.addEventListener("click", () => {
-      modal?.classList.remove("active");
-    });
-
-    modal?.addEventListener("click", (e) => {
-      if (e.target === modal) {
-        modal.classList.remove("active");
-      }
-    });
-
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && modal?.classList.contains("active")) {
-        modal.classList.remove("active");
-      }
-    });
+    this.setupModalClose(modal);
+    closeBtn?.addEventListener("click", () => modal?.classList.remove("active"));
   }
 
   setupPRTModal() {
     const modal = document.getElementById("prt-modal");
     const closeBtn = modal?.querySelector(".modal-close");
 
-    closeBtn?.addEventListener("click", () => {
-      modal?.classList.remove("active");
-    });
+    closeBtn?.addEventListener("click", () => modal?.classList.remove("active"));
+
+    this.setupModalClose(modal);
+  }
+
+  setupModalClose(modal: HTMLElement | null) {
+    if (!modal) {
+      return;
+    }
 
     modal?.addEventListener("click", (e) => {
       if (e.target === modal) {
@@ -95,11 +88,14 @@ class OpenCodeView {
       }
     });
 
-    document.addEventListener("keydown", (e) => {
+    const closeOnEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape" && modal?.classList.contains("active")) {
         modal.classList.remove("active");
+        document.removeEventListener("keydown", closeOnEscape);
       }
-    });
+    };
+
+    document.addEventListener("keydown", closeOnEscape);
   }
 
   showPRTModal(prtData) {
@@ -494,8 +490,6 @@ class OpenCodeView {
       ${type === "projects" ? this.renderProjectsChart(data, type) : ""}
     `;
 
-    this.setupPaginationEvents();
-
     if (type === "daily" || type === "weekly" || type === "monthly") {
       this.renderCharts(data, type);
     }
@@ -564,6 +558,31 @@ class OpenCodeView {
         </div>
       </div>
     `;
+  }
+
+  getBaseChartOptions() {
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: false
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: {
+            color: "rgba(0, 0, 0, 0.05)"
+          }
+        },
+        x: {
+          grid: {
+            display: false
+          }
+        }
+      }
+    };
   }
 
   renderCharts(data, type) {
