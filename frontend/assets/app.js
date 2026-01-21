@@ -26,7 +26,7 @@ class OpenCodeView {
   updateFooterTime() {
     const footerTime = document.querySelector(".footer-time");
     if (footerTime) {
-      footerTime.textContent = new Date().toLocaleString();
+      footerTime.textContent = new Date().toLocaleString("en-US");
     }
   }
 
@@ -326,7 +326,7 @@ class OpenCodeView {
 
       <footer class="app-footer">
         <span>Built with OpenCodeView v0.5.2</span>
-        <span class="footer-time">${new Date().toLocaleString()}</span>
+        <span class="footer-time">${new Date().toLocaleString("en-US")}</span>
       </footer>
     `;
   }
@@ -1231,7 +1231,7 @@ class OpenCodeView {
     app.innerHTML = `
       <div class="loading">
         <div class="spinner"></div>
-        <p>Loading中...</p>
+        <p>Loading...</p>
       </div>
     `;
   }
@@ -1508,7 +1508,7 @@ class OpenCodeView {
       return "";
     }
     const date = new Date(timestamp);
-    return date.toLocaleString("zh-CN", {
+    return date.toLocaleString("en-US", {
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
@@ -1525,11 +1525,11 @@ class OpenCodeView {
   }
 
   formatNumber(num) {
-    return new Intl.NumberFormat("zh-CN").format(num);
+    return new Intl.NumberFormat("en-US").format(num);
   }
 
   formatDate(date) {
-    return date.toLocaleString("zh-CN", {
+    return date.toLocaleString("en-US", {
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
