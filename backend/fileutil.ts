@@ -1,14 +1,28 @@
-import path from "node:path";
 import { existsSync, readdirSync, lstatSync } from "node:fs";
 import type { TokenUsage, TimeData, InteractionFile, SessionData, PricingData, PRTInfo } from "./types";
+
+// Path utility functions - standard JavaScript implementation
+function joinPath(...parts: string[]): string {
+  return parts.filter((p) => p).join("/");
+}
+
+function basename(path: string): string {
+  return path.split("/").pop() || "";
+}
+
+function dirname(path: string): string {
+  const parts = path.split("/");
+  parts.pop();
+  return parts.join("/") || "/";
+}
 
 const OPENCODE_STORAGE_PATH = (() => {
   const home = process.env.HOME || process.env.USERPROFILE || "";
 
   const paths = [
-    path.join(home, ".local", "share", "opencode", "storage", "message"),
-    path.join(home, ".opencode", "storage", "message"),
-    path.join(home, ".config", "opencode", "storage", "message")
+    joinPath(home, ".local", "share", "opencode", "storage", "message"),
+    joinPath(home, ".opencode", "storage", "message"),
+    joinPath(home, ".config", "opencode", "storage", "message")
   ];
 
   for (const p of paths) {
@@ -25,9 +39,9 @@ const PART_STORAGE_PATH = (() => {
   const home = process.env.HOME || process.env.USERPROFILE || "";
 
   const paths = [
-    path.join(home, ".local", "share", "opencode", "storage", "part"),
-    path.join(home, ".opencode", "storage", "part"),
-    path.join(home, ".config", "opencode", "storage", "part")
+    joinPath(home, ".local", "share", "opencode", "storage", "part"),
+    joinPath(home, ".opencode", "storage", "part"),
+    joinPath(home, ".config", "opencode", "storage", "part")
   ];
 
   for (const p of paths) {
@@ -40,7 +54,7 @@ const PART_STORAGE_PATH = (() => {
   return paths[0];
 })();
 
-const PRICING_PATH = path.join(process.cwd(), "config", "models.json");
+const PRICING_PATH = joinPath(process.cwd(), "config", "models.json");
 
 function isSessionDir(dirName: string): boolean {
   return dirName.startsWith("ses_");
@@ -64,7 +78,7 @@ export class FileManager {
 
         for (const entry of entries) {
           if (entry.isDirectory() && isSessionDir(entry.name)) {
-            sessions.push(path.join(OPENCODE_STORAGE_PATH, entry.name));
+            sessions.push(joinPath(OPENCODE_STORAGE_PATH, entry.name));
           }
         }
       }
@@ -91,7 +105,7 @@ export class FileManager {
 
         for (const entry of entries) {
           if (entry.isFile() && entry.name.endsWith(".json")) {
-            files.push(path.join(directory, entry.name));
+            files.push(joinPath(directory, entry.name));
           }
         }
       }
@@ -195,7 +209,7 @@ export class FileManager {
 
   async loadSession(sessionPath: string): Promise<SessionData | null> {
     try {
-      const sessionId = path.basename(sessionPath);
+      const sessionId = basename(sessionPath);
       const jsonFiles = await this.findJSONFiles(sessionPath);
 
       if (jsonFiles.length === 0) {
@@ -290,7 +304,7 @@ export class FileManager {
   async getOpenCodeInfo(): Promise<OpenCodeInfo> {
     const home = process.env.HOME || process.env.USERPROFILE || "";
     const storagePath = OPENCODE_STORAGE_PATH;
-    const configPath = path.join(home, ".config", "opencode");
+    const configPath = joinPath(home, ".config", "opencode");
 
     let sessionCount = 0;
     if (existsSync(storagePath)) {
@@ -313,7 +327,7 @@ export class FileManager {
 
   async loadPRTFiles(messageId: string): Promise<PRTInfo[]> {
     try {
-      const messagePath = path.join(PART_STORAGE_PATH, messageId);
+      const messagePath = joinPath(PART_STORAGE_PATH, messageId);
 
       if (!existsSync(messagePath)) {
         return [];
@@ -324,7 +338,7 @@ export class FileManager {
 
       for (const entry of entries) {
         if (entry.isFile() && entry.name.endsWith(".json")) {
-          const filePath = path.join(messagePath, entry.name);
+          const filePath = joinPath(messagePath, entry.name);
           const content = await this.loadJSON<any>(filePath);
 
           if (content) {

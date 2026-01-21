@@ -1,8 +1,12 @@
 import type { SessionData, SessionSummary, MessageInfo } from "./types";
 import { FileManager } from "./fileutil";
 import { Sessions } from "./sessions";
-import path from "node:path";
 import { existsSync, readdirSync } from "node:fs";
+
+// Path utility functions - standard JavaScript implementation
+function joinPath(...parts: string[]): string {
+  return parts.filter((p) => p).join("/");
+}
 
 const fileManager = new FileManager();
 const analyzer = new Sessions();
@@ -309,9 +313,9 @@ export async function handleGetOpenCodeInfo(req: Request): Promise<Response> {
   const info = await fileManager.getOpenCodeInfo();
 
   const home = info.homePath;
-  const mcpPath = path.join(home, ".config", "opencode", "mcp");
-  const skillsPath = path.join(home, ".config", "opencode", "skills");
-  const pluginsPath = path.join(home, ".config", "opencode", "plugins");
+  const mcpPath = joinPath(home, ".config", "opencode", "mcp");
+  const skillsPath = joinPath(home, ".config", "opencode", "skills");
+  const pluginsPath = joinPath(home, ".config", "opencode", "plugins");
 
   const mcpExists = existsSync(mcpPath);
   const skillsExists = existsSync(skillsPath);
@@ -351,8 +355,8 @@ export async function handleGetOpenCodeInfo(req: Request): Promise<Response> {
     }
   } catch (e) {
     const versionPaths = [
-      path.join(info.configPath, "package.json"),
-      path.join(home, ".local", "share", "opencode", "package.json")
+      joinPath(info.configPath, "package.json"),
+      joinPath(home, ".local", "share", "opencode", "package.json")
     ];
 
     for (const vPath of versionPaths) {

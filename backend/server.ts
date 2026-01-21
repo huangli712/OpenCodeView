@@ -1,10 +1,14 @@
 import { serve } from "bun";
-import path from "node:path";
 import type { SessionData } from "./types";
 
 import { handleGetSessions, handleGetSessionById, handleGetMostRecent, handleGetAnalytics, handleGetSummary, handleValidate, handleGetOpenCodeInfo } from "./routes";
 import { FileManager } from "./fileutil";
 import { Sessions } from "./sessions";
+
+// Path utility functions - standard JavaScript implementation
+function joinPath(...parts: string[]): string {
+  return parts.filter((p) => p).join("/");
+}
 
 const PORT = parseInt(process.env.PORT || "3000");
 
@@ -14,7 +18,7 @@ async function handleStatic(req: Request, url: URL): Promise<Response> {
     pathname = "/index.html";
   }
 
-  const filePath = path.join(process.cwd(), "frontend", pathname);
+  const filePath = joinPath(process.cwd(), "frontend", pathname);
   const file = Bun.file(filePath);
 
   try {
