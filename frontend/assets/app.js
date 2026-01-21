@@ -6,6 +6,7 @@ import { AnalyticsView } from "./views/analytics.js";
 import { AboutView } from "./views/about.js";
 import { ToastComponent } from "./components/toasts.js";
 import { showLoading } from "./utils/dom.js";
+import { config } from "./config.js";
 
 class OpenCodeView {
   constructor() {
@@ -29,7 +30,7 @@ class OpenCodeView {
   async init() {
     await this.loadDashboard();
     this.updateFooterTime();
-    setInterval(() => this.updateFooterTime(), 1000);
+    setInterval(() => this.updateFooterTime(), config.ui.updateInterval);
     this.setupAboutModal();
     this.setupPRTModal();
   }
@@ -37,7 +38,7 @@ class OpenCodeView {
   updateFooterTime() {
     const footerTime = document.querySelector(".footer-time");
     if (footerTime) {
-      footerTime.textContent = new Date().toLocaleString("en-US");
+      footerTime.textContent = new Date().toLocaleString(config.display.defaultLocale);
     }
   }
 
@@ -95,7 +96,10 @@ class OpenCodeView {
         break;
 
       case "sessions": {
-        const result = await this.views.sessions.loadList(10, 0);
+        const result = await this.views.sessions.loadList(
+          config.pagination.defaultLimit,
+          0
+        );
         app.innerHTML = result.html;
         this.setupSessionEvents();
         this.setupPaginationEvents();
@@ -134,9 +138,9 @@ class OpenCodeView {
     this.views.sessions.pagination.setupEvents(async (offset, isMessage = false) => {
       if (isMessage) {
         const sessionId = this.state.getCurrentSessionId();
-        await this.loadMessages(sessionId, 10, offset);
+        await this.loadMessages(sessionId, config.pagination.defaultLimit, offset);
       } else {
-        await this.loadSessionsList(10, offset);
+        await this.loadSessionsList(config.pagination.defaultLimit, offset);
       }
     });
   }
@@ -155,18 +159,25 @@ class OpenCodeView {
     showLoading();
     const app = document.getElementById("app");
 
-    const result = await this.views.sessions.loadDetails(sessionId, 10, 0);
+    const result = await this.views.sessions.loadDetails(
+      sessionId,
+      config.pagination.defaultLimit,
+      0
+    );
     app.innerHTML = result.html;
 
     document.getElementById("back-to-list-button").onclick = async () => {
-      await this.loadSessionsList(10, this.state.getPagination().offset);
+      await this.loadSessionsList(
+        config.pagination.defaultLimit,
+        this.state.getPagination().offset
+      );
     };
 
     this.setupPaginationEvents();
     this.setupMessagePRTEvents(result.messages);
   }
 
-  async loadMessages(sessionId, limit, offset) {
+  async loadMessages(sessionId, limit = config.pagination.defaultLimit, offset) {
     showLoading();
     const app = document.getElementById("app");
 
@@ -174,7 +185,10 @@ class OpenCodeView {
     app.innerHTML = result.html;
 
     document.getElementById("back-to-list-button").onclick = async () => {
-      await this.loadSessionsList(10, this.state.getPagination().offset);
+      await this.loadSessionsList(
+        config.pagination.defaultLimit,
+        this.state.getPagination().offset
+      );
     };
 
     this.setupPaginationEvents();

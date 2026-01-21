@@ -1,3 +1,5 @@
+import { config } from "./config.js";
+
 export class API {
   constructor(apiBase = "/api") {
     this.apiBase = apiBase;
@@ -24,11 +26,11 @@ export class API {
   }
 
   // Sessions
-  async getSessions(limit = 10, offset = 0) {
+  async getSessions(limit = config.pagination.defaultLimit, offset = 0) {
     return this.request(`/sessions?limit=${limit}&offset=${offset}`);
   }
 
-  async getSession(sessionId, limit = 10, offset = 0) {
+  async getSession(sessionId, limit = config.pagination.defaultLimit, offset = 0) {
     return this.request(`/sessions/${sessionId}?limit=${limit}&offset=${offset}`);
   }
 

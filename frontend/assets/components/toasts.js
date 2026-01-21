@@ -1,3 +1,5 @@
+import { config } from "../config.js";
+
 export class ToastComponent {
   show(message, detail = "", type = "success") {
     const container = document.getElementById("toast-container");
@@ -17,7 +19,7 @@ export class ToastComponent {
 
     setTimeout(() => {
       toast.remove();
-    }, 5000);
+    }, config.ui.toastDuration);
   }
 
   success(message, detail = "") {

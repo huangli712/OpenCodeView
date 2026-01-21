@@ -1,9 +1,11 @@
+import { config } from "../config.js";
+
 export function formatNumber(num) {
-  return new Intl.NumberFormat("en-US").format(num);
+  return new Intl.NumberFormat(config.display.defaultLocale).format(num);
 }
 
 export function formatDate(date) {
-  return date.toLocaleString("en-US", {
+  return date.toLocaleString(config.display.defaultLocale, {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -14,7 +16,7 @@ export function formatDate(date) {
 
 export function formatTimestamp(timestamp) {
   if (!timestamp) return "";
-  return new Date(timestamp).toLocaleString("en-US", {
+  return new Date(timestamp).toLocaleString(config.display.defaultLocale, {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -46,7 +48,7 @@ export function formatRole(role) {
   return roleMap[role] || role;
 }
 
-export function truncate(str, length) {
+export function truncate(str, length = config.display.maxIdLength) {
   if (str.length <= length) return str;
   return str.slice(0, length - 3) + "...";
 }

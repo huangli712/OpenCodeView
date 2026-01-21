@@ -1,5 +1,6 @@
 import { formatNumber, formatDate, formatDuration, truncate, escapeHtml, formatRole, formatTimestamp } from "../utils/formatters.js";
 import { PaginationComponent } from "../components/pagination.js";
+import { config } from "../config.js";
 
 export class SessionsView {
   constructor(api) {
@@ -51,7 +52,7 @@ export class SessionsView {
   renderSessionHeader(session, index) {
     return `
       <div class="session-header">
-        <div class="session-title-flex">${index} / ${truncate(session.sessionId, 50)}</div>
+        <div class="session-title-flex">${index} / ${truncate(session.sessionId)}</div>
         <div class="session-meta">
           <span class="badge badge-secondary">${session.files.length} interactions</span>
           <span class="badge badge-secondary">$${session.totalCost?.toFixed(2)}</span>
@@ -217,7 +218,9 @@ export class SessionsView {
 
           if (prt.type !== null && prt.type !== undefined) {
             if (typeof prt.type === "string") {
-              typeStr = prt.type.length > 50 ? prt.type.substring(0, 50) + "..." : prt.type;
+              typeStr = prt.type.length > config.display.maxTypeLength
+                ? prt.type.substring(0, config.display.maxTypeLength) + "..."
+                : prt.type;
             } else if (typeof prt.type === "object") {
               typeStr = JSON.stringify(prt.type);
             } else {

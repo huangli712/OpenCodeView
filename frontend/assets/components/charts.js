@@ -1,3 +1,5 @@
+import { config } from "../config.js";
+
 export class ChartsComponent {
   constructor() {
     this.chartInstances = new Map();
@@ -102,7 +104,7 @@ export class ChartsComponent {
           ...options.scales.y,
           ticks: {
             callback: function(value) {
-              if (value >= 10000) {
+              if (value >= config.charts.exponentialThreshold) {
                 return value.toExponential(1);
               }
               return value;
