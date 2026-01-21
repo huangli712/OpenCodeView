@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.5.2 (2026-01-21)
+- Removed node:path dependency - use standard JavaScript path functions
+- Refactored frontend - remove unused CSS and duplicate code
+- Fixed syntax error - remove TypeScript type annotations from .js file
+- Merge duplicate CSS - consolidate message and PRT styles
+- Split message-time and message-tokens CSS classes
+- Remove unused CSS and add missing .empty-state styles
+- Move inline CSS styles from app.js to style.css
+- Fix CSS syntax error - restore missing .message-agent selector
+- Updated version to 0.5.2 across all files
+
 ## v0.5.1 (2026-01-21)
 - Added bar charts for Models Analysis page
 - Added 4 charts: Cost, Tokens, Sessions, Interactions by model

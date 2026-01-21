@@ -325,7 +325,7 @@ class OpenCodeView {
       </div>
 
       <footer class="app-footer">
-        <span>Built with OpenCodeView v0.5.1</span>
+        <span>Built with OpenCodeView v0.5.2</span>
         <span class="footer-time">${new Date().toLocaleString()}</span>
       </footer>
     `;
