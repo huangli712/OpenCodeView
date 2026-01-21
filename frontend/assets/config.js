@@ -47,6 +47,14 @@ export const config = {
     }
   },
 
+  api: {
+    baseUrl: "/api",
+    timeout: 30000,
+    maxRetries: 3,
+    retryDelay: 1000,
+    retryableStatuses: [408, 429, 500, 502, 503, 504]
+  },
+
   ui: {
     toastDuration: 5000,
     updateInterval: 1000
