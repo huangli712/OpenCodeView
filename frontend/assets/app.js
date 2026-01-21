@@ -77,7 +77,7 @@ class OpenCodeView {
     this.setupModalClose(modal);
   }
 
-  setupModalClose(modal: HTMLElement | null) {
+  setupModalClose(modal) {
     if (!modal) {
       return;
     }
@@ -88,7 +88,7 @@ class OpenCodeView {
       }
     });
 
-    const closeOnEscape = (e: KeyboardEvent) => {
+    const closeOnEscape = (e) => {
       if (e.key === "Escape" && modal?.classList.contains("active")) {
         modal.classList.remove("active");
         document.removeEventListener("keydown", closeOnEscape);
