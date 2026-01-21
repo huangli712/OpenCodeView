@@ -359,6 +359,16 @@ body {
    color: var(--success);
 }
 
+.empty-state {
+  text-align: center;
+  padding: 4rem;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
 .data-table {
   width: 100%;
   border-collapse: collapse;
@@ -409,10 +419,6 @@ body {
   border-left: 4px solid var(--primary);
   animation: slideIn 0.3s ease;
   max-width: 400px;
-}
-
-.toast.success {
-  border-left-color: var(--success);
 }
 
 @keyframes slideIn {
@@ -650,15 +656,6 @@ body {
 
 .btn:active {
   transform: translateY(0);
-}
-
-.btn-primary {
-  background: var(--primary);
-  color: white;
-}
-
-.btn-primary:hover {
-  background: var(--primary-dark);
 }
 
 .btn-secondary {
