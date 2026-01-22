@@ -16,8 +16,8 @@ analyzer.init().catch((error) => {
 });
 
 export async function handleGetSessions(req: Request, url: URL): Promise<Response> {
-  const limit = parseInt(url.searchParams.get("limit") || "50");
-  const offset = parseInt(url.searchParams.get("offset") || "0");
+  const limit = Math.min(Math.max(parseInt(url.searchParams.get("limit") || "50"), 1), 1000);
+  const offset = Math.max(parseInt(url.searchParams.get("offset") || "0"), 0);
 
   const allSessions = await fileManager.loadAllSessions();
   const total = allSessions.length;
@@ -58,8 +58,8 @@ export async function handleGetSessions(req: Request, url: URL): Promise<Respons
 
 export async function handleGetSessionById(req: Request, url: URL): Promise<Response> {
   const sessionId = url.pathname.split("/").pop();
-  const limit = parseInt(url.searchParams.get("limit") || "50");
-  const offset = parseInt(url.searchParams.get("offset") || "0");
+  const limit = Math.min(Math.max(parseInt(url.searchParams.get("limit") || "50"), 1), 1000);
+  const offset = Math.max(parseInt(url.searchParams.get("offset") || "0"), 0);
 
   if (!sessionId) {
     return Response.json({
@@ -156,9 +156,17 @@ export async function handleGetMostRecent(req: Request): Promise<Response> {
 
 export async function handleGetAnalytics(req: Request, url: URL): Promise<Response> {
   const type = url.searchParams.get("type") || "daily";
-  const weekStart = parseInt(url.searchParams.get("weekStart") || "0");
+  const validTypes = ["daily", "weekly", "monthly", "models", "projects"];
 
-  await analyzer.init();
+  if (!validTypes.includes(type)) {
+    return Response.json({
+      success: false,
+      error: `Invalid analytics type: ${type}. Valid types are: ${validTypes.join(", ")}`
+    }, { status: 400 });
+  }
+
+  const weekStart = Math.min(Math.max(parseInt(url.searchParams.get("weekStart") || "0"), 0), 6);
+
   const sessions = await fileManager.loadAllSessions();
 
   switch (type) {
@@ -218,7 +226,6 @@ export async function handleGetAnalytics(req: Request, url: URL): Promise<Respon
 }
 
 export async function handleGetSummary(req: Request): Promise<Response> {
-  await analyzer.init();
   const sessions = await fileManager.loadAllSessions();
   const summary = await analyzer.generateSessionsSummary(sessions);
 

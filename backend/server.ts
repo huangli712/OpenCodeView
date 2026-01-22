@@ -87,11 +87,6 @@ async function handleAPI(req: Request, url: URL): Promise<Response> {
   return new Response("Not Found", { status: 404 });
 }
 
-async function initializeAnalyzer(): Promise<void> {
-  const sessions = new Sessions();
-  await sessions.init();
-}
-
 const server = serve({
   port: PORT,
   fetch(req: Request) {
