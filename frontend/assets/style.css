@@ -77,7 +77,7 @@ body {
 .nav-link.active {
   background: var(--primary);
   color: white;
-}
+ }
 
  .main-content {
   max-width: 1400px;
@@ -351,15 +351,15 @@ body {
 }
 
 .token-segment-fill.input {
-  background: var(--success);
+   background: var(--success);
 }
 
 .token-segment-fill.output {
-  background: var(--primary);
+   background: var(--success);
 }
 
 .token-segment-fill.cache {
-  background: var(--warning);
+   background: var(--success);
 }
 
 .token-segment-value {
@@ -734,32 +734,9 @@ body {
   .session-stats {
     grid-template-columns: 1fr;
   }
-
-  /* Message List Styles */
-  .message-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-  }
-
-  .message-card {
-    padding: 1rem;
-  }
-
-  .message-info-grid {
-    grid-template-columns: 1fr;
-    gap: 0.5rem;
-    padding: 0.75rem;
-  }
-
-  .message-info-item {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-  }
 }
 
-@media (max-width: 1024px) {
+/* Message List Styles */
 .messages-list {
   display: flex;
   flex-direction: column;
@@ -901,6 +878,30 @@ body {
   margin-top: 0.25rem;
   display: inline-block;
   margin-right: 1rem;
+}
+
+@media (max-width: 768px) {
+  .message-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .message-card {
+    padding: 1rem;
+  }
+
+  .message-info-grid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
+
+  .message-info-item {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
 }
 
 /* PRT Files Section in Message Cards */
