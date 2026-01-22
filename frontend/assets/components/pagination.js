@@ -6,7 +6,11 @@ export class PaginationComponent {
 
     return `
       <div class="pagination ${prefix ? `pagination-${prefix}` : ""}">
-        <span class="page-info">Showing ${offset + 1}-${Math.min(offset + limit, total)} of ${total}</span>
+        <span class="page-info">
+          ${total === 0
+            ? `No items`
+            : `Showing ${offset + 1}-${Math.min(offset + limit, total)} of ${total}`}
+        </span>
         <div class="pagination-buttons">
           ${offset > 0 ? `<button class="btn btn-secondary ${btnClass}" ${dataAttr}="${offset - limit}">← Previous</button>` : ""}
           ${hasMore ? `<button class="btn btn-secondary ${btnClass}" ${dataAttr}="${offset + limit}">Next →</button>` : ""}

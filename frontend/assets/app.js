@@ -19,6 +19,9 @@ class OpenCodeView {
     this.beforeUnloadHandler = null;
     this.hashChangeHandler = null;
     this.modalEscapeHandlers = new Map();
+    this.modalClickHandlers = new Map();
+    this.prtClickHandlers = [];
+    this.backToListHandler = null;
 
     this.views = {
       dashboard: new DashboardView(this.api),
@@ -193,12 +196,19 @@ class OpenCodeView {
     );
     app.innerHTML = result.html;
 
-    document.getElementById("back-to-list-button").onclick = async () => {
-      await this.loadSessionsList(
-        config.pagination.defaultLimit,
-        this.state.getPagination().offset
-      );
-    };
+    const backBtn = document.getElementById("back-to-list-button");
+    if (backBtn) {
+      if (this.backToListHandler) {
+        backBtn.removeEventListener("click", this.backToListHandler);
+      }
+      this.backToListHandler = async () => {
+        await this.loadSessionsList(
+          config.pagination.defaultLimit,
+          this.state.getPagination().offset
+        );
+      };
+      backBtn.addEventListener("click", this.backToListHandler);
+    }
 
     this.setupPaginationEvents();
     this.setupMessagePRTEvents(result.messages);
@@ -211,12 +221,19 @@ class OpenCodeView {
     const result = await this.views.sessions.loadDetails(sessionId, limit, offset);
     app.innerHTML = result.html;
 
-    document.getElementById("back-to-list-button").onclick = async () => {
-      await this.loadSessionsList(
-        config.pagination.defaultLimit,
-        this.state.getPagination().offset
-      );
-    };
+    const backBtn = document.getElementById("back-to-list-button");
+    if (backBtn) {
+      if (this.backToListHandler) {
+        backBtn.removeEventListener("click", this.backToListHandler);
+      }
+      this.backToListHandler = async () => {
+        await this.loadSessionsList(
+          config.pagination.defaultLimit,
+          this.state.getPagination().offset
+        );
+      };
+      backBtn.addEventListener("click", this.backToListHandler);
+    }
 
     this.setupPaginationEvents();
     this.setupMessagePRTEvents(result.messages);
@@ -237,7 +254,7 @@ class OpenCodeView {
     }
 
     document.querySelectorAll(".prt-file-type").forEach(typeEl => {
-      typeEl.addEventListener("click", (e) => {
+      const handler = (e) => {
         e.stopPropagation();
         const prtId = typeEl.closest(".prt-file-item")?.dataset.prtId;
         if (prtId) {
@@ -249,7 +266,9 @@ class OpenCodeView {
             }
           }
         }
-      });
+      };
+      typeEl.addEventListener("click", handler);
+      this.prtClickHandlers.push({ el: typeEl, handler });
     });
   }
 
@@ -280,11 +299,13 @@ class OpenCodeView {
   setupModalClose(modal) {
     if (!modal) return;
 
-    modal.addEventListener("click", (e) => {
+    const clickHandler = (e) => {
       if (e.target === modal) {
         modal.classList.remove("active");
       }
-    });
+    };
+    modal.addEventListener("click", clickHandler);
+    this.modalClickHandlers.set(modal, clickHandler);
 
     const closeOnEscape = (e) => {
       if (e.key === "Escape" && modal?.classList.contains("active")) {
@@ -332,6 +353,24 @@ class OpenCodeView {
       window.removeEventListener("hashchange", this.hashChangeHandler);
       this.hashChangeHandler = null;
     }
+
+    if (this.backToListHandler) {
+      const backBtn = document.getElementById("back-to-list-button");
+      if (backBtn) {
+        backBtn.removeEventListener("click", this.backToListHandler);
+      }
+      this.backToListHandler = null;
+    }
+
+    this.prtClickHandlers.forEach(({ el, handler }) => {
+      el.removeEventListener("click", handler);
+    });
+    this.prtClickHandlers = [];
+
+    this.modalClickHandlers.forEach((handler, modal) => {
+      modal.removeEventListener("click", handler);
+    });
+    this.modalClickHandlers.clear();
 
     this.modalEscapeHandlers.forEach((handler, modal) => {
       document.removeEventListener("keydown", handler);

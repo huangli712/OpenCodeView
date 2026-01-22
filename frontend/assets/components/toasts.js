@@ -1,3 +1,5 @@
+import { config } from "../config.js";
+
 export class ToastComponent {
   show(message, detail = "", type = "success") {
     const container = document.getElementById("toast-container");

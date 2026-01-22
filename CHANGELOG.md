@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.6.2 (2026-01-22)
+- Fixed ToastComponent missing config import causing runtime error
+- Fixed onclick usage causing event handler overwrite
+- Added null pointer checks for getElementById
+- Fixed setupMessagePRTEvents event listener accumulation
+- Fixed setupModalClose click event listener accumulation
+- Added event handler reference tracking for backToListButton
+- Added modal click handler tracking in Map
+- Added PRT click handler tracking in array
+- Fixed pagination display showing "Showing 1-0 of 0" when total=0
+- Added all new event handlers to cleanup() method
+- Updated version to 0.6.2 across all files
+
 ## v0.6.1 (2026-01-22)
 - Fixed event listener memory leaks in app.js
 - Added event handler reference tracking for proper cleanup
