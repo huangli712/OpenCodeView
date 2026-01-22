@@ -33,19 +33,17 @@ analyzer.init().catch((error) => {
   console.warn("Cost calculations will return 0. Please ensure config/models.json exists and is valid.");
 });
 
+analyzer.init().catch((error) => {
+  console.error("Failed to initialize analyzer:", error);
+  console.warn("Cost calculations will return 0. Please ensure config/models.json exists and is valid.");
+});
+
 /**
  * GET /api/sessions - List all sessions with pagination
  * @param req - HTTP request
  * @param url - Request URL with query params (limit, offset)
  * @returns JSON response with sessions data, summary, and pagination info
  */
-export async function handleGetSessions(req: Request, url: URL): Promise<Response> {
-
-analyzer.init().catch((error) => {
-  console.error("Failed to initialize analyzer:", error);
-  console.warn("Cost calculations will return 0. Please ensure config/models.json exists and is valid.");
-});
-
 export async function handleGetSessions(req: Request, url: URL): Promise<Response> {
   const limit = Math.min(Math.max(parseSafeInt(url.searchParams.get("limit"), 50), 1), 1000);
   const offset = Math.max(parseSafeInt(url.searchParams.get("offset"), 0), 0);

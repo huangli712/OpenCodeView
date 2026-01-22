@@ -155,6 +155,7 @@ const server = serve({
             }
           });
         }
+
         return handleAPI(req, url);
       }
 
