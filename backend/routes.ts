@@ -1,17 +1,28 @@
 import type { SessionData, SessionSummary, MessageInfo } from "./types";
 import { FileManager } from "./fileutil";
 import { Sessions } from "./sessions";
+import { joinPath } from "./utils/path.js";
 import { promises as fsPromises } from "node:fs";
-
-// Path utility functions - standard JavaScript implementation
-function joinPath(...parts: string[]): string {
-  return parts.filter((p) => p).join("/");
-}
 
 // Utility function for safe integer parsing
 function parseSafeInt(value: string | null, defaultValue: number): number {
   const parsed = parseInt(value || `${defaultValue}`, 10);
   return isNaN(parsed) ? defaultValue : parsed;
+}
+
+// Helper function to enrich session data with computed fields
+async function enrichSession(session: SessionData, analyzer: Sessions) {
+  const startTime = analyzer.getStartTime(session);
+  const durationHours = analyzer.getDurationHours(session);
+  const totalCost = await analyzer.costCalculator.calculateSessionCost(session);
+
+  return {
+    ...session,
+    projectName: analyzer.getProjectName(session),
+    startTime: startTime ? startTime.getTime() : null,
+    durationHours,
+    totalCost
+  };
 }
 
 const fileManager = new FileManager();
@@ -33,19 +44,7 @@ export async function handleGetSessions(req: Request, url: URL): Promise<Respons
   const summary = await analyzer.generateSessionsSummary(paginated);
 
   const sessionsWithComputedData = await Promise.all(
-    paginated.map(async (session) => {
-      const startTime = analyzer.getStartTime(session);
-      const durationHours = analyzer.getDurationHours(session);
-      const totalCost = await analyzer.costCalculator.calculateSessionCost(session);
-
-      return {
-        ...session,
-        projectName: analyzer.getProjectName(session),
-        startTime: startTime ? startTime.getTime() : null,
-        durationHours,
-        totalCost
-      };
-    })
+    paginated.map((session) => enrichSession(session, analyzer))
   );
 
   return Response.json({
@@ -84,9 +83,7 @@ export async function handleGetSessionById(req: Request, url: URL): Promise<Resp
     }, { status: 404 });
   }
 
-  const cost = await analyzer.costCalculator.calculateSessionCost(session);
-  const duration = analyzer.getDurationHours(session);
-  const projectName = analyzer.getProjectName(session);
+  const enrichedSession = await enrichSession(session, analyzer);
 
   const allMessages = formatMessages(session);
   const totalMessages = allMessages.length;
@@ -107,10 +104,7 @@ export async function handleGetSessionById(req: Request, url: URL): Promise<Resp
   return Response.json({
     success: true,
     data: {
-      ...session,
-      totalCost: cost,
-      durationHours: duration,
-      projectName,
+      ...enrichedSession,
       modelsUsed: analyzer.getModelsUsed(session),
       interactionCount: analyzer.getInteractionCount(session),
       displayTitle: analyzer.getDisplayTitle(session),

@@ -1,21 +1,7 @@
 import { existsSync, readdirSync, lstatSync } from "node:fs";
 import { promises as fsPromises } from "node:fs";
 import type { TokenUsage, TimeData, InteractionFile, SessionData, PricingData, PRTInfo, TokensData, RawInteractionData, TimeFieldData, PRTData } from "./types";
-
-// Path utility functions - standard JavaScript implementation
-function joinPath(...parts: string[]): string {
-  return parts.filter((p) => p).join("/");
-}
-
-function basename(path: string): string {
-  return path.split("/").pop() || "";
-}
-
-function dirname(path: string): string {
-  const parts = path.split("/");
-  parts.pop();
-  return parts.join("/") || "/";
-}
+import { joinPath, basename, dirname } from "./utils/path.js";
 
 const OPENCODE_STORAGE_PATH = (() => {
   const home = process.env.HOME || process.env.USERPROFILE || "";
@@ -68,6 +54,9 @@ export interface OpenCodeInfo {
   hasOpenCode: boolean;
   sessionCount: number;
 }
+
+const SESSION_FETCH_MULTIPLIER = 3;
+const MAX_SESSIONS_TO_SCAN = 1000;
 
 export class FileManager {
   async findSessions(limit?: number): Promise<string[]> {
@@ -288,10 +277,9 @@ export class FileManager {
     }
 
     const sessions: SessionData[] = [];
-    let pathsToCheck = limit * 3;
-    const maxPaths = 1000;
+    let pathsToCheck = limit * SESSION_FETCH_MULTIPLIER;
 
-    while (sessions.length < limit && pathsToCheck <= maxPaths) {
+    while (sessions.length < limit && pathsToCheck <= MAX_SESSIONS_TO_SCAN) {
       const sessionPaths = await this.findSessions(pathsToCheck);
 
       for (let i = sessions.length; i < sessionPaths.length && sessions.length < limit; i++) {

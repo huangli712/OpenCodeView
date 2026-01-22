@@ -1,17 +1,25 @@
 import { serve } from "bun";
 import { resolve, normalize } from "node:path";
 import type { SessionData } from "./types";
+import { joinPath } from "./utils/path.js";
 
 import { handleGetSessions, handleGetSessionById, handleGetMostRecent, handleGetAnalytics, handleGetSummary, handleValidate, handleGetOpenCodeInfo } from "./routes";
 import { FileManager } from "./fileutil";
 import { Sessions } from "./sessions";
 
-// Path utility functions - standard JavaScript implementation
-function joinPath(...parts: string[]): string {
-  return parts.filter((p) => p).join("/");
-}
+const DEFAULT_PORT = 3000;
+const MAX_PORT = 65535;
+const MIN_PORT = 1;
+const MAX_REQUEST_SIZE = 10 * 1024 * 1024; // 10MB
 
-const PORT = parseInt(process.env.PORT || "3000");
+const PORT = (() => {
+  const port = parseInt(process.env.PORT || `${DEFAULT_PORT}`, 10);
+  if (isNaN(port) || port < MIN_PORT || port > MAX_PORT) {
+    console.warn(`Invalid PORT value: ${process.env.PORT}, using ${DEFAULT_PORT}`);
+    return DEFAULT_PORT;
+  }
+  return port;
+})();
 
 async function handleStatic(req: Request, url: URL): Promise<Response> {
   let pathname = url.pathname;
@@ -101,6 +109,11 @@ const server = serve({
     const url = new URL(req.url);
 
     console.log(`${req.method} ${url.pathname}`);
+
+    const contentLength = req.headers.get("content-length");
+    if (contentLength && parseInt(contentLength, 10) > MAX_REQUEST_SIZE) {
+      return new Response("Request body too large", { status: 413 });
+    }
 
     try {
       if (url.pathname.startsWith("/api/")) {
