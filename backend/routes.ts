@@ -11,6 +11,10 @@ function joinPath(...parts: string[]): string {
 const fileManager = new FileManager();
 const analyzer = new Sessions();
 
+analyzer.init().catch((error) => {
+  console.error("Failed to initialize analyzer:", error);
+});
+
 export async function handleGetSessions(req: Request, url: URL): Promise<Response> {
   const limit = parseInt(url.searchParams.get("limit") || "50");
   const offset = parseInt(url.searchParams.get("offset") || "0");
@@ -124,8 +128,6 @@ export async function handleGetMostRecent(req: Request): Promise<Response> {
       error: "No sessions found"
     }, { status: 404 });
   }
-
-  await analyzer.init();
 
   const cost = await analyzer.costCalculator.calculateSessionCost(session);
   const duration = analyzer.getDurationHours(session);
@@ -329,19 +331,25 @@ export async function handleGetOpenCodeInfo(req: Request): Promise<Response> {
     try {
       const entries = readdirSync(mcpPath);
       mcpServers = entries.filter((e) => e.endsWith(".json")).map((e) => e.replace(".json", ""));
-    } catch (e) {}
+    } catch (e) {
+      console.error("Error reading MCP directory:", e);
+    }
   }
 
   if (skillsExists) {
     try {
       skillsCount = readdirSync(skillsPath).length;
-    } catch (e) {}
+    } catch (e) {
+      console.error("Error reading skills directory:", e);
+    }
   }
 
   if (pluginsExists) {
     try {
       pluginsCount = readdirSync(pluginsPath).length;
-    } catch (e) {}
+    } catch (e) {
+      console.error("Error reading plugins directory:", e);
+    }
   }
 
   let version = "Unknown";
@@ -354,6 +362,7 @@ export async function handleGetOpenCodeInfo(req: Request): Promise<Response> {
       }
     }
   } catch (e) {
+    console.error("Error getting OpenCode version from command:", e);
     const versionPaths = [
       joinPath(info.configPath, "package.json"),
       joinPath(home, ".local", "share", "opencode", "package.json")
@@ -365,12 +374,14 @@ export async function handleGetOpenCodeInfo(req: Request): Promise<Response> {
           const content = await Bun.file(vPath).text();
           const pkg = JSON.parse(content);
           version = pkg.version || version;
-          if (version && version !== "Unknown") {
-            break;
-          }
-        } catch (e) {}
+    if (version && version !== "Unknown") {
+      break;
+    }
+      } catch (e) {
+        console.error("Error reading version from package.json:", e);
       }
     }
+  }
   }
 
   return Response.json({

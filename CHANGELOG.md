@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.6.4 (2026-01-22)
+- Fixed CSS indentation for .nav-link.active selector
+- Fixed token segment colors - output and cache now use correct colors (primary and warning)
+- Fixed responsive layout for message list - removed duplicate 1024px media query
+- Moved message list responsive styles to proper 768px breakpoint
+- Updated version to 0.6.4 across all files
+
 ## v0.6.3 (2026-01-22)
 - Fixed duplicate CSS media queries for 768px breakpoint
 - Fixed CSS indentation inconsistency in .nav-link.active

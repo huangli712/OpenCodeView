@@ -1,5 +1,5 @@
 import { existsSync, readdirSync, lstatSync } from "node:fs";
-import type { TokenUsage, TimeData, InteractionFile, SessionData, PricingData, PRTInfo } from "./types";
+import type { TokenUsage, TimeData, InteractionFile, SessionData, PricingData, PRTInfo, TokensData, RawInteractionData, TimeFieldData, PRTData } from "./types";
 
 // Path utility functions - standard JavaScript implementation
 function joinPath(...parts: string[]): string {
@@ -139,7 +139,7 @@ export class FileManager {
     return pricing || {};
   }
 
-  parseTokenUsage(data: any): TokenUsage {
+  parseTokenUsage(data: { tokens?: TokensData; }): TokenUsage {
     const tokensData = data.tokens || {};
     const cacheData = tokensData.cache || {};
 
@@ -151,7 +151,7 @@ export class FileManager {
     };
   }
 
-  parseTimeData(data: any): TimeData | undefined {
+  parseTimeData(data: { time?: TimeFieldData; }): TimeData | undefined {
     if (!data.time) {
       return undefined;
     }
@@ -177,7 +177,7 @@ export class FileManager {
   }
 
   async parseInteractionFile(filePath: string, sessionId: string): Promise<InteractionFile | null> {
-    const data = await this.loadJSON(filePath);
+    const data = await this.loadJSON<RawInteractionData>(filePath);
     if (!data) {
       return null;
     }
@@ -339,7 +339,7 @@ export class FileManager {
       for (const entry of entries) {
         if (entry.isFile() && entry.name.endsWith(".json")) {
           const filePath = joinPath(messagePath, entry.name);
-          const content = await this.loadJSON<any>(filePath);
+          const content = await this.loadJSON<PRTData>(filePath);
 
           if (content) {
             prtFiles.push({

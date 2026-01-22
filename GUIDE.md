@@ -19,13 +19,12 @@ OpenCodeView/
 │       └── app.js            # Frontend logic
 ├── config/
 │   └── models.json          # Model pricing configuration
-├── package.json
-├── tsconfig.json
-├── README.md
-├── CONFIG.md               # Configuration guide
-├── CHANGELOG.md            # Version history
-└── start.sh                # Quick start script
-```
+ ├── package.json
+ ├── tsconfig.json
+ ├── README.md
+ ├── CHANGELOG.md            # Version history
+ └── start.sh                # Quick start script
+ ```
 
 ## 🌐 API Endpoints
 
@@ -91,11 +90,13 @@ OPCODE_STORAGE_PATH=/custom/path bun run start
 
 ### Custom Storage Path
 
-If your OpenCode storage path is not at the default location, modify `OPENCODE_STORAGE_PATH` in `backend/fileManager.ts`:
+OpenCodeView automatically searches for OpenCode storage in these locations (in order):
 
-```typescript
-const OPENCODE_STORAGE_PATH = "/your/custom/path";
-```
+1. `~/.local/share/opencode/storage/message`
+2. `~/.opencode/storage/message`
+3. `~/.config/opencode/storage/message`
+
+If your OpenCode uses a different location, set the `OPCODE_STORAGE_PATH` environment variable.
 
 ## 📱 Features Guide
 

@@ -14,6 +14,52 @@ export interface TimeData {
   completed?: number;
 }
 
+export interface ModelData {
+  modelID?: string;
+}
+
+export interface TokensData {
+  input?: number;
+  output?: number;
+  cache?: {
+    write?: number;
+    read?: number;
+  };
+}
+
+export interface SummaryData {
+  title?: string;
+  diffs?: Array<{
+    additions?: number;
+    deletions?: number;
+  }>;
+}
+
+export interface PathData {
+  cwd?: string;
+  root?: string;
+}
+
+export interface TimeFieldData {
+  created?: number;
+  completed?: number;
+}
+
+export interface RawInteractionData {
+  id?: string;
+  role?: string;
+  modelID?: string;
+  model?: ModelData;
+  providerID?: string;
+  mode?: string;
+  agent?: string;
+  time?: TimeFieldData;
+  tokens?: TokensData;
+  cost?: number;
+  path?: PathData;
+  summary?: SummaryData;
+}
+
 export interface InteractionFile {
   filePath: string;
   sessionId: string;
@@ -21,7 +67,7 @@ export interface InteractionFile {
   tokens: TokenUsage;
   timeData?: TimeData;
   projectPath?: string;
-  rawData?: any;
+  rawData?: RawInteractionData;
 }
 
 export interface SessionData {
@@ -99,6 +145,18 @@ export interface SessionSummary {
   dateRange: string;
 }
 
+export interface PRTData {
+  id: string;
+  type: string;
+  text?: string;
+  time?: {
+    start?: number;
+    end?: number;
+  };
+  messageID: string;
+  sessionID: string;
+}
+
 export interface PRTInfo {
   id: string;
   type: string;
@@ -109,7 +167,7 @@ export interface PRTInfo {
   };
   messageID: string;
   sessionID: string;
-  rawData?: any;
+  rawData?: PRTData;
 }
 
 export interface MessageInfo {
