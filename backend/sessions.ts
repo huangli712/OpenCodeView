@@ -359,10 +359,10 @@ export class Sessions {
         model.sessions++;
 
         const modelFiles = session.files.filter((f) => f.modelId === modelId);
-        model.interactions += modelFiles.length;
+        model.interactions += this.getInteractionCount(session);
 
         for (const file of modelFiles) {
-          model.tokens += file.tokens.input + file.tokens.output;
+          model.tokens += file.tokens.input + file.tokens.output + file.tokens.cache_write + file.tokens.cache_read;
         }
       }
     }
