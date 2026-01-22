@@ -33,11 +33,6 @@ analyzer.init().catch((error) => {
   console.warn("Cost calculations will return 0. Please ensure config/models.json exists and is valid.");
 });
 
-analyzer.init().catch((error) => {
-  console.error("Failed to initialize analyzer:", error);
-  console.warn("Cost calculations will return 0. Please ensure config/models.json exists and is valid.");
-});
-
 /**
  * GET /api/sessions - List all sessions with pagination
  * @param req - HTTP request
