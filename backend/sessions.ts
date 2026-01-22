@@ -126,12 +126,37 @@ export class Sessions {
     return mostCommon.split("/").pop() || "Unknown";
   }
 
-  getDisplayTitle(session: SessionData): string {
+    getDisplayTitle(session: SessionData): string {
     if (session.sessionTitle) {
       const title = session.sessionTitle;
       return title.length > 50 ? title.slice(0, 47) + "..." : title;
     }
     return session.sessionId;
+  }
+
+  accumulateSessionStats(session: SessionData, totalTokens: TokenUsage, totalInteractionsRef: { value: number }, modelsUsed: Set<string>, startTimes: Date[], endTimes: Date[]): void {
+    const tokens = this.computeTotalTokens(session);
+    totalTokens.input += tokens.input;
+    totalTokens.output += tokens.output;
+    totalTokens.cache_write += tokens.cache_write;
+    totalTokens.cache_read += tokens.cache_read;
+
+    totalInteractionsRef.value += this.getInteractionCount(session);
+
+    for (const model of this.getModelsUsed(session)) {
+      if (model) {
+        modelsUsed.add(model);
+      }
+    }
+
+    const start = this.getStartTime(session);
+    const end = this.getEndTime(session);
+    if (start) {
+      startTimes.push(start);
+    }
+    if (end) {
+      endTimes.push(end);
+    }
   }
 
   async generateSessionsSummary(sessions: SessionData[]): Promise<SessionSummary> {
@@ -161,38 +186,37 @@ export class Sessions {
     };
 
     let totalCost = 0;
+    const totalInteractionsRef = { value: 0 };
+    const modelsUsed = new Set<string>();
+    const startTimes: Date[] = [];
+    const endTimes: Date[] = [];
+
+    for (const session of sessions) {
+      this.accumulateSessionStats(session, totalTokens, totalInteractionsRef, modelsUsed, startTimes, endTimes);
+    }
+
+    const totalInteractions = totalInteractionsRef.value;
+
+    for (const session of sessions) {
+      totalCost += await this.costCalculator.calculateSessionCost(session);
+    }
+
+    const totalTokens = {
+      input: 0,
+      output: 0,
+      cache_write: 0,
+      cache_read: 0,
+      total: 0
+    };
+
+    let totalCost = 0;
     let totalInteractions = 0;
     const modelsUsed = new Set<string>();
     const startTimes: Date[] = [];
     const endTimes: Date[] = [];
 
     for (const session of sessions) {
-      const cost = await this.costCalculator.calculateSessionCost(session);
-      totalCost += cost;
-      
-      const interactionCount = this.getInteractionCount(session);
-      totalInteractions += interactionCount;
-      
-      const tokens = this.computeTotalTokens(session);
-      totalTokens.input += tokens.input;
-      totalTokens.output += tokens.output;
-      totalTokens.cache_write += tokens.cache_write;
-      totalTokens.cache_read += tokens.cache_read;
-
-      for (const model of this.getModelsUsed(session)) {
-        if (model) {
-          modelsUsed.add(model);
-        }
-      }
-
-      const start = this.getStartTime(session);
-      const end = this.getEndTime(session);
-      if (start) {
-        startTimes.push(start);
-      }
-      if (end) {
-        endTimes.push(end);
-      }
+      this.accumulateSessionStats(session, totalTokens, totalCost, totalInteractions, modelsUsed, startTimes, endTimes);
     }
 
     let dateRange = "Unknown";

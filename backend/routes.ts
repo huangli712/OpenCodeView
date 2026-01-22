@@ -85,8 +85,17 @@ export async function handleGetSessionById(req: Request, url: URL): Promise<Resp
     }, { status: 400 });
   }
 
-  const allSessions = await fileManager.loadAllSessions();
-  const session = allSessions.find((s) => s.sessionId === sessionId);
+  const sessionPaths = await fileManager.findSessions();
+  const sessionPath = sessionPaths.find((path) => path.endsWith(`/${sessionId}`));
+
+  if (!sessionPath) {
+    return Response.json({
+      success: false,
+      error: "Session not found"
+    }, { status: 404 });
+  }
+
+  const session = await fileManager.loadSession(sessionPath);
 
   if (!session) {
     return Response.json({
