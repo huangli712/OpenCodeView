@@ -1,4 +1,5 @@
 import { serve } from "bun";
+import { resolve, normalize } from "node:path";
 import type { SessionData } from "./types";
 
 import { handleGetSessions, handleGetSessionById, handleGetMostRecent, handleGetAnalytics, handleGetSummary, handleValidate, handleGetOpenCodeInfo } from "./routes";
@@ -18,7 +19,14 @@ async function handleStatic(req: Request, url: URL): Promise<Response> {
     pathname = "/index.html";
   }
 
-  const filePath = joinPath(process.cwd(), "frontend", pathname);
+  const frontendDir = resolve(process.cwd(), "frontend");
+  const filePath = normalize(joinPath(frontendDir, pathname));
+
+  // Security check: prevent directory traversal
+  if (!filePath.startsWith(frontendDir)) {
+    return new Response("Forbidden", { status: 403 });
+  }
+
   const file = Bun.file(filePath);
 
   try {

@@ -1,4 +1,5 @@
 import { existsSync, readdirSync, lstatSync } from "node:fs";
+import { promises as fsPromises } from "node:fs";
 import type { TokenUsage, TimeData, InteractionFile, SessionData, PricingData, PRTInfo, TokensData, RawInteractionData, TimeFieldData, PRTData } from "./types";
 
 // Path utility functions - standard JavaScript implementation
@@ -73,23 +74,35 @@ export class FileManager {
     try {
       const sessions: string[] = [];
 
-      if (existsSync(OPENCODE_STORAGE_PATH)) {
-        const entries = readdirSync(OPENCODE_STORAGE_PATH, { withFileTypes: true });
+      try {
+        const entries = await fsPromises.readdir(OPENCODE_STORAGE_PATH, { withFileTypes: true });
 
         for (const entry of entries) {
           if (entry.isDirectory() && isSessionDir(entry.name)) {
             sessions.push(joinPath(OPENCODE_STORAGE_PATH, entry.name));
           }
         }
+      } catch {
+        // Directory doesn't exist, return empty array
+        return [];
       }
 
-      sessions.sort((a, b) => {
-        const mtA = lstatSync(a).mtimeMs;
-        const mtB = lstatSync(b).mtimeMs;
-        return mtB - mtA;
-      });
+      // Use async stat for each file to avoid blocking
+      const sessionsWithStats = await Promise.all(
+        sessions.map(async (path) => {
+          try {
+            const stats = await fsPromises.stat(path);
+            return { path, mtimeMs: stats.mtimeMs };
+          } catch {
+            return { path, mtimeMs: 0 };
+          }
+        })
+      );
 
-      return limit ? sessions.slice(0, limit) : sessions;
+      sessionsWithStats.sort((a, b) => b.mtimeMs - a.mtimeMs);
+
+      const sortedSessions = sessionsWithStats.map(s => s.path);
+      return limit ? sortedSessions.slice(0, limit) : sortedSessions;
     } catch (error) {
       console.error("Error finding sessions:", error);
       return [];
@@ -100,23 +113,34 @@ export class FileManager {
     try {
       const files: string[] = [];
 
-      if (existsSync(directory)) {
-        const entries = readdirSync(directory, { withFileTypes: true });
+      try {
+        const entries = await fsPromises.readdir(directory, { withFileTypes: true });
 
         for (const entry of entries) {
           if (entry.isFile() && entry.name.endsWith(".json")) {
             files.push(joinPath(directory, entry.name));
           }
         }
+      } catch {
+        // Directory doesn't exist, return empty array
+        return [];
       }
 
-      files.sort((a, b) => {
-        const mtA = lstatSync(a).mtimeMs;
-        const mtB = lstatSync(b).mtimeMs;
-        return mtB - mtA;
-      });
+      // Use async stat for each file to avoid blocking
+      const filesWithStats = await Promise.all(
+        files.map(async (path) => {
+          try {
+            const stats = await fsPromises.stat(path);
+            return { path, mtimeMs: stats.mtimeMs };
+          } catch {
+            return { path, mtimeMs: 0 };
+          }
+        })
+      );
 
-      return files;
+      filesWithStats.sort((a, b) => b.mtimeMs - a.mtimeMs);
+
+      return filesWithStats.map(f => f.path);
     } catch (error) {
       console.error(`Error finding JSON files in ${directory}:`, error);
       return [];
@@ -281,7 +305,7 @@ export class FileManager {
         break;
       }
 
-      pathsToCheck *= 2;
+      pathsToCheck = Math.min(pathsToCheck * 2, maxPaths + 1);
     }
 
     return sessions;
@@ -307,33 +331,47 @@ export class FileManager {
     const configPath = joinPath(home, ".config", "opencode");
 
     let sessionCount = 0;
-    if (existsSync(storagePath)) {
-      const entries = readdirSync(storagePath, { withFileTypes: true });
+    let hasOpenCode = false;
+
+    try {
+      await fsPromises.access(storagePath);
+      hasOpenCode = true;
+      const entries = await fsPromises.readdir(storagePath, { withFileTypes: true });
       sessionCount = entries.filter((e) => e.isDirectory() && isSessionDir(e.name)).length;
+    } catch {
+      // Directory doesn't exist
     }
 
     return {
       storagePath,
       configPath,
       homePath: home,
-      hasOpenCode: existsSync(storagePath),
+      hasOpenCode,
       sessionCount
     };
   }
 
   async validatePath(pathStr: string): Promise<boolean> {
-    return existsSync(pathStr);
+    try {
+      await fsPromises.access(pathStr);
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   async loadPRTFiles(messageId: string): Promise<PRTInfo[]> {
     try {
       const messagePath = joinPath(PART_STORAGE_PATH, messageId);
 
-      if (!existsSync(messagePath)) {
+      try {
+        await fsPromises.access(messagePath);
+      } catch {
+        // Directory doesn't exist, return empty array
         return [];
       }
 
-      const entries = readdirSync(messagePath, { withFileTypes: true });
+      const entries = await fsPromises.readdir(messagePath, { withFileTypes: true });
       const prtFiles: PRTInfo[] = [];
 
       for (const entry of entries) {

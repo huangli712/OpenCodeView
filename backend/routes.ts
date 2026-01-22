@@ -1,11 +1,17 @@
 import type { SessionData, SessionSummary, MessageInfo } from "./types";
 import { FileManager } from "./fileutil";
 import { Sessions } from "./sessions";
-import { existsSync, readdirSync } from "node:fs";
+import { promises as fsPromises } from "node:fs";
 
 // Path utility functions - standard JavaScript implementation
 function joinPath(...parts: string[]): string {
   return parts.filter((p) => p).join("/");
+}
+
+// Utility function for safe integer parsing
+function parseSafeInt(value: string | null, defaultValue: number): number {
+  const parsed = parseInt(value || `${defaultValue}`, 10);
+  return isNaN(parsed) ? defaultValue : parsed;
 }
 
 const fileManager = new FileManager();
@@ -13,19 +19,18 @@ const analyzer = new Sessions();
 
 analyzer.init().catch((error) => {
   console.error("Failed to initialize analyzer:", error);
+  console.warn("Cost calculations will return 0. Please ensure config/models.json exists and is valid.");
 });
 
 export async function handleGetSessions(req: Request, url: URL): Promise<Response> {
-  const limit = Math.min(Math.max(parseInt(url.searchParams.get("limit") || "50"), 1), 1000);
-  const offset = Math.max(parseInt(url.searchParams.get("offset") || "0"), 0);
+  const limit = Math.min(Math.max(parseSafeInt(url.searchParams.get("limit"), 50), 1), 1000);
+  const offset = Math.max(parseSafeInt(url.searchParams.get("offset"), 0), 0);
 
-  const allSessions = await fileManager.loadAllSessions();
-  const total = allSessions.length;
+  const sessions = await fileManager.loadAllSessions(limit + offset);
+  const total = await fileManager.findSessions().length;
 
-  const paginatedSessions = await fileManager.loadAllSessions(limit + offset);
-  const paginated = paginatedSessions.slice(offset, offset + limit);
-
-  const summary = await analyzer.generateSessionsSummary(paginatedSessions);
+  const paginated = sessions.slice(offset, offset + limit);
+  const summary = await analyzer.generateSessionsSummary(paginated);
 
   const sessionsWithComputedData = await Promise.all(
     paginated.map(async (session) => {
@@ -57,9 +62,10 @@ export async function handleGetSessions(req: Request, url: URL): Promise<Respons
 }
 
 export async function handleGetSessionById(req: Request, url: URL): Promise<Response> {
-  const sessionId = url.pathname.split("/").pop();
-  const limit = Math.min(Math.max(parseInt(url.searchParams.get("limit") || "50"), 1), 1000);
-  const offset = Math.max(parseInt(url.searchParams.get("offset") || "0"), 0);
+  const pathParts = url.pathname.split("/");
+  const sessionId = pathParts[pathParts.length - 1];
+  const limit = Math.min(Math.max(parseSafeInt(url.searchParams.get("limit"), 50), 1), 1000);
+  const offset = Math.max(parseSafeInt(url.searchParams.get("offset"), 0), 0);
 
   if (!sessionId) {
     return Response.json({
@@ -165,7 +171,7 @@ export async function handleGetAnalytics(req: Request, url: URL): Promise<Respon
     }, { status: 400 });
   }
 
-  const weekStart = Math.min(Math.max(parseInt(url.searchParams.get("weekStart") || "0"), 0), 6);
+  const weekStart = Math.min(Math.max(parseSafeInt(url.searchParams.get("weekStart"), 0), 0), 6);
 
   const sessions = await fileManager.loadAllSessions();
 
@@ -326,9 +332,24 @@ export async function handleGetOpenCodeInfo(req: Request): Promise<Response> {
   const skillsPath = joinPath(home, ".config", "opencode", "skills");
   const pluginsPath = joinPath(home, ".config", "opencode", "plugins");
 
-  const mcpExists = existsSync(mcpPath);
-  const skillsExists = existsSync(skillsPath);
-  const pluginsExists = existsSync(pluginsPath);
+  let mcpExists = false;
+  let skillsExists = false;
+  let pluginsExists = false;
+
+  try {
+    await fsPromises.access(mcpPath);
+    mcpExists = true;
+  } catch {}
+
+  try {
+    await fsPromises.access(skillsPath);
+    skillsExists = true;
+  } catch {}
+
+  try {
+    await fsPromises.access(pluginsPath);
+    pluginsExists = true;
+  } catch {}
 
   let mcpServers: string[] = [];
   let skillsCount = 0;
@@ -336,7 +357,7 @@ export async function handleGetOpenCodeInfo(req: Request): Promise<Response> {
 
   if (mcpExists) {
     try {
-      const entries = readdirSync(mcpPath);
+      const entries = await fsPromises.readdir(mcpPath);
       mcpServers = entries.filter((e) => e.endsWith(".json")).map((e) => e.replace(".json", ""));
     } catch (e) {
       console.error("Error reading MCP directory:", e);
@@ -345,7 +366,8 @@ export async function handleGetOpenCodeInfo(req: Request): Promise<Response> {
 
   if (skillsExists) {
     try {
-      skillsCount = readdirSync(skillsPath).length;
+      const entries = await fsPromises.readdir(skillsPath);
+      skillsCount = entries.length;
     } catch (e) {
       console.error("Error reading skills directory:", e);
     }
@@ -353,7 +375,8 @@ export async function handleGetOpenCodeInfo(req: Request): Promise<Response> {
 
   if (pluginsExists) {
     try {
-      pluginsCount = readdirSync(pluginsPath).length;
+      const entries = await fsPromises.readdir(pluginsPath);
+      pluginsCount = entries.length;
     } catch (e) {
       console.error("Error reading plugins directory:", e);
     }
@@ -376,19 +399,23 @@ export async function handleGetOpenCodeInfo(req: Request): Promise<Response> {
     ];
 
     for (const vPath of versionPaths) {
-      if (existsSync(vPath)) {
-        try {
-          const content = await Bun.file(vPath).text();
-          const pkg = JSON.parse(content);
-          version = pkg.version || version;
-    if (version && version !== "Unknown") {
-      break;
-    }
+      try {
+        await fsPromises.access(vPath);
+      } catch {
+        continue;
+      }
+
+      try {
+        const content = await Bun.file(vPath).text();
+        const pkg = JSON.parse(content);
+        version = pkg.version || version;
+        if (version && version !== "Unknown") {
+          break;
+        }
       } catch (e) {
         console.error("Error reading version from package.json:", e);
       }
     }
-  }
   }
 
   return Response.json({

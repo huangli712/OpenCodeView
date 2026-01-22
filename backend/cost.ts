@@ -3,20 +3,41 @@ import { FileManager } from "./fileutil";
 
 export class CostCalculator {
   private pricingData: PricingData;
+  private initialized: boolean = false;
+  private initializationError: string | null = null;
 
   constructor() {
     this.pricingData = {};
   }
 
   async init(): Promise<void> {
-    const fileManager = new FileManager();
-    this.pricingData = await fileManager.loadPricing();
+    try {
+      const fileManager = new FileManager();
+      this.pricingData = await fileManager.loadPricing();
+      this.initialized = true;
+    } catch (error) {
+      this.initializationError = error instanceof Error ? error.message : String(error);
+      this.initialized = false;
+    }
+  }
+
+  isInitialized(): boolean {
+    return this.initialized;
+  }
+
+  getInitializationError(): string | null {
+    return this.initializationError;
   }
 
   calculateInteractionCost(interaction: InteractionFile): number {
     const pricing = this.pricingData[interaction.modelId];
 
     if (!pricing) {
+      if (!this.initialized) {
+        console.warn(`Cost calculation: pricing data not initialized. Model: ${interaction.modelId}`);
+      } else {
+        console.warn(`Cost calculation: pricing not found for model: ${interaction.modelId}`);
+      }
       return 0;
     }
 

@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.7.1 (2026-01-22)
+- Security: Fixed path traversal vulnerability in static file handler (server.ts)
+- Performance: Eliminated duplicate session loading in handleGetSessions (routes.ts)
+- Reliability: Fixed infinite loop potential in loadAllSessions (fileutil.ts)
+- Type safety: Added parseSafeInt utility for robust query parameter parsing (routes.ts)
+- Reliability: Enhanced cost calculator initialization failure handling with warnings (cost.ts)
+- Performance: Converted all synchronous file operations to async (fileutil.ts, routes.ts)
+- Optimized file system operations using Promise.all for parallel execution
+- Updated version to 0.7.1 across all files
+
 ## v0.7.0 (2026-01-22)
 - Backend optimization: Moved Sessions analyzer initialization to module level for better performance
 - Added comprehensive API parameter validation (limit: 1-1000, offset >= 0, weekStart: 0-6)
