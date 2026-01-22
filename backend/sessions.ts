@@ -146,11 +146,12 @@ export class Sessions {
     tokensAccumulator.cache_write += tokens.cache_write;
     tokensAccumulator.cache_read += tokens.cache_read;
 
-    costAccumulator += this.costCalculator.calculateSessionCost(session);
     interactionsAccumulator += this.getInteractionCount(session);
 
     for (const model of this.getModelsUsed(session)) {
-      modelsAccumulator.add(model);
+      if (model) {
+        modelsAccumulator.add(model);
+      }
     }
 
     const start = this.getStartTime(session);
@@ -196,6 +197,8 @@ export class Sessions {
     const endTimes: Date[] = [];
 
     for (const session of sessions) {
+      const cost = await this.costCalculator.calculateSessionCost(session);
+      totalCost += cost;
       this.accumulateSessionStats(session, totalTokens, totalCost, totalInteractions, modelsUsed, startTimes, endTimes);
     }
 
