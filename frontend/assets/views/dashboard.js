@@ -64,7 +64,7 @@ export class DashboardView {
       </div>
 
       <footer class="app-footer">
-        <span>Built with OpenCodeView v0.6.0</span>
+        <span>Built with OpenCodeView v0.6.1</span>
         <span class="footer-time">${new Date().toLocaleString(config.display.defaultLocale)}</span>
       </footer>
     `;

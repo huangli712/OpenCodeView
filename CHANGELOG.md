@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.6.1 (2026-01-22)
+- Fixed event listener memory leaks in app.js
+- Added event handler reference tracking for proper cleanup
+- Implemented complete cleanup() method with resource disposal
+- Fixed beforeunload event listener leak
+- Fixed hashchange event listener leak
+- Fixed modal Escape key listener accumulation using {once: true}
+- Added Chart instance cleanup in cleanup() method
+- Updated version to 0.6.1 across all files
+
 ## v0.6.0 (2026-01-21)
 - Refactored frontend into modular architecture
 - Split app.js (1575 lines) into 12 focused modules

@@ -14,6 +14,12 @@ class OpenCodeView {
     this.state = new AppState();
     this.toasts = new ToastComponent();
 
+    this.sessionClickHandler = null;
+    this.paginationClickHandler = null;
+    this.beforeUnloadHandler = null;
+    this.hashChangeHandler = null;
+    this.modalEscapeHandlers = new Map();
+
     this.views = {
       dashboard: new DashboardView(this.api),
       sessions: new SessionsView(this.api),
@@ -54,14 +60,16 @@ class OpenCodeView {
       });
     });
 
-    window.addEventListener("hashchange", () => {
+    this.hashChangeHandler = () => {
       const hash = window.location.hash.slice(1) || "dashboard";
       this.switchTab(hash);
-    });
+    };
+    window.addEventListener("hashchange", this.hashChangeHandler);
 
-    window.addEventListener("beforeunload", () => {
+    this.beforeUnloadHandler = () => {
       this.cleanup();
-    });
+    };
+    window.addEventListener("beforeunload", this.beforeUnloadHandler);
   }
 
   async switchTab(tab) {
@@ -126,23 +134,42 @@ class OpenCodeView {
   }
 
   setupSessionEvents() {
-    document.addEventListener("click", async (e) => {
+    if (this.sessionClickHandler) {
+      document.removeEventListener("click", this.sessionClickHandler);
+    }
+
+    this.sessionClickHandler = async (e) => {
       const card = e.target.closest(".session-card");
       if (card && card.dataset.sessionId) {
         await this.loadSessionDetails(card.dataset.sessionId);
       }
-    });
+    };
+    document.addEventListener("click", this.sessionClickHandler);
   }
 
   setupPaginationEvents() {
-    this.views.sessions.pagination.setupEvents(async (offset, isMessage = false) => {
-      if (isMessage) {
-        const sessionId = this.state.getCurrentSessionId();
-        await this.loadMessages(sessionId, config.pagination.defaultLimit, offset);
-      } else {
+    if (this.paginationClickHandler) {
+      document.removeEventListener("click", this.paginationClickHandler);
+    }
+
+    this.paginationClickHandler = async (e) => {
+      const target = e.target;
+
+      if (target.classList.contains("btn") && target.dataset.offset) {
+        e.preventDefault();
+        const offset = parseInt(target.dataset.offset);
         await this.loadSessionsList(config.pagination.defaultLimit, offset);
       }
-    });
+
+      if (target.classList.contains("message-page-btn") && target.dataset.messageOffset) {
+        e.preventDefault();
+        const offset = parseInt(target.dataset.messageOffset);
+        const sessionId = this.state.getCurrentSessionId();
+        await this.loadMessages(sessionId, config.pagination.defaultLimit, offset);
+      }
+    };
+
+    document.addEventListener("click", this.paginationClickHandler);
   }
 
   async loadSessionsList(limit, offset) {
@@ -262,11 +289,11 @@ class OpenCodeView {
     const closeOnEscape = (e) => {
       if (e.key === "Escape" && modal?.classList.contains("active")) {
         modal.classList.remove("active");
-        document.removeEventListener("keydown", closeOnEscape);
       }
     };
 
-    document.addEventListener("keydown", closeOnEscape);
+    document.addEventListener("keydown", closeOnEscape, { once: true });
+    this.modalEscapeHandlers.set(modal, closeOnEscape);
   }
 
   showPRTModal(prtData) {
@@ -286,6 +313,36 @@ class OpenCodeView {
   }
 
   cleanup() {
+    if (this.sessionClickHandler) {
+      document.removeEventListener("click", this.sessionClickHandler);
+      this.sessionClickHandler = null;
+    }
+
+    if (this.paginationClickHandler) {
+      document.removeEventListener("click", this.paginationClickHandler);
+      this.paginationClickHandler = null;
+    }
+
+    if (this.beforeUnloadHandler) {
+      window.removeEventListener("beforeunload", this.beforeUnloadHandler);
+      this.beforeUnloadHandler = null;
+    }
+
+    if (this.hashChangeHandler) {
+      window.removeEventListener("hashchange", this.hashChangeHandler);
+      this.hashChangeHandler = null;
+    }
+
+    this.modalEscapeHandlers.forEach((handler, modal) => {
+      document.removeEventListener("keydown", handler);
+    });
+    this.modalEscapeHandlers.clear();
+
+    Object.values(this.views).forEach(view => {
+      if (view.charts && typeof view.charts.destroyAll === "function") {
+        view.charts.destroyAll();
+      }
+    });
   }
 }
 
