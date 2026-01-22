@@ -6,8 +6,12 @@ export class CostCalculator {
   private initialized: boolean = false;
   private initializationError: string | null = null;
 
+  private sessionCostCache: Map<string, number>;
+  private readonly CACHE_MAX_SIZE = 1000;
+
   constructor() {
     this.pricingData = {};
+    this.sessionCostCache = new Map();
   }
 
   async init(): Promise<void> {
@@ -53,13 +57,28 @@ export class CostCalculator {
   }
 
   calculateSessionCost(session: SessionData): number {
+    if (this.sessionCostCache.has(session.sessionId)) {
+      return this.sessionCostCache.get(session.sessionId)!;
+    }
+
     let total = 0;
 
     for (const file of session.files) {
       total += this.calculateInteractionCost(file);
     }
 
+    if (this.sessionCostCache.size >= this.CACHE_MAX_SIZE) {
+      const firstKey = this.sessionCostCache.keys().next().value;
+      this.sessionCostCache.delete(firstKey);
+    }
+
+    this.sessionCostCache.set(session.sessionId, total);
+
     return total;
+  }
+
+  clearCache(): void {
+    this.sessionCostCache.clear();
   }
 
   async calculateSessionsCost(sessions: SessionData[]): Promise<number> {

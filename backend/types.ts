@@ -2,6 +2,9 @@
  * Type definitions for OpenCodeView
  */
 
+/**
+ * Token usage statistics for a single interaction
+ */
 export interface TokenUsage {
   input: number;
   output: number;
@@ -70,6 +73,9 @@ export interface InteractionFile {
   rawData?: RawInteractionData;
 }
 
+/**
+ * Complete session data with all interactions and metadata
+ */
 export interface SessionData {
   sessionId: string;
   sessionPath: string;
@@ -130,6 +136,9 @@ export interface ProjectBreakdown {
   modelsUsed: string[];
 }
 
+/**
+ * Summary statistics across all sessions
+ */
 export interface SessionSummary {
   totalSessions: number;
   totalInteractions: number;

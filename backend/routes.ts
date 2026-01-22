@@ -33,6 +33,19 @@ analyzer.init().catch((error) => {
   console.warn("Cost calculations will return 0. Please ensure config/models.json exists and is valid.");
 });
 
+/**
+ * GET /api/sessions - List all sessions with pagination
+ * @param req - HTTP request
+ * @param url - Request URL with query params (limit, offset)
+ * @returns JSON response with sessions data, summary, and pagination info
+ */
+export async function handleGetSessions(req: Request, url: URL): Promise<Response> {
+
+analyzer.init().catch((error) => {
+  console.error("Failed to initialize analyzer:", error);
+  console.warn("Cost calculations will return 0. Please ensure config/models.json exists and is valid.");
+});
+
 export async function handleGetSessions(req: Request, url: URL): Promise<Response> {
   const limit = Math.min(Math.max(parseSafeInt(url.searchParams.get("limit"), 50), 1), 1000);
   const offset = Math.max(parseSafeInt(url.searchParams.get("offset"), 0), 0);
@@ -60,6 +73,12 @@ export async function handleGetSessions(req: Request, url: URL): Promise<Respons
   });
 }
 
+/**
+ * GET /api/sessions/:id - Get session details by ID
+ * @param req - HTTP request
+ * @param url - Request URL with session ID in path
+ * @returns JSON response with session data and messages (paginated)
+ */
 export async function handleGetSessionById(req: Request, url: URL): Promise<Response> {
   const pathParts = url.pathname.split("/");
   const sessionId = pathParts[pathParts.length - 1];
@@ -119,6 +138,11 @@ export async function handleGetSessionById(req: Request, url: URL): Promise<Resp
   });
 }
 
+/**
+ * GET /api/sessions/recent - Get most recent session
+ * @param req - HTTP request
+ * @returns JSON response with recent session data
+ */
 export async function handleGetMostRecent(req: Request): Promise<Response> {
   const session = await fileManager.getMostRecentSession();
 
@@ -154,6 +178,12 @@ export async function handleGetMostRecent(req: Request): Promise<Response> {
   });
 }
 
+/**
+ * GET /api/analytics - Get analytics data (daily/weekly/monthly/models/projects)
+ * @param req - HTTP request
+ * @param url - Request URL with query params (type, weekStart)
+ * @returns JSON response with analytics data by type
+ */
 export async function handleGetAnalytics(req: Request, url: URL): Promise<Response> {
   const type = url.searchParams.get("type") || "daily";
   const validTypes = ["daily", "weekly", "monthly", "models", "projects"];
@@ -225,6 +255,11 @@ export async function handleGetAnalytics(req: Request, url: URL): Promise<Respon
   }
 }
 
+/**
+ * GET /api/summary - Get overall summary statistics
+ * @param req - HTTP request
+ * @returns JSON response with total statistics
+ */
 export async function handleGetSummary(req: Request): Promise<Response> {
   const sessions = await fileManager.loadAllSessions();
   const summary = await analyzer.generateSessionsSummary(sessions);
@@ -235,6 +270,11 @@ export async function handleGetSummary(req: Request): Promise<Response> {
   });
 }
 
+/**
+ * GET /api/validate - Validate OpenCode installation
+ * @param req - HTTP request
+ * @returns JSON response with validation status
+ */
 export async function handleValidate(req: Request): Promise<Response> {
   const path = fileManager.getOpenCodeStoragePath();
   const isValid = await fileManager.validatePath(path);
@@ -318,6 +358,11 @@ function getActivityStatus(end: Date | null): "active" | "recent" | "idle" | "in
   return "inactive";
 }
 
+/**
+ * GET /api/opencode - Get OpenCode installation information
+ * @param req - HTTP request
+ * @returns JSON response with OpenCode info, MCP servers, skills, plugins, version
+ */
 export async function handleGetOpenCodeInfo(req: Request): Promise<Response> {
   const info = await fileManager.getOpenCodeInfo();
 

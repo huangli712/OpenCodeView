@@ -10,7 +10,17 @@ import { Sessions } from "./sessions";
 const DEFAULT_PORT = 3000;
 const MAX_PORT = 65535;
 const MIN_PORT = 1;
-const MAX_REQUEST_SIZE = 10 * 1024 * 1024; // 10MB
+const MAX_REQUEST_SIZE = 10 * 1024 * 1024;
+
+const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
+const RATE_LIMIT_MAX_REQUESTS = 100; // Max 100 requests per minute per IP
+
+type RequestLog = {
+  count: number;
+  resetTime: number;
+};
+
+const ipRequestLog = new Map<string, RequestLog>();
 
 const PORT = (() => {
   const port = parseInt(process.env.PORT || `${DEFAULT_PORT}`, 10);
@@ -69,6 +79,25 @@ function getContentType(pathname: string): string {
   return types[ext || ""] || "application/octet-stream";
 }
 
+function checkRateLimit(req: Request): boolean {
+  const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
+
+  const now = Date.now();
+  const log = ipRequestLog.get(ip);
+
+  if (!log || now > log.resetTime + RATE_LIMIT_WINDOW_MS) {
+    ipRequestLog.set(ip, { count: 1, resetTime: now });
+    return true;
+  }
+
+  if (log.count >= RATE_LIMIT_MAX_REQUESTS) {
+    return false;
+  }
+
+  log.count++;
+  return true;
+}
+
 async function handleAPI(req: Request, url: URL): Promise<Response> {
   const pathname = url.pathname;
 
@@ -117,6 +146,15 @@ const server = serve({
 
     try {
       if (url.pathname.startsWith("/api/")) {
+        if (!checkRateLimit(req)) {
+          return new Response("Too many requests. Please try again later.", {
+            status: 429,
+            headers: {
+              "Content-Type": "application/json",
+              "Retry-After": `${Math.ceil(RATE_LIMIT_WINDOW_MS / 1000)}`
+            }
+          });
+        }
         return handleAPI(req, url);
       }
 
