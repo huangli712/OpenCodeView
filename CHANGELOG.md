@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.7.0 (2026-01-22)
+- Backend optimization: Moved Sessions analyzer initialization to module level for better performance
+- Added comprehensive API parameter validation (limit: 1-1000, offset >= 0, weekStart: 0-6)
+- Added analytics type validation to ensure only valid types are requested
+- Enhanced error logging with detailed console.error messages for better debugging
+- Removed duplicate initializeAnalyzer function from backend/server.ts
+- Type safety improvements: Added new TypeScript type definitions (ModelData, TokensData, SummaryData, PathData, TimeFieldData, RawInteractionData, PRTData)
+- Replaced generic 'any' types with specific type definitions throughout backend
+- Documentation overhaul: Comprehensive update to GUIDE.md with full API documentation
+- Merged CONFIG.md content into GUIDE.md for consolidated documentation
+- Deleted CONFIG.md - configuration now documented in GUIDE.md
+- Added detailed API endpoint documentation with request/response examples
+- Improved type safety in fileutil.ts with proper generic type parameters
+- Enhanced PRT file parsing with strict type definitions
+- Updated version to 0.7.0 across all files
+
 ## v0.6.4 (2026-01-22)
 - Fixed CSS indentation for .nav-link.active selector
 - Fixed token segment colors - output and cache now use correct colors (primary and warning)
