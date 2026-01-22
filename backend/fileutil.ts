@@ -234,14 +234,7 @@ export class FileManager {
       for (const filePath of jsonFiles) {
         const interaction = await this.parseInteractionFile(filePath, sessionId);
         if (interaction) {
-          const totalTokens = interaction.tokens.input +
-                            interaction.tokens.output +
-                            interaction.tokens.cache_write +
-                            interaction.tokens.cache_read;
-
-          if (totalTokens > 0) {
-            interactionFiles.push(interaction);
-          }
+          interactionFiles.push(interaction);
         }
       }
 
@@ -279,21 +272,24 @@ export class FileManager {
     const sessions: SessionData[] = [];
     let pathsToCheck = limit * SESSION_FETCH_MULTIPLIER;
 
+    let loadedCount = 0;
+
     while (sessions.length < limit && pathsToCheck <= MAX_SESSIONS_TO_SCAN) {
       const sessionPaths = await this.findSessions(pathsToCheck);
 
-      for (let i = sessions.length; i < sessionPaths.length && sessions.length < limit; i++) {
+      for (let i = 0; i < sessionPaths.length && sessions.length < limit; i++) {
         const session = await this.loadSession(sessionPaths[i]);
         if (session) {
           sessions.push(session);
+          loadedCount++;
         }
       }
 
-      if (sessionPaths.length < pathsToCheck) {
+      if (loadedCount < sessionPaths.length && sessions.length < limit) {
+        pathsToCheck = Math.min(pathsToCheck * 2, MAX_SESSIONS_TO_SCAN + 1);
+      } else {
         break;
       }
-
-      pathsToCheck = Math.min(pathsToCheck * 2, maxPaths + 1);
     }
 
     return sessions;

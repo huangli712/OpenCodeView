@@ -83,9 +83,12 @@ export class Sessions {
 
   getModelsUsed(session: SessionData): string[] {
     const models = new Set<string>();
+    const invalidModels = ["", "unknown", "undefined"];
 
     for (const file of session.files) {
-      models.add(file.modelId);
+      if (file.modelId && !invalidModels.includes(file.modelId)) {
+        models.add(file.modelId);
+      }
     }
 
     return Array.from(models);
