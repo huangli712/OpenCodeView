@@ -134,39 +134,6 @@ export class Sessions {
     return session.sessionId;
   }
 
-  private accumulateSessionStats(
-    session: SessionData,
-    tokensAccumulator: TokenUsage,
-    costAccumulator: number,
-    interactionsAccumulator: number,
-    modelsAccumulator: Set<string>,
-    startTimes: Date[],
-    endTimes: Date[]
-  ): void {
-    const tokens = this.computeTotalTokens(session);
-    tokensAccumulator.input += tokens.input;
-    tokensAccumulator.output += tokens.output;
-    tokensAccumulator.cache_write += tokens.cache_write;
-    tokensAccumulator.cache_read += tokens.cache_read;
-
-    interactionsAccumulator += this.getInteractionCount(session);
-
-    for (const model of this.getModelsUsed(session)) {
-      if (model) {
-        modelsAccumulator.add(model);
-      }
-    }
-
-    const start = this.getStartTime(session);
-    const end = this.getEndTime(session);
-    if (start) {
-      startTimes.push(start);
-    }
-    if (end) {
-      endTimes.push(end);
-    }
-  }
-
   async generateSessionsSummary(sessions: SessionData[]): Promise<SessionSummary> {
     if (sessions.length === 0) {
       return {
@@ -202,7 +169,30 @@ export class Sessions {
     for (const session of sessions) {
       const cost = await this.costCalculator.calculateSessionCost(session);
       totalCost += cost;
-      this.accumulateSessionStats(session, totalTokens, totalCost, totalInteractions, modelsUsed, startTimes, endTimes);
+      
+      const interactionCount = this.getInteractionCount(session);
+      totalInteractions += interactionCount;
+      
+      const tokens = this.computeTotalTokens(session);
+      totalTokens.input += tokens.input;
+      totalTokens.output += tokens.output;
+      totalTokens.cache_write += tokens.cache_write;
+      totalTokens.cache_read += tokens.cache_read;
+
+      for (const model of this.getModelsUsed(session)) {
+        if (model) {
+          modelsUsed.add(model);
+        }
+      }
+
+      const start = this.getStartTime(session);
+      const end = this.getEndTime(session);
+      if (start) {
+        startTimes.push(start);
+      }
+      if (end) {
+        endTimes.push(end);
+      }
     }
 
     let dateRange = "Unknown";
