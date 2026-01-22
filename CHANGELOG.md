@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.6.3 (2026-01-22)
+- Fixed duplicate CSS media queries for 768px breakpoint
+- Fixed CSS indentation inconsistency in .nav-link.active
+- Distinguished token colors by type (input: success, output: primary, cache: warning)
+- Added environment detection to config.js
+- Sanitized API error messages in production mode
+- Dev mode shows full error details, production shows generic messages
+- Added isDev flag to config for environment-based behavior
+- Updated version to 0.6.3 across all files
+
 ## v0.6.2 (2026-01-22)
 - Fixed ToastComponent missing config import causing runtime error
 - Fixed onclick usage causing event handler overwrite

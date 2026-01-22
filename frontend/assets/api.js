@@ -27,23 +27,19 @@ export class API {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        throw new APIError(
-          `HTTP ${response.status}: ${response.statusText}`,
-          response.status,
-          endpoint,
-          "HTTP_ERROR"
-        );
+        const errorMessage = config.isDev
+          ? `HTTP ${response.status}: ${response.statusText}`
+          : "An error occurred. Please try again.";
+        throw new APIError(errorMessage, response.status, endpoint, "HTTP_ERROR");
       }
 
       const result = await response.json();
 
       if (!result.success) {
-        throw new APIError(
-          result.error || "Request failed",
-          response.status,
-          endpoint,
-          "API_ERROR"
-        );
+        const errorMessage = config.isDev
+          ? result.error || "Request failed"
+          : "An error occurred. Please try again.";
+        throw new APIError(errorMessage, response.status, endpoint, "API_ERROR");
       }
 
       return result;
@@ -76,13 +72,14 @@ export class API {
         );
       }
 
-      console.error(`API Error [${endpoint}]:`, error);
-      throw new APIError(
-        error.message || "Unknown error occurred",
-        0,
-        endpoint,
-        "UNKNOWN"
-      );
+      if (config.isDev) {
+        console.error(`API Error [${endpoint}]:`, error);
+      }
+
+      const errorMessage = config.isDev
+        ? error.message || "Unknown error occurred"
+        : "An error occurred. Please try again.";
+      throw new APIError(errorMessage, 0, endpoint, "UNKNOWN");
     }
   }
 

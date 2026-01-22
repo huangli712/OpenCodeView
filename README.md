@@ -1,6 +1,6 @@
 # OpenCodeView
 
-**Version: 0.6.2**
+**Version: 0.6.3**
 
 OpenCode is an AI coding assistant that provides intelligent code suggestions and automation. OpenCodeView, inspired by Shlomob's ocmonitor-share project, is a web-based monitoring tool that helps you track and analyze your OpenCode usage, including session history, token consumption, and cost estimation. This project is built with Bun, TypeScript, HTML, and CSS.
 

@@ -1,4 +1,6 @@
 export const config = {
+  isDev: typeof window !== 'undefined' && window.location.hostname === 'localhost',
+
   pagination: {
     defaultLimit: 10
   },
