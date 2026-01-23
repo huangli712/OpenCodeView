@@ -358,6 +358,11 @@ GET /api/opencode
       "path": "string",
       "exists": boolean,
       "count": number
+    },
+    "config": {
+      "path": "string",
+      "jsonFiles": ["string"],
+      "jsonFileCount": number
     }
   }
 }

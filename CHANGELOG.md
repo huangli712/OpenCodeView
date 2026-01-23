@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.7.2 (2026-01-23)
+- Added config section display with JSON file count (excluding package.json)
+- Added MCP server count display in About modal
+- Removed console.error statements from error handling for cleaner output
+- Fixed bracket placement issue in version retrieval logic
+- Enhanced OpenCode modal with improved Configuration and MCP Servers sections
+
 ## v0.7.1 (2026-01-22)
 - Security: Fixed path traversal vulnerability in static file handler (server.ts)
 - Performance: Eliminated duplicate session loading in handleGetSessions (routes.ts)
