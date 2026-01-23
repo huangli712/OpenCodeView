@@ -95,15 +95,20 @@ export class FileManager {
 
         for (const entry of entries) {
           if (entry.isDirectory() && isSessionDir(entry.name)) {
-            sessions.push(joinPath(OPENCODE_STORAGE_PATH, entry.name));
+            const sessionPath = joinPath(OPENCODE_STORAGE_PATH, entry.name);
+            try {
+              const files = await fsPromises.readdir(sessionPath);
+              if (files.length > 0) {
+                sessions.push(sessionPath);
+              }
+            } catch {
+            }
           }
         }
       } catch {
-        // Directory doesn't exist, return empty array
         return [];
       }
 
-      // Use async stat for each file to avoid blocking
       const sessionsWithStats = await Promise.all(
         sessions.map(async (path) => {
           try {
