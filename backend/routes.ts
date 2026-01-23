@@ -431,7 +431,7 @@ export async function handleGetOpenCodeInfo(req: Request): Promise<Response> {
         version = versionMatch[1];
       }
     }
-  } catch (e) {}
+  } catch (e) {
     const versionPaths = [
       joinPath(info.configPath, "package.json"),
       joinPath(home, ".local", "share", "opencode", "package.json")
