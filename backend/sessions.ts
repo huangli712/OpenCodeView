@@ -95,10 +95,7 @@ export class Sessions {
   }
 
   getInteractionCount(session: SessionData): number {
-    return session.files.filter(f => {
-      const hasTokens = f.tokens.input + f.tokens.output + f.tokens.cache_write + f.tokens.cache_read > 0;
-      return hasTokens;
-    }).length;
+    return session.files.length;
   }
 
   getProjectName(session: SessionData): string {
