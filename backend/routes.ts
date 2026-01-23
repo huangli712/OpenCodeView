@@ -400,34 +400,26 @@ export async function handleGetOpenCodeInfo(req: Request): Promise<Response> {
     try {
       const entries = await fsPromises.readdir(mcpPath);
       mcpServers = entries.filter((e) => e.endsWith(".json")).map((e) => e.replace(".json", ""));
-    } catch (e) {
-      console.error("Error reading MCP directory:", e);
-    }
+    } catch (e) {}
   }
 
   try {
     const entries = await fsPromises.readdir(info.configPath);
     configJsonFiles = entries.filter((e) => e.endsWith(".json"));
-  } catch (e) {
-    console.error("Error reading config directory:", e);
-  }
+  } catch (e) {}
 
   if (skillsExists) {
     try {
       const entries = await fsPromises.readdir(skillsPath);
       skillsCount = entries.length;
-    } catch (e) {
-      console.error("Error reading skills directory:", e);
-    }
+    } catch (e) {}
   }
 
   if (pluginsExists) {
     try {
       const entries = await fsPromises.readdir(pluginsPath);
       pluginsCount = entries.length;
-    } catch (e) {
-      console.error("Error reading plugins directory:", e);
-    }
+    } catch (e) {}
   }
 
   let version = "Unknown";
@@ -439,8 +431,7 @@ export async function handleGetOpenCodeInfo(req: Request): Promise<Response> {
         version = versionMatch[1];
       }
     }
-  } catch (e) {
-    console.error("Error getting OpenCode version from command:", e);
+  } catch (e) {}
     const versionPaths = [
       joinPath(info.configPath, "package.json"),
       joinPath(home, ".local", "share", "opencode", "package.json")
@@ -460,9 +451,7 @@ export async function handleGetOpenCodeInfo(req: Request): Promise<Response> {
         if (version && version !== "Unknown") {
           break;
         }
-      } catch (e) {
-        console.error("Error reading version from package.json:", e);
-      }
+      } catch (e) {}
     }
   }
 
