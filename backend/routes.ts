@@ -43,7 +43,7 @@ export async function handleGetSessions(req: Request, url: URL): Promise<Respons
   const offset = Math.max(parseSafeInt(url.searchParams.get("offset"), 0), 0);
 
   const sessions = await fileManager.loadAllSessions(limit + offset);
-  const total = await fileManager.findSessions().length;
+  const total = (await fileManager.findSessions()).length;
 
   const paginated = sessions.slice(offset, offset + limit);
   const summary = await analyzer.generateSessionsSummary(paginated);
