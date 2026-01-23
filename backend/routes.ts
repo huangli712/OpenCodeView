@@ -1,7 +1,6 @@
 import type { SessionData, SessionSummary, MessageInfo } from "./types";
-import { FileManager } from "./fileutil";
+import { FileManager, joinPath } from "./fileutil";
 import { Sessions } from "./sessions";
-import { joinPath } from "./utils/path.js";
 import { promises as fsPromises } from "node:fs";
 
 // Utility function for safe integer parsing

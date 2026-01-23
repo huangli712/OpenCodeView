@@ -1,7 +1,7 @@
 import { serve } from "bun";
 import { resolve, normalize } from "node:path";
 import type { SessionData } from "./types";
-import { joinPath } from "./utils/path.js";
+import { joinPath } from "./fileutil";
 
 import { handleGetSessions, handleGetSessionById, handleGetMostRecent, handleGetAnalytics, handleGetSummary, handleValidate, handleGetOpenCodeInfo } from "./routes";
 import { FileManager } from "./fileutil";
