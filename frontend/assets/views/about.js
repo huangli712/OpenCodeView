@@ -30,9 +30,7 @@ export class AboutView {
 
       <div class="about-section">
         <h3>⚙️ Configuration</h3>
-        <div class="about-grid">
-          ${this.renderPathItem("Path", data.configPath)}
-        </div>
+        ${this.renderConfigSection(data.config)}
       </div>
 
       <div class="about-section">
@@ -67,23 +65,27 @@ export class AboutView {
   }
 
   renderMCPSection(mcp) {
-    if (mcp.exists) {
-      return `
-        <div class="about-mcp-container">
-          <label class="about-mcp-label">MCP Servers</label>
-          <div class="about-mcp-list">
-            ${mcp.servers.length > 0
-              ? mcp.servers.map(s => `<span class="mcp-server-tag">${s}</span>`).join("")
-              : '<span class="not-exists">No MCP servers configured</span>'}
-          </div>
+    return `
+      <div class="about-grid">
+        ${this.renderPathItem("Path", mcp.path)}
+        ${this.renderCountItem("Count", mcp.serverCount)}
+      </div>
+    `;
+  }
+
+  renderConfigSection(config) {
+    const filteredFiles = config.jsonFiles.filter(f => f !== "package.json");
+    return `
+      <div class="about-grid">
+        <div class="about-item">
+          <label>Path</label>
+          <span class="exists">${config.path}</span>
         </div>
-      `;
-    } else {
-      return `
-        <div class="about-grid">
-          ${this.renderPathItem("Path", mcp.path)}
+        <div class="about-item">
+          <label>Count</label>
+          <span class="exists">${filteredFiles.length}</span>
         </div>
-      `;
-    }
+      </div>
+    `;
   }
 }

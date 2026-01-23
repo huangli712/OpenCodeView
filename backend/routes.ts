@@ -394,6 +394,7 @@ export async function handleGetOpenCodeInfo(req: Request): Promise<Response> {
   let mcpServers: string[] = [];
   let skillsCount = 0;
   let pluginsCount = 0;
+  let configJsonFiles: string[] = [];
 
   if (mcpExists) {
     try {
@@ -402,6 +403,13 @@ export async function handleGetOpenCodeInfo(req: Request): Promise<Response> {
     } catch (e) {
       console.error("Error reading MCP directory:", e);
     }
+  }
+
+  try {
+    const entries = await fsPromises.readdir(info.configPath);
+    configJsonFiles = entries.filter((e) => e.endsWith(".json"));
+  } catch (e) {
+    console.error("Error reading config directory:", e);
   }
 
   if (skillsExists) {
@@ -482,6 +490,11 @@ export async function handleGetOpenCodeInfo(req: Request): Promise<Response> {
         path: pluginsPath,
         exists: pluginsExists,
         count: pluginsCount
+      },
+      config: {
+        path: info.configPath,
+        jsonFiles: configJsonFiles,
+        jsonFileCount: configJsonFiles.length
       }
     }
   });
