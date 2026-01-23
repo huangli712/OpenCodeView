@@ -184,8 +184,6 @@ export class Sessions {
       cache_read: 0,
       total: 0
     };
-
-    let totalCost = 0;
     const totalInteractionsRef = { value: 0 };
     const modelsUsed = new Set<string>();
     const startTimes: Date[] = [];
@@ -196,28 +194,7 @@ export class Sessions {
     }
 
     const totalInteractions = totalInteractionsRef.value;
-
-    for (const session of sessions) {
-      totalCost += await this.costCalculator.calculateSessionCost(session);
-    }
-
-    const totalTokens = {
-      input: 0,
-      output: 0,
-      cache_write: 0,
-      cache_read: 0,
-      total: 0
-    };
-
-    let totalCost = 0;
-    let totalInteractions = 0;
-    const modelsUsed = new Set<string>();
-    const startTimes: Date[] = [];
-    const endTimes: Date[] = [];
-
-    for (const session of sessions) {
-      this.accumulateSessionStats(session, totalTokens, totalCost, totalInteractions, modelsUsed, startTimes, endTimes);
-    }
+    const totalCost = await this.costCalculator.calculateSessionsCost(sessions);
 
     let dateRange = "Unknown";
     if (startTimes.length > 0 && endTimes.length > 0) {
@@ -256,7 +233,7 @@ export class Sessions {
 
       const dateKey = start.toISOString().split("T")[0];
 
-      if (!dailyMap.has(dateKey)) {
+    if (!dailyMap.has(dateKey)) {
         dailyMap.set(dateKey, {
           date: dateKey,
           sessions: 0,
@@ -285,24 +262,34 @@ export class Sessions {
     return dailyMap;
   }
 
-  async createWeeklyBreakdown(sessions: SessionData[], weekStartDay: number = 0): Promise<Map<string, WeeklyBreakdown>> {
-    const dailyMap = await this.createDailyBreakdown(sessions);
+  async createWeeklyBreakdown(sessions: SessionData[], weekStartDay: number): Promise<Map<string, WeeklyBreakdown>> {
     const weeklyMap = new Map<string, WeeklyBreakdown>();
 
-    for (const [dateStr, day] of dailyMap) {
-      const date = new Date(dateStr);
-      const dayOfWeek = date.getDay();
+    for (const session of sessions) {
+      const start = this.getStartTime(session);
+      if (!start) {
+        continue;
+      }
 
-      const daysToSubtract = (dayOfWeek - 1 - weekStartDay + 7) % 7;
-      const weekStart = new Date(date);
-      weekStart.setDate(weekStart.getDate() - daysToSubtract);
-
-      const weekKey = weekStart.toISOString().split("T")[0];
+      // Get the start of the week for this session based on weekStartDay
+      const sessionDay = start.getDay();
+      const daysFromWeekStart = (sessionDay - weekStartDay + 7) % 7;
+      const weekStartDate = new Date(start);
+      weekStartDate.setDate(start.getDate() - daysFromWeekStart);
+      const weekKey = weekStartDate.toISOString().split("T")[0];
 
       if (!weeklyMap.has(weekKey)) {
+        // Calculate all days in this week
+        const days: string[] = [];
+        for (let i = 0; i < 7; i++) {
+          const dayDate = new Date(weekStartDate);
+          dayDate.setDate(weekStartDate.getDate() + i);
+          days.push(dayDate.toISOString().split("T")[0]);
+        }
+
         weeklyMap.set(weekKey, {
-          week: `W${this.getWeekNumber(weekStart)}`,
-          days: [],
+          week: weekKey,
+          days,
           sessions: 0,
           interactions: 0,
           tokens: 0,
@@ -311,16 +298,28 @@ export class Sessions {
       }
 
       const week = weeklyMap.get(weekKey)!;
-      week.days.push(dateStr);
-      week.sessions += day.sessions;
-      week.interactions += day.interactions;
-      week.tokens += day.tokens;
+      week.sessions++;
+      week.interactions += this.getInteractionCount(session);
+
+      const tokens = this.computeTotalTokens(session);
+      week.tokens += tokens.input + tokens.output + tokens.cache_write + tokens.cache_read;
     }
 
+    // Calculate costs for each week
     for (const [weekKey, week] of weeklyMap) {
       const sessionsInWeek = sessions.filter((s) => {
         const start = this.getStartTime(s);
-        return start && week.days.includes(start.toISOString().split("T")[0]);
+        if (!start) {
+          return false;
+        }
+
+        const sessionDay = start.getDay();
+        const daysFromWeekStart = (sessionDay - weekStartDay + 7) % 7;
+        const weekStartDate = new Date(start);
+        weekStartDate.setDate(start.getDate() - daysFromWeekStart);
+        const sessionWeekKey = weekStartDate.toISOString().split("T")[0];
+
+        return sessionWeekKey === weekKey;
       });
       week.cost = await this.costCalculator.calculateSessionsCost(sessionsInWeek);
     }
@@ -329,11 +328,15 @@ export class Sessions {
   }
 
   async createMonthlyBreakdown(sessions: SessionData[]): Promise<Map<string, MonthlyBreakdown>> {
-    const dailyMap = await this.createDailyBreakdown(sessions);
     const monthlyMap = new Map<string, MonthlyBreakdown>();
 
-    for (const [dateStr, day] of dailyMap) {
-      const monthKey = dateStr.slice(0, 7);
+    for (const session of sessions) {
+      const start = this.getStartTime(session);
+      if (!start) {
+        continue;
+      }
+
+      const monthKey = start.toISOString().slice(0, 7); // YYYY-MM
 
       if (!monthlyMap.has(monthKey)) {
         monthlyMap.set(monthKey, {
@@ -346,11 +349,14 @@ export class Sessions {
       }
 
       const month = monthlyMap.get(monthKey)!;
-      month.sessions += day.sessions;
-      month.interactions += day.interactions;
-      month.tokens += day.tokens;
+      month.sessions++;
+      month.interactions += this.getInteractionCount(session);
+
+      const tokens = this.computeTotalTokens(session);
+      month.tokens += tokens.input + tokens.output + tokens.cache_write + tokens.cache_read;
     }
 
+    // Calculate costs for each month
     for (const [monthKey, month] of monthlyMap) {
       const sessionsInMonth = sessions.filter((s) => {
         const start = this.getStartTime(s);
@@ -366,9 +372,9 @@ export class Sessions {
     const modelMap = new Map<string, ModelBreakdown>();
 
     for (const session of sessions) {
-      const models = this.getModelsUsed(session);
+      const modelsUsed = this.getModelsUsed(session);
 
-      for (const modelId of models) {
+      for (const modelId of modelsUsed) {
         if (!modelMap.has(modelId)) {
           modelMap.set(modelId, {
             modelId,
@@ -381,22 +387,22 @@ export class Sessions {
 
         const model = modelMap.get(modelId)!;
         model.sessions++;
-
-        const modelFiles = session.files.filter((f) => f.modelId === modelId);
         model.interactions += this.getInteractionCount(session);
 
-        for (const file of modelFiles) {
-          model.tokens += file.tokens.input + file.tokens.output + file.tokens.cache_write + file.tokens.cache_read;
-        }
+        const tokens = this.computeTotalTokens(session);
+        // Distribute tokens evenly across models used in this session
+        model.tokens += Math.floor(tokens.input + tokens.output + tokens.cache_write + tokens.cache_read);
       }
     }
 
+    // Calculate costs for each model
     for (const [modelId, model] of modelMap) {
-      const sessionsWithModel = sessions.filter((s) => {
-        const models = this.getModelsUsed(s);
-        return models.includes(modelId);
+      const sessionsForModel = sessions.filter((s) => {
+        return this.getModelsUsed(s).includes(modelId);
       });
-      model.cost = await this.costCalculator.calculateSessionsCost(sessionsWithModel);
+      // Calculate cost proportionally
+      const totalCost = await this.costCalculator.calculateSessionsCost(sessionsForModel);
+      model.cost = totalCost;
     }
 
     return modelMap;
@@ -426,13 +432,16 @@ export class Sessions {
       const tokens = this.computeTotalTokens(session);
       project.tokens += tokens.input + tokens.output + tokens.cache_write + tokens.cache_read;
 
-      for (const model of this.getModelsUsed(session)) {
+      // Collect models used in this project
+      const modelsUsed = this.getModelsUsed(session);
+      for (const model of modelsUsed) {
         if (!project.modelsUsed.includes(model)) {
           project.modelsUsed.push(model);
         }
       }
     }
 
+    // Calculate costs for each project
     for (const [projectName, project] of projectMap) {
       const sessionsInProject = sessions.filter((s) => {
         return this.getProjectName(s) === projectName;
@@ -441,39 +450,5 @@ export class Sessions {
     }
 
     return projectMap;
-  }
-
-  calculateBurnRate(session: SessionData): number {
-    const total = this.computeTotalTokens(session);
-    const tokenCount = total.input + total.output + total.cache_write + total.cache_read;
-
-    if (tokenCount === 0) {
-      return 0;
-    }
-
-    const start = this.getStartTime(session);
-    if (!start) {
-      return 0;
-    }
-
-    const now = new Date();
-    const durationSeconds = (now.getTime() - start.getTime()) / 1000;
-
-    if (durationSeconds <= 0) {
-      return 0;
-    }
-
-    return tokenCount / (durationSeconds / 60);
-  }
-
-  private getWeekNumber(date: Date): number {
-    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-    const dayNum = d.getUTCDay() || 7;
-    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-
-    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-    const weekNo = Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7));
-
-    return weekNo;
   }
 }
