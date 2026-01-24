@@ -1,4 +1,4 @@
-import type { TokenUsage, InteractionFile, SessionData, PricingData } from "./types";
+import type { InteractionFile, SessionData, PricingData } from "./types";
 import { FileManager } from "./fileutil";
 
 export class CostCalculator {

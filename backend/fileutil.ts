@@ -1,6 +1,17 @@
 import { existsSync } from "node:fs";
 import { promises as fsPromises } from "node:fs";
-import type { TokenUsage, TimeData, InteractionFile, SessionData, PricingData, PRTInfo, TokensData, RawInteractionData, TimeFieldData, PRTData } from "./types";
+import type {
+  TokenUsage,
+  TimeData, 
+  InteractionFile, 
+  SessionData, 
+  PricingData, 
+  PRTInfo, 
+  TokensData, 
+  RawInteractionData, 
+  TimeFieldData, 
+  PRTData 
+} from "./types";
 
 /**
  * Path utility functions

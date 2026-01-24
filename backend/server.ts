@@ -1,11 +1,16 @@
 import { serve } from "bun";
 import { resolve, normalize } from "node:path";
-import type { SessionData } from "./types";
 import { joinPath } from "./fileutil";
-
-import { handleGetSessions, handleGetSessionById, handleGetMostRecent, handleGetAnalytics, handleGetSummary, handleValidate, handleGetOpenCodeInfo } from "./routes";
+import { 
+  handleGetSessions, 
+  handleGetSessionById, 
+  handleGetMostRecent, 
+  handleGetAnalytics, 
+  handleGetSummary, 
+  handleValidate, 
+  handleGetOpenCodeInfo 
+} from "./routes";
 import { FileManager } from "./fileutil";
-import { Sessions } from "./sessions";
 
 const DEFAULT_PORT = 3000;
 const MAX_PORT = 65535;

@@ -253,7 +253,7 @@ export class Sessions {
 
       const dateKey = start.toLocaleDateString('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit' });
 
-      if (!dailyMap.has(dateKey)) {
+    if (!dailyMap.has(dateKey)) {
         dailyMap.set(dateKey, {
           date: dateKey,
           sessions: 0,
@@ -271,6 +271,14 @@ export class Sessions {
       day.tokens += tokens.input + tokens.output + tokens.cache_write + tokens.cache_read;
     }
 
+    for (const [dateStr, day] of dailyMap) {
+      const sessionsInDay = sessions.filter((s) => {
+        const start = this.getStartTime(s);
+        return start && start.toLocaleDateString('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit' }) === dateStr;
+      });
+      day.cost = await this.costCalculator.calculateSessionsCost(sessionsInDay);
+    }
+
     return dailyMap;
   }
 
@@ -283,35 +291,6 @@ export class Sessions {
       if (!start) {
         continue;
       }
-
-      const sessionDay = start.getDay();
-      const daysFromWeekStart = (sessionDay - weekStartDay + 7) % 7;
-      const weekStartDate = new Date(start);
-      weekStartDate.setDate(start.getDate() - daysFromWeekStart);
-
-      const weekKey = weekStartDate.toLocaleDateString('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit' });
-
-      if (!weeklyMap.has(weekKey)) {
-        weeklyMap.set(weekKey, {
-          week: weekKey,
-          days: [],
-          sessions: 0,
-          interactions: 0,
-          tokens: 0,
-          cost: 0
-        });
-      }
-
-      const week = weeklyMap.get(weekKey)!;
-      week.sessions++;
-      week.interactions += this.getInteractionCount(session);
-
-      const tokens = this.computeTotalTokens(session);
-      week.tokens += tokens.input + tokens.output + tokens.cache_write + tokens.cache_read;
-    }
-
-    return weeklyMap;
-  }
 
       const sessionDay = start.getDay();
       const daysFromWeekStart = (sessionDay - weekStartDay + 7) % 7;
@@ -399,6 +378,15 @@ export class Sessions {
       month.tokens += tokens.input + tokens.output + tokens.cache_write + tokens.cache_read;
     }
 
+    // Calculate costs for each month
+    for (const [monthKey, month] of monthlyMap) {
+      const sessionsInMonth = sessions.filter((s) => {
+        const start = this.getStartTime(s);
+        return start && start.toLocaleDateString('en-CA', { year: 'numeric', month: '2-digit' }) === monthKey;
+      });
+      month.cost = await this.costCalculator.calculateSessionsCost(sessionsInMonth);
+    }
+
     return monthlyMap;
   }
 
@@ -425,7 +413,7 @@ export class Sessions {
         model.interactions += this.getInteractionCount(session);
 
         const tokens = this.computeTotalTokens(session);
-        // Calculate total cost for this model
+        // Distribute tokens evenly across models used in this session
         model.tokens += tokens.input + tokens.output + tokens.cache_write + tokens.cache_read;
       }
     }

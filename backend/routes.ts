@@ -1,4 +1,4 @@
-import type { SessionData, SessionSummary, MessageInfo } from "./types";
+import type { SessionData, MessageInfo } from "./types";
 import { FileManager, joinPath } from "./fileutil";
 import { Sessions } from "./sessions";
 import { promises as fsPromises } from "node:fs";
