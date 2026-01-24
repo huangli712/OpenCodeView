@@ -9,8 +9,6 @@
     "build": "bun build frontend/app.ts",
     "serve": "bun server.ts"
   },
-  "dependencies": {
-  },
   "devDependencies": {
     "bun-types": "latest"
   }
