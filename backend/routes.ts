@@ -212,11 +212,12 @@ export async function handleGetAnalytics(req: Request, url: URL): Promise<Respon
 
     case "weekly": {
       const weekly = await analyzer.createWeeklyBreakdown(sessions, weekStart);
+      const data = Array.from(weekly.entries()).map(([date, stats]) => ({ date, ...stats }));
       return Response.json({
         success: true,
         type: "weekly",
         weekStart,
-        data: Array.from(weekly.entries()).map(([date, stats]) => ({ date, ...stats }))
+        data
       });
     }
 

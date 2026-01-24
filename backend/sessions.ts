@@ -228,7 +228,7 @@ export class Sessions {
         continue;
       }
 
-      const dateKey = start.toISOString().split("T")[0];
+      const dateKey = start.toLocaleDateString('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit' });
 
     if (!dailyMap.has(dateKey)) {
         dailyMap.set(dateKey, {
@@ -251,7 +251,7 @@ export class Sessions {
     for (const [dateStr, day] of dailyMap) {
       const sessionsInDay = sessions.filter((s) => {
         const start = this.getStartTime(s);
-        return start && start.toISOString().split("T")[0] === dateStr;
+        return start && start.toLocaleDateString('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit' }) === dateStr;
       });
       day.cost = await this.costCalculator.calculateSessionsCost(sessionsInDay);
     }
@@ -268,12 +268,12 @@ export class Sessions {
         continue;
       }
 
-      // Get the start of the week for this session based on weekStartDay
       const sessionDay = start.getDay();
       const daysFromWeekStart = (sessionDay - weekStartDay + 7) % 7;
       const weekStartDate = new Date(start);
       weekStartDate.setDate(start.getDate() - daysFromWeekStart);
-      const weekKey = weekStartDate.toISOString().split("T")[0];
+
+      const weekKey = weekStartDate.toLocaleDateString('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit' });
 
       if (!weeklyMap.has(weekKey)) {
         // Calculate all days in this week
@@ -314,7 +314,7 @@ export class Sessions {
         const daysFromWeekStart = (sessionDay - weekStartDay + 7) % 7;
         const weekStartDate = new Date(start);
         weekStartDate.setDate(start.getDate() - daysFromWeekStart);
-        const sessionWeekKey = weekStartDate.toISOString().split("T")[0];
+        const sessionWeekKey = weekStartDate.toLocaleDateString('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit' });
 
         return sessionWeekKey === weekKey;
       });
@@ -333,7 +333,7 @@ export class Sessions {
         continue;
       }
 
-      const monthKey = start.toISOString().slice(0, 7); // YYYY-MM
+      const monthKey = start.toLocaleDateString('en-CA', { year: 'numeric', month: '2-digit' }); // YYYY-MM
 
       if (!monthlyMap.has(monthKey)) {
         monthlyMap.set(monthKey, {
@@ -357,7 +357,7 @@ export class Sessions {
     for (const [monthKey, month] of monthlyMap) {
       const sessionsInMonth = sessions.filter((s) => {
         const start = this.getStartTime(s);
-        return start && start.toISOString().slice(0, 7) === monthKey;
+        return start && start.toLocaleDateString('en-CA', { year: 'numeric', month: '2-digit' }) === monthKey;
       });
       month.cost = await this.costCalculator.calculateSessionsCost(sessionsInMonth);
     }
