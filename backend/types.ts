@@ -8,15 +8,18 @@ export interface TokenUsage {
     cache_read: number;
 }
 
+// Time data with creation and completion timestamps
 export interface TimeData {
     created?: number;
     completed?: number;
 }
 
+// Model identifier information
 export interface ModelData {
     modelID?: string;
 }
 
+// Token usage data with cache information
 export interface TokensData {
     input?: number;
     output?: number;
@@ -26,6 +29,7 @@ export interface TokensData {
     };
 }
 
+// Summary data including title and diff statistics
 export interface SummaryData {
     title?: string;
     diffs?: Array<{
@@ -34,16 +38,19 @@ export interface SummaryData {
     }>;
 }
 
+// Path information including working directory and root
 export interface PathData {
     cwd?: string;
     root?: string;
 }
 
+// Time field data with timestamps
 export interface TimeFieldData {
     created?: number;
     completed?: number;
 }
 
+// Raw interaction data from OpenCode session
 export interface RawInteractionData {
     id?: string;
     role?: string;
@@ -59,6 +66,7 @@ export interface RawInteractionData {
     summary?: SummaryData;
 }
 
+// Interaction file data with file path and session metadata
 export interface InteractionFile {
     filePath: string;
     sessionId: string;
@@ -79,6 +87,7 @@ export interface SessionData {
     totalCost?: number;
 }
 
+// Pricing data by model for cost calculation
 export interface PricingData {
     [modelId: string]: {
         input: number;
@@ -88,6 +97,7 @@ export interface PricingData {
     };
 }
 
+// Daily statistics breakdown
 export interface DailyBreakdown {
     date: string;
     sessions: number;
@@ -96,6 +106,7 @@ export interface DailyBreakdown {
     cost: number;
 }
 
+// Weekly statistics breakdown
 export interface WeeklyBreakdown {
     week: string;
     days: string[];
@@ -105,6 +116,7 @@ export interface WeeklyBreakdown {
     cost: number;
 }
 
+// Monthly statistics breakdown
 export interface MonthlyBreakdown {
     month: string;
     sessions: number;
@@ -113,6 +125,7 @@ export interface MonthlyBreakdown {
     cost: number;
 }
 
+// Statistics breakdown by model
 export interface ModelBreakdown {
     modelId: string;
     sessions: number;
@@ -121,6 +134,7 @@ export interface ModelBreakdown {
     cost: number;
 }
 
+// Statistics breakdown by project
 export interface ProjectBreakdown {
     projectName: string;
     sessions: number;
@@ -146,6 +160,7 @@ export interface SessionSummary {
     dateRange: string;
 }
 
+// PRT (Prompt/Response/Tool) data
 export interface PRTData {
     id: string;
     type: string;
@@ -158,6 +173,7 @@ export interface PRTData {
     sessionID: string;
 }
 
+// PRT file information with raw data reference
 export interface PRTInfo {
     id: string;
     type: string;
@@ -171,6 +187,7 @@ export interface PRTInfo {
     rawData?: PRTData;
 }
 
+// Message information including metadata and PRT files
 export interface MessageInfo {
     id: string;
     role: string;
