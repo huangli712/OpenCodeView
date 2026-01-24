@@ -15,31 +15,41 @@ import { promises as fsPromises } from "node:fs";
 
 // Utility function for safe integer parsing
 // Parse integer safely with fallback
-function parseSafeInt(value: string | null, defaultValue: number): number {
-  const parsed = parseInt(value || `${defaultValue}`, 10);
-  return isNaN(parsed) ? defaultValue : parsed;
+function parseSafeInt(
+    value: string | null,
+    defaultValue: number
+): number {
+    const parsed = parseInt(value || `${defaultValue}`, 10);
+    return isNaN(parsed) ? defaultValue : parsed;
 }
 
 // Enrich session with computed stats
-async function enrichSession(session: SessionData, analyzer: Sessions) {
-  const startTime = analyzer.getStartTime(session);
-  const durationHours = analyzer.getDurationHours(session);
-  const totalCost = await analyzer.costCalculator.calculateSessionCost(session);
+async function enrichSession(
+    session: SessionData,
+    analyzer: Sessions
+) {
+    const startTime = analyzer.getStartTime(session);
+    const durationHours = analyzer.getDurationHours(session);
+    const totalCost = await analyzer.costCalculator
+        .calculateSessionCost(session);
 
-  return {
-    ...session,
-    projectName: analyzer.getProjectName(session),
-    startTime: startTime ? startTime.getTime() : null,
-    durationHours,
-    totalCost
-  };
+    return {
+        ...session,
+        projectName: analyzer.getProjectName(session),
+        startTime: startTime ? startTime.getTime() : null,
+        durationHours,
+        totalCost
+    };
 }
 
 const analyzer = new Sessions();
 
 analyzer.init().catch((error) => {
-  console.error("Failed to initialize analyzer:", error);
-  console.warn("Cost calculations will return 0. Please ensure config/models.json exists and is valid.");
+    console.error("Failed to initialize analyzer:", error);
+    console.warn(
+        "Cost calculations will return 0. " +
+        "Please ensure config/models.json exists and is valid."
+    );
 });
 
 /**
@@ -48,31 +58,41 @@ analyzer.init().catch((error) => {
  * @param url - Request URL with query params (limit, offset)
  * @returns JSON response with sessions data, summary, and pagination info
  */
-export async function handleGetSessions(req: Request, url: URL): Promise<Response> {
-  const limit = Math.min(Math.max(parseSafeInt(url.searchParams.get("limit"), 50), 1), 1000);
-  const offset = Math.max(parseSafeInt(url.searchParams.get("offset"), 0), 0);
+export async function handleGetSessions(
+    req: Request,
+    url: URL
+): Promise<Response> {
+    const limit = Math.min(
+        Math.max(parseSafeInt(url.searchParams.get("limit"), 50), 1
+    ),
+        1000
+    );
+    const offset = Math.max(
+        parseSafeInt(url.searchParams.get("offset"), 0),
+        0
+    );
 
-  const sessions = await loadAllSessions(limit + offset);
-  const total = (await findSessions()).length;
+    const sessions = await loadAllSessions(limit + offset);
+    const total = (await findSessions()).length;
 
-  const paginated = sessions.slice(offset, offset + limit);
-  const summary = await analyzer.generateSessionsSummary(paginated);
+    const paginated = sessions.slice(offset, offset + limit);
+    const summary = await analyzer.generateSessionsSummary(paginated);
 
-  const sessionsWithComputedData = await Promise.all(
-    paginated.map((session) => enrichSession(session, analyzer))
-  );
+    const sessionsWithComputedData = await Promise.all(
+        paginated.map((session) => enrichSession(session, analyzer))
+    );
 
-  return Response.json({
-    success: true,
-    data: sessionsWithComputedData,
-    summary,
-    pagination: {
-      offset,
-      limit,
-      total,
-      hasMore: offset + limit < total
-    }
-  });
+    return Response.json({
+        success: true,
+        data: sessionsWithComputedData,
+        summary,
+        pagination: {
+            offset,
+            limit,
+            total,
+            hasMore: offset + limit < total
+        }
+    });
 }
 
 /**
@@ -81,72 +101,84 @@ export async function handleGetSessions(req: Request, url: URL): Promise<Respons
  * @param url - Request URL with session ID in path
  * @returns JSON response with session data and messages (paginated)
  */
-export async function handleGetSessionById(req: Request, url: URL): Promise<Response> {
-  const pathParts = url.pathname.split("/");
-  const sessionId = pathParts[pathParts.length - 1];
-  const limit = Math.min(Math.max(parseSafeInt(url.searchParams.get("limit"), 50), 1), 1000);
-  const offset = Math.max(parseSafeInt(url.searchParams.get("offset"), 0), 0);
+export async function handleGetSessionById(
+    req: Request,
+    url: URL
+): Promise<Response> {
+    const pathParts = url.pathname.split("/");
+    const sessionId = pathParts[pathParts.length - 1];
+    const limit = Math.min(
+        Math.max(parseSafeInt(url.searchParams.get("limit"), 50), 1
+    ),
+        1000
+    );
+    const offset = Math.max(
+        parseSafeInt(url.searchParams.get("offset"), 0),
+        0
+    );
 
-  if (!sessionId) {
-    return Response.json({
-      success: false,
-      error: "Session ID is required"
-    }, { status: 400 });
-  }
-
-  const sessionPaths = await findSessions();
-  const sessionPath = sessionPaths.find((path) => path.endsWith(`/${sessionId}`));
-
-  if (!sessionPath) {
-    return Response.json({
-      success: false,
-      error: "Session not found"
-    }, { status: 404 });
-  }
-
-  const session = await loadSession(sessionPath);
-
-  if (!session) {
-    return Response.json({
-      success: false,
-      error: "Session not found"
-    }, { status: 404 });
-  }
-
-  const enrichedSession = await enrichSession(session, analyzer);
-
-  const allMessages = formatMessages(session);
-  const totalMessages = allMessages.length;
-
-  const paginatedMessages = allMessages.slice(offset, offset + limit);
-  const hasMore = offset + limit < totalMessages;
-
-  const messagesWithPRT = await Promise.all(
-    paginatedMessages.map(async (msg) => {
-      const prtFiles = await loadPRTFiles(msg.id);
-      return {
-        ...msg,
-        prtFiles
-      };
-    })
-  );
-
-  return Response.json({
-    success: true,
-    data: {
-      ...enrichedSession,
-      modelsUsed: analyzer.getModelsUsed(session),
-      interactionCount: analyzer.getInteractionCount(session),
-      displayTitle: analyzer.getDisplayTitle(session),
-      messages: messagesWithPRT
-    },
-    pagination: {
-      offset,
-      limit,
-      total: totalMessages,
-      hasMore
+    if (!sessionId) {
+        return Response.json({
+            success: false,
+            error: "Session ID is required"
+        }, { status: 400 });
     }
-  });
+
+    const sessionPaths = await findSessions();
+    const sessionPath = sessionPaths.find((path) =>
+        path.endsWith(`/${sessionId}`)
+    );
+
+    if (!sessionPath) {
+        return Response.json({
+            success: false,
+            error: "Session not found"
+        }, { status: 404 });
+    }
+
+    const session = await loadSession(sessionPath);
+
+    if (!session) {
+        return Response.json({
+            success: false,
+            error: "Session not found"
+        }, { status: 404 });
+    }
+
+    const enrichedSession = await enrichSession(session, analyzer);
+
+    const allMessages = formatMessages(session);
+    const totalMessages = allMessages.length;
+
+    const paginatedMessages = allMessages.slice(offset, offset + limit);
+    const hasMore = offset + limit < totalMessages;
+
+    const messagesWithPRT = await Promise.all(
+        paginatedMessages.map(async (msg) => {
+            const prtFiles = await loadPRTFiles(msg.id);
+            return {
+                ...msg,
+                prtFiles
+            };
+        })
+    );
+
+    return Response.json({
+        success: true,
+        data: {
+            ...enrichedSession,
+            modelsUsed: analyzer.getModelsUsed(session),
+            interactionCount: analyzer.getInteractionCount(session),
+            displayTitle: analyzer.getDisplayTitle(session),
+            messages: messagesWithPRT
+        },
+        pagination: {
+            offset,
+            limit,
+            total: totalMessages,
+            hasMore
+        }
+    });
 }
 
 /**
@@ -154,117 +186,152 @@ export async function handleGetSessionById(req: Request, url: URL): Promise<Resp
  * @param req - HTTP request
  * @returns JSON response with recent session data
  */
-export async function handleGetMostRecent(req: Request): Promise<Response> {
-  const session = await getMostRecentSession();
+export async function handleGetMostRecent(
+    req: Request
+): Promise<Response> {
+    const session = await getMostRecentSession();
 
-  if (!session) {
-    return Response.json({
-      success: false,
-      error: "No sessions found"
-    }, { status: 404 });
-  }
-
-  const cost = await analyzer.costCalculator.calculateSessionCost(session);
-  const duration = analyzer.getDurationHours(session);
-  const projectName = analyzer.getProjectName(session);
-  const burnRate = analyzer.calculateBurnRate(session);
-
-  const end = analyzer.getEndTime(session);
-  const activityStatus = getActivityStatus(end);
-
-  return Response.json({
-    success: true,
-    data: {
-      sessionId: session.sessionId,
-      displayTitle: analyzer.getDisplayTitle(session),
-      projectName,
-      interactionCount: analyzer.getInteractionCount(session),
-      totalTokens: analyzer.computeTotalTokens(session),
-      totalCost: cost,
-      modelsUsed: analyzer.getModelsUsed(session),
-      durationHours: duration,
-      burnRate,
-      activityStatus
+    if (!session) {
+        return Response.json({
+            success: false,
+            error: "No sessions found"
+        }, { status: 404 });
     }
-  });
+
+    const cost = await analyzer.costCalculator.calculateSessionCost(
+        session
+    );
+    const duration = analyzer.getDurationHours(session);
+    const projectName = analyzer.getProjectName(session);
+    const burnRate = analyzer.calculateBurnRate(session);
+
+    const end = analyzer.getEndTime(session);
+    const activityStatus = getActivityStatus(end);
+
+    return Response.json({
+        success: true,
+        data: {
+            sessionId: session.sessionId,
+            displayTitle: analyzer.getDisplayTitle(session),
+            projectName,
+            interactionCount: analyzer.getInteractionCount(session),
+            totalTokens: analyzer.computeTotalTokens(session),
+            totalCost: cost,
+            modelsUsed: analyzer.getModelsUsed(session),
+            durationHours: duration,
+            burnRate,
+            activityStatus
+        }
+    });
 }
 
 /**
- * GET /api/analytics - Get analytics data (daily/weekly/monthly/models/projects)
+ * GET /api/analytics - Get analytics data
+ * (daily/weekly/monthly/models/projects)
  * @param req - HTTP request
  * @param url - Request URL with query params (type, weekStart)
  * @returns JSON response with analytics data by type
  */
-export async function handleGetAnalytics(req: Request, url: URL): Promise<Response> {
-  const type = url.searchParams.get("type") || "daily";
-  const validTypes = ["daily", "weekly", "monthly", "models", "projects"];
+export async function handleGetAnalytics(
+    req: Request,
+    url: URL
+): Promise<Response> {
+    const type = url.searchParams.get("type") || "daily";
+    const validTypes = [
+        "daily",
+        "weekly",
+        "monthly",
+        "models",
+        "projects"
+    ];
 
-  if (!validTypes.includes(type)) {
-    return Response.json({
-      success: false,
-      error: `Invalid analytics type: ${type}. Valid types are: ${validTypes.join(", ")}`
-    }, { status: 400 });
-  }
-
-  const weekStart = Math.min(Math.max(parseSafeInt(url.searchParams.get("weekStart"), 0), 0), 6);
-
-  const sessions = await loadAllSessions();
-
-  switch (type) {
-    case "daily": {
-      const daily = await analyzer.createDailyBreakdown(sessions);
-      return Response.json({
-        success: true,
-        type: "daily",
-        data: Array.from(daily.entries()).map(([date, stats]) => ({ date, ...stats }))
-      });
+    if (!validTypes.includes(type)) {
+        return Response.json({
+            success: false,
+            error: `Invalid analytics type: ${type}. ` +
+                `Valid types are: ${validTypes.join(", ")}`
+        }, { status: 400 });
     }
 
-    case "weekly": {
-      const weekly = await analyzer.createWeeklyBreakdown(sessions, weekStart);
-      const data = Array.from(weekly.entries()).map(([date, stats]) => ({ date, ...stats }));
-      return Response.json({
-        success: true,
-        type: "weekly",
-        weekStart,
-        data
-      });
-    }
+    const weekStart = Math.min(
+        Math.max(parseSafeInt(url.searchParams.get("weekStart"), 0), 0),
+        6
+    );
 
-    case "monthly": {
-      const monthly = await analyzer.createMonthlyBreakdown(sessions);
-      return Response.json({
-        success: true,
-        type: "monthly",
-        data: Array.from(monthly.entries()).map(([date, stats]) => ({ date, ...stats }))
-      });
-    }
+    const sessions = await loadAllSessions();
 
-    case "models": {
-      const models = await analyzer.createModelBreakdown(sessions);
-      return Response.json({
-        success: true,
-        type: "models",
-        data: Array.from(models.entries()).map(([modelId, stats]) => ({ modelId, ...stats }))
-      });
-    }
+    switch (type) {
+        case "daily": {
+            const daily = await analyzer.createDailyBreakdown(sessions);
+            return Response.json({
+                success: true,
+                type: "daily",
+                data: Array.from(daily.entries()).map(
+                    ([date, stats]) => ({ date, ...stats })
+                )
+            });
+        }
 
-    case "projects": {
-      const projects = await analyzer.createProjectBreakdown(sessions);
-      return Response.json({
-        success: true,
-        type: "projects",
-        data: Array.from(projects.entries()).map(([name, stats]) => ({ projectName: name, ...stats }))
-      });
-    }
+        case "weekly": {
+            const weekly = await analyzer.createWeeklyBreakdown(
+                sessions,
+                weekStart
+            );
+            const data = Array.from(weekly.entries()).map(
+                ([date, stats]) => ({ date, ...stats })
+            );
+            return Response.json({
+                success: true,
+                type: "weekly",
+                weekStart,
+                data
+            });
+        }
 
-    default: {
-      return Response.json({
-        success: false,
-        error: `Invalid analytics type: ${type}`
-      }, { status: 400 });
+        case "monthly": {
+            const monthly = await analyzer.createMonthlyBreakdown(
+                sessions
+            );
+            return Response.json({
+                success: true,
+                type: "monthly",
+                data: Array.from(monthly.entries()).map(
+                    ([date, stats]) => ({ date, ...stats })
+                )
+            });
+        }
+
+        case "models": {
+            const models = await analyzer.createModelBreakdown(sessions);
+            return Response.json({
+                success: true,
+                type: "models",
+                data: Array.from(models.entries()).map(
+                    ([modelId, stats]) => ({ modelId, ...stats })
+                )
+            });
+        }
+
+        case "projects": {
+            const projects = await analyzer.createProjectBreakdown(
+                sessions
+            );
+            return Response.json({
+                success: true,
+                type: "projects",
+                data: Array.from(projects.entries()).map(
+                    ([name, stats]) => ({ projectName: name, ...stats })
+                )
+            });
+        }
+
+        default: {
+            return Response.json({
+                success: false,
+                error: `Invalid analytics type: ${type}`
+            }, { status: 400 });
+        }
     }
-  }
 }
 
 /**
@@ -272,14 +339,16 @@ export async function handleGetAnalytics(req: Request, url: URL): Promise<Respon
  * @param req - HTTP request
  * @returns JSON response with total statistics
  */
-export async function handleGetSummary(req: Request): Promise<Response> {
-  const sessions = await loadAllSessions();
-  const summary = await analyzer.generateSessionsSummary(sessions);
+export async function handleGetSummary(
+    req: Request
+): Promise<Response> {
+    const sessions = await loadAllSessions();
+    const summary = await analyzer.generateSessionsSummary(sessions);
 
-  return Response.json({
-    success: true,
-    data: summary
-  });
+    return Response.json({
+        success: true,
+        data: summary
+    });
 }
 
 /**
@@ -287,246 +356,288 @@ export async function handleGetSummary(req: Request): Promise<Response> {
  * @param req - HTTP request
  * @returns JSON response with validation status
  */
-export async function handleValidate(req: Request): Promise<Response> {
-  const path = getOpenCodeStoragePath();
-  const isValid = await validatePath(path);
+export async function handleValidate(
+    req: Request
+): Promise<Response> {
+    const path = getOpenCodeStoragePath();
+    const isValid = await validatePath(path);
 
-  const sessionDirs = await findSessions(1);
-  const hasSessions = sessionDirs.length > 0;
+    const sessionDirs = await findSessions(1);
+    const hasSessions = sessionDirs.length > 0;
 
-  let warnings: string[] = [];
-  if (!hasSessions) {
-    warnings.push("No sessions found in storage directory");
-  } else {
-    const recent = await loadSession(sessionDirs[0]);
-    if (!recent || recent.files.length === 0) {
-      warnings.push("Most recent session has no valid interaction data");
+    let warnings: string[] = [];
+    if (!hasSessions) {
+        warnings.push("No sessions found in storage directory");
+    } else {
+        const recent = await loadSession(sessionDirs[0]);
+        if (!recent || recent.files.length === 0) {
+            warnings.push(
+                "Most recent session has no valid " +
+                "interaction data"
+            );
+        }
     }
-  }
 
-  return Response.json({
-    success: true,
-    valid: isValid,
-    path,
-    hasSessions,
-    warnings
-  });
+    return Response.json({
+        success: true,
+        valid: isValid,
+        path,
+        hasSessions,
+        warnings
+    });
 }
 
 // Format session files into message info
 function formatMessages(session: SessionData): MessageInfo[] {
-  return session.files.map((file, index) => {
-    const data = file.rawData;
-    const totalTokens = file.tokens.input +
-                      file.tokens.output +
-                      file.tokens.cache_write +
-                      file.tokens.cache_read;
+    return session.files.map((file, index) => {
+        const data = file.rawData;
+        const totalTokens =
+            file.tokens.input +
+            file.tokens.output +
+            file.tokens.cache_write +
+            file.tokens.cache_read;
 
-    let title: string | undefined;
-    let fileCount: number | undefined;
-    let diffCount: number | undefined;
+        let title: string | undefined;
+        let fileCount: number | undefined;
+        let diffCount: number | undefined;
 
-    if (data.role === "user" && data.summary) {
-      title = data.summary.title;
-      if (data.summary.diffs) {
-        fileCount = data.summary.diffs.length;
-        diffCount = data.summary.diffs.reduce((sum, diff) => sum + (diff.additions || 0) + (diff.deletions || 0), 0);
-      }
-    }
+        if (data.role === "user" && data.summary) {
+            title = data.summary.title;
+            if (data.summary.diffs) {
+                fileCount = data.summary.diffs.length;
+                diffCount = data.summary.diffs.reduce(
+                    (sum, diff) =>
+                        sum + (diff.additions || 0) +
+                        (diff.deletions || 0),
+                    0
+                );
+            }
+        }
 
-    return {
-      id: data.id || `msg_${index}`,
-      role: data.role || "unknown",
-      modelId: data.modelID || data.model?.modelID,
-      providerID: data.providerID,
-      mode: data.mode,
-      agent: data.agent,
-      timestamp: data.time?.created || file.timeData?.created,
-      tokens: totalTokens,
-      cost: data.cost,
-      title,
-      fileCount,
-      diffCount
-    };
-  });
+        return {
+            id: data.id || `msg_${index}`,
+            role: data.role || "unknown",
+            modelId: data.modelID || data.model?.modelID,
+            providerID: data.providerID,
+            mode: data.mode,
+            agent: data.agent,
+            timestamp: data.time?.created || file.timeData?.created,
+            tokens: totalTokens,
+            cost: data.cost,
+            title,
+            fileCount,
+            diffCount
+        };
+    });
 }
 
 // Get activity status based on end time
-function getActivityStatus(end: Date | null): "active" | "recent" | "idle" | "inactive" {
-  if (!end) {
-    return "unknown";
-  }
+function getActivityStatus(end: Date | null):
+    "active" | "recent" | "idle" | "inactive" {
+    if (!end) {
+        return "unknown";
+    }
 
-  const now = new Date();
-  const secondsAgo = (now.getTime() - end.getTime()) / 1000;
+    const now = new Date();
+    const secondsAgo = (now.getTime() - end.getTime()) / 1000;
 
-  if (secondsAgo < 60) { // < 1 min
-    return "active";
-  }
-  if (secondsAgo < 300) { // < 5 min
-    return "recent";
-  }
-  if (secondsAgo < 1800) { // < 30 min
-    return "idle";
-  }
-  return "inactive";
+    if (secondsAgo < 60) { // < 1 min
+        return "active";
+    }
+    if (secondsAgo < 300) { // < 5 min
+        return "recent";
+    }
+    if (secondsAgo < 1800) { // < 30 min
+        return "idle";
+    }
+    return "inactive";
 }
 
 /**
  * GET /api/opencode - Get OpenCode installation information
  * @param req - HTTP request
- * @returns JSON response with OpenCode info, MCP servers, skills, plugins, version
+ * @returns JSON response with OpenCode info, MCP servers,
+ *          skills, plugins, version
  */
-export async function handleGetOpenCodeInfo(req: Request): Promise<Response> {
-  const info = await getOpenCodeInfo();
+export async function handleGetOpenCodeInfo(
+    req: Request
+): Promise<Response> {
+    const info = await getOpenCodeInfo();
 
-  const home = info.homePath;
-  const mcpPath = joinPath(home, ".config", "opencode", "mcp");
-  const skillsPath = joinPath(home, ".config", "opencode", "skills");
-  const pluginsPath = joinPath(home, ".config", "opencode", "plugins");
+    const home = info.homePath;
+    const mcpPath = joinPath(home, ".config", "opencode", "mcp");
+    const skillsPath = joinPath(home, ".config", "opencode", "skills");
+    const pluginsPath = joinPath(home, ".config", "opencode", "plugins");
 
-  let mcpExists = false;
-  let skillsExists = false;
-  let pluginsExists = false;
+    let mcpExists = false;
+    let skillsExists = false;
+    let pluginsExists = false;
 
-  try {
-    await fsPromises.access(mcpPath);
-    mcpExists = true;
-  } catch (error) {
-    // Expected if path doesn't exist
-    if (error.code !== 'ENOENT') {
-      console.error(`Error checking MCP path ${mcpPath}:`, error);
-    }
-  }
-
-  try {
-    await fsPromises.access(skillsPath);
-    skillsExists = true;
-  } catch (error) {
-    // Expected if path doesn't exist
-    if (error.code !== 'ENOENT') {
-      console.error(`Error checking skills path ${skillsPath}:`, error);
-    }
-  }
-
-  try {
-    await fsPromises.access(pluginsPath);
-    pluginsExists = true;
-  } catch (error) {
-    // Expected if path doesn't exist
-    if (error.code !== 'ENOENT') {
-      console.error(`Error checking plugins path ${pluginsPath}:`, error);
-    }
-  }
-
-  let mcpServers: string[] = [];
-  let skillsCount = 0;
-  let pluginsCount = 0;
-  let configJsonFiles: string[] = [];
-
-  if (mcpExists) {
     try {
-      const entries = await fsPromises.readdir(mcpPath);
-      mcpServers = entries.filter((e) => e.endsWith(".json")).map((e) => e.replace(".json", ""));
+        await fsPromises.access(mcpPath);
+        mcpExists = true;
     } catch (error) {
-      console.error(`Error reading MCP directory ${mcpPath}:`, error);
-    }
-  }
-
-  try {
-    const entries = await fsPromises.readdir(info.configPath);
-    configJsonFiles = entries.filter((e) => e.endsWith(".json"));
-  } catch (error) {
-    console.error(`Error reading config directory ${info.configPath}:`, error);
-  }
-
-  if (skillsExists) {
-    try {
-      const entries = await fsPromises.readdir(skillsPath);
-      skillsCount = entries.length;
-    } catch (error) {
-      console.error(`Error reading skills directory ${skillsPath}:`, error);
-    }
-  }
-
-  if (pluginsExists) {
-    try {
-      const entries = await fsPromises.readdir(pluginsPath);
-      pluginsCount = entries.length;
-    } catch (error) {
-      console.error(`Error reading plugins directory ${pluginsPath}:`, error);
-    }
-  }
-
-  let version = "Unknown";
-  try {
-    const versionOutput = await Bun.$`opencode --version`.quiet().text();
-    if (versionOutput) {
-      const versionMatch = versionOutput.match(/(\d+\.\d+\.\d+)/);
-      if (versionMatch) {
-        version = versionMatch[1];
-      }
-    }
-  } catch (e) {
-    const versionPaths = [
-      joinPath(info.configPath, "package.json"),
-      joinPath(home, ".local", "share", "opencode", "package.json")
-    ];
-
-    for (const vPath of versionPaths) {
-      try {
-        await fsPromises.access(vPath);
-      } catch (error) {
         // Expected if path doesn't exist
         if (error.code !== 'ENOENT') {
-          console.error(`Error checking version path ${vPath}:`, error);
+            console.error(
+                `Error checking MCP path ${mcpPath}:`,
+                error
+            );
         }
-        continue;
-      }
+    }
 
-      try {
-        const content = await Bun.file(vPath).text();
-        const pkg = JSON.parse(content);
-        version = pkg.version || version;
-        if (version && version !== "Unknown") {
-          break;
+    try {
+        await fsPromises.access(skillsPath);
+        skillsExists = true;
+    } catch (error) {
+        // Expected if path doesn't exist
+        if (error.code !== 'ENOENT') {
+            console.error(
+                `Error checking skills path ${skillsPath}:`,
+                error
+            );
         }
-      } catch (error) {
-        console.error(`Error reading version from ${vPath}:`, error);
-      }
     }
-  }
 
-  return Response.json({
-    success: true,
-    data: {
-      storagePath: info.storagePath,
-      configPath: info.configPath,
-      homePath: info.homePath,
-      hasOpenCode: info.hasOpenCode,
-      sessionCount: info.sessionCount,
-      version,
-      mcp: {
-        path: mcpPath,
-        exists: mcpExists,
-        servers: mcpServers,
-        serverCount: mcpServers.length
-      },
-      skills: {
-        path: skillsPath,
-        exists: skillsExists,
-        count: skillsCount
-      },
-      plugins: {
-        path: pluginsPath,
-        exists: pluginsExists,
-        count: pluginsCount
-      },
-      config: {
-        path: info.configPath,
-        jsonFiles: configJsonFiles,
-        jsonFileCount: configJsonFiles.length
-      }
+    try {
+        await fsPromises.access(pluginsPath);
+        pluginsExists = true;
+    } catch (error) {
+        // Expected if path doesn't exist
+        if (error.code !== 'ENOENT') {
+            console.error(
+                `Error checking plugins path ${pluginsPath}:`,
+                error
+            );
+        }
     }
-  });
+
+    let mcpServers: string[] = [];
+    let skillsCount = 0;
+    let pluginsCount = 0;
+    let configJsonFiles: string[] = [];
+
+    if (mcpExists) {
+        try {
+            const entries = await fsPromises.readdir(mcpPath);
+            mcpServers = entries.filter((e) => e.endsWith(".json"))
+                .map((e) => e.replace(".json", ""));
+        } catch (error) {
+            console.error(
+                `Error reading MCP directory ${mcpPath}:`,
+                error
+            );
+        }
+    }
+
+    try {
+        const entries = await fsPromises.readdir(info.configPath);
+        configJsonFiles = entries.filter((e) => e.endsWith(".json"));
+    } catch (error) {
+        console.error(`Error reading config directory ${info.configPath}:`,
+            error
+        );
+    }
+
+    if (skillsExists) {
+        try {
+            const entries = await fsPromises.readdir(skillsPath);
+            skillsCount = entries.length;
+        } catch (error) {
+            console.error(`Error reading skills directory ${skillsPath}:`,
+                error
+            );
+        }
+    }
+
+    if (pluginsExists) {
+        try {
+            const entries = await fsPromises.readdir(pluginsPath);
+            pluginsCount = entries.length;
+        } catch (error) {
+            console.error(
+                `Error reading plugins directory ${pluginsPath}:`,
+                error
+            );
+        }
+    }
+
+    let version = "Unknown";
+    try {
+        const versionOutput = await Bun.$`opencode --version`.quiet()
+            .text();
+        if (versionOutput) {
+            const versionMatch = versionOutput.match(/(\d+\.\d+\.\d+)/);
+            if (versionMatch) {
+                version = versionMatch[1];
+            }
+        }
+    } catch (e) {
+        const versionPaths = [
+            joinPath(info.configPath, "package.json"),
+            joinPath(home, ".local", "share", "opencode",
+                "package.json")
+        ];
+
+        for (const vPath of versionPaths) {
+            try {
+                await fsPromises.access(vPath);
+            } catch (error) {
+                // Expected if path doesn't exist
+                if (error.code !== 'ENOENT') {
+                    console.error(`Error checking version path ${vPath}:`,
+                        error
+                    );
+                }
+                continue;
+            }
+
+            try {
+                const content = await Bun.file(vPath).text();
+                const pkg = JSON.parse(content);
+                version = pkg.version || version;
+                if (version && version !== "Unknown") {
+                    break;
+                }
+            } catch (error) {
+                console.error(
+                    `Error reading version from ${vPath}:`,
+                    error
+                );
+            }
+        }
+    }
+
+    return Response.json({
+        success: true,
+        data: {
+            storagePath: info.storagePath,
+            configPath: info.configPath,
+            homePath: info.homePath,
+            hasOpenCode: info.hasOpenCode,
+            sessionCount: info.sessionCount,
+            version,
+            mcp: {
+                path: mcpPath,
+                exists: mcpExists,
+                servers: mcpServers,
+                serverCount: mcpServers.length
+            },
+            skills: {
+                path: skillsPath,
+                exists: skillsExists,
+                count: skillsCount
+            },
+            plugins: {
+                path: pluginsPath,
+                exists: pluginsExists,
+                count: pluginsCount
+            },
+            config: {
+                path: info.configPath,
+                jsonFiles: configJsonFiles,
+                jsonFileCount: configJsonFiles.length
+            }
+        }
+    });
 }
