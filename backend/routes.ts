@@ -380,17 +380,32 @@ export async function handleGetOpenCodeInfo(req: Request): Promise<Response> {
   try {
     await fsPromises.access(mcpPath);
     mcpExists = true;
-  } catch {}
+  } catch (error) {
+    // Expected if path doesn't exist
+    if (error.code !== 'ENOENT') {
+      console.error(`Error checking MCP path ${mcpPath}:`, error);
+    }
+  }
 
   try {
     await fsPromises.access(skillsPath);
     skillsExists = true;
-  } catch {}
+  } catch (error) {
+    // Expected if path doesn't exist
+    if (error.code !== 'ENOENT') {
+      console.error(`Error checking skills path ${skillsPath}:`, error);
+    }
+  }
 
   try {
     await fsPromises.access(pluginsPath);
     pluginsExists = true;
-  } catch {}
+  } catch (error) {
+    // Expected if path doesn't exist
+    if (error.code !== 'ENOENT') {
+      console.error(`Error checking plugins path ${pluginsPath}:`, error);
+    }
+  }
 
   let mcpServers: string[] = [];
   let skillsCount = 0;
@@ -401,26 +416,34 @@ export async function handleGetOpenCodeInfo(req: Request): Promise<Response> {
     try {
       const entries = await fsPromises.readdir(mcpPath);
       mcpServers = entries.filter((e) => e.endsWith(".json")).map((e) => e.replace(".json", ""));
-    } catch (e) {}
+    } catch (error) {
+      console.error(`Error reading MCP directory ${mcpPath}:`, error);
+    }
   }
 
   try {
     const entries = await fsPromises.readdir(info.configPath);
     configJsonFiles = entries.filter((e) => e.endsWith(".json"));
-  } catch (e) {}
+  } catch (error) {
+    console.error(`Error reading config directory ${info.configPath}:`, error);
+  }
 
   if (skillsExists) {
     try {
       const entries = await fsPromises.readdir(skillsPath);
       skillsCount = entries.length;
-    } catch (e) {}
+    } catch (error) {
+      console.error(`Error reading skills directory ${skillsPath}:`, error);
+    }
   }
 
   if (pluginsExists) {
     try {
       const entries = await fsPromises.readdir(pluginsPath);
       pluginsCount = entries.length;
-    } catch (e) {}
+    } catch (error) {
+      console.error(`Error reading plugins directory ${pluginsPath}:`, error);
+    }
   }
 
   let version = "Unknown";
@@ -441,7 +464,11 @@ export async function handleGetOpenCodeInfo(req: Request): Promise<Response> {
     for (const vPath of versionPaths) {
       try {
         await fsPromises.access(vPath);
-      } catch {
+      } catch (error) {
+        // Expected if path doesn't exist
+        if (error.code !== 'ENOENT') {
+          console.error(`Error checking version path ${vPath}:`, error);
+        }
         continue;
       }
 
@@ -452,7 +479,9 @@ export async function handleGetOpenCodeInfo(req: Request): Promise<Response> {
         if (version && version !== "Unknown") {
           break;
         }
-      } catch (e) {}
+      } catch (error) {
+        console.error(`Error reading version from ${vPath}:`, error);
+      }
     }
   }
 

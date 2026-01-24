@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, lstatSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { promises as fsPromises } from "node:fs";
 import type { TokenUsage, TimeData, InteractionFile, SessionData, PricingData, PRTInfo, TokensData, RawInteractionData, TimeFieldData, PRTData } from "./types";
 
@@ -101,11 +101,16 @@ export class FileManager {
               if (files.length > 0) {
                 sessions.push(sessionPath);
               }
-            } catch {
+            } catch (error) {
+              // Expected for inaccessible directories
+              if (error.code !== 'EACCES' && error.code !== 'EPERM') {
+                console.error(`Error reading session directory ${sessionPath}:`, error);
+              }
             }
           }
         }
-      } catch {
+      } catch (error) {
+        console.error("Error reading OpenCode storage directory:", error);
         return [];
       }
 
@@ -114,7 +119,8 @@ export class FileManager {
           try {
             const stats = await fsPromises.stat(path);
             return { path, mtimeMs: stats.mtimeMs };
-          } catch {
+          } catch (error) {
+            console.error(`Error getting stats for ${path}:`, error);
             return { path, mtimeMs: 0 };
           }
         })
@@ -142,8 +148,11 @@ export class FileManager {
             files.push(joinPath(directory, entry.name));
           }
         }
-      } catch {
+      } catch (error) {
         // Directory doesn't exist, return empty array
+        if (error.code !== 'ENOENT') {
+          console.error(`Error reading directory ${directory}:`, error);
+        }
         return [];
       }
 
@@ -153,7 +162,8 @@ export class FileManager {
           try {
             const stats = await fsPromises.stat(path);
             return { path, mtimeMs: stats.mtimeMs };
-          } catch {
+          } catch (error) {
+            console.error(`Error getting stats for ${path}:`, error);
             return { path, mtimeMs: 0 };
           }
         })
@@ -354,8 +364,11 @@ export class FileManager {
       hasOpenCode = true;
       const entries = await fsPromises.readdir(storagePath, { withFileTypes: true });
       sessionCount = entries.filter((e) => e.isDirectory() && isSessionDir(e.name)).length;
-    } catch {
-      // Directory doesn't exist
+    } catch (error) {
+      // Directory doesn't exist or is inaccessible
+      if (error.code !== 'ENOENT' && error.code !== 'EACCES') {
+        console.error("Error accessing OpenCode storage:", error);
+      }
     }
 
     return {
@@ -371,7 +384,11 @@ export class FileManager {
     try {
       await fsPromises.access(pathStr);
       return true;
-    } catch {
+    } catch (error) {
+      // Expected when path doesn't exist
+      if (error.code !== 'ENOENT' && error.code !== 'EACCES') {
+        console.error(`Error validating path ${pathStr}:`, error);
+      }
       return false;
     }
   }
@@ -382,8 +399,11 @@ export class FileManager {
 
       try {
         await fsPromises.access(messagePath);
-      } catch {
+      } catch (error) {
         // Directory doesn't exist, return empty array
+        if (error.code !== 'ENOENT') {
+          console.error(`Error accessing message path ${messagePath}:`, error);
+        }
         return [];
       }
 

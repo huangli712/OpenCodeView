@@ -400,7 +400,7 @@ export class Sessions {
 
         const tokens = this.computeTotalTokens(session);
         // Distribute tokens evenly across models used in this session
-        model.tokens += Math.floor(tokens.input + tokens.output + tokens.cache_write + tokens.cache_read);
+        model.tokens += tokens.input + tokens.output + tokens.cache_write + tokens.cache_read;
       }
     }
 

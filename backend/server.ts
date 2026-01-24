@@ -56,7 +56,8 @@ async function handleStatic(req: Request, url: URL): Promise<Response> {
     const response = new Response(file);
     response.headers.set("Content-Type", getContentType(pathname));
     return response;
-  } catch {
+  } catch (error) {
+    console.error(`Error serving static file ${pathname}:`, error);
     return new Response("Not Found", { status: 404 });
   }
 }
