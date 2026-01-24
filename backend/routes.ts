@@ -1,5 +1,15 @@
 import type { SessionData, MessageInfo } from "./types";
-import { FileManager, joinPath } from "./fileutil";
+import {
+    loadAllSessions,
+    findSessions,
+    loadSession,
+    getMostRecentSession,
+    getOpenCodeStoragePath,
+    validatePath,
+    getOpenCodeInfo,
+    loadPRTFiles,
+    joinPath
+} from "./fileutil";
 import { Sessions } from "./sessions";
 import { promises as fsPromises } from "node:fs";
 
@@ -25,7 +35,6 @@ async function enrichSession(session: SessionData, analyzer: Sessions) {
   };
 }
 
-const fileManager = new FileManager();
 const analyzer = new Sessions();
 
 analyzer.init().catch((error) => {
@@ -43,8 +52,8 @@ export async function handleGetSessions(req: Request, url: URL): Promise<Respons
   const limit = Math.min(Math.max(parseSafeInt(url.searchParams.get("limit"), 50), 1), 1000);
   const offset = Math.max(parseSafeInt(url.searchParams.get("offset"), 0), 0);
 
-  const sessions = await fileManager.loadAllSessions(limit + offset);
-  const total = (await fileManager.findSessions()).length;
+  const sessions = await loadAllSessions(limit + offset);
+  const total = (await findSessions()).length;
 
   const paginated = sessions.slice(offset, offset + limit);
   const summary = await analyzer.generateSessionsSummary(paginated);
@@ -85,7 +94,7 @@ export async function handleGetSessionById(req: Request, url: URL): Promise<Resp
     }, { status: 400 });
   }
 
-  const sessionPaths = await fileManager.findSessions();
+  const sessionPaths = await findSessions();
   const sessionPath = sessionPaths.find((path) => path.endsWith(`/${sessionId}`));
 
   if (!sessionPath) {
@@ -95,7 +104,7 @@ export async function handleGetSessionById(req: Request, url: URL): Promise<Resp
     }, { status: 404 });
   }
 
-  const session = await fileManager.loadSession(sessionPath);
+  const session = await loadSession(sessionPath);
 
   if (!session) {
     return Response.json({
@@ -114,7 +123,7 @@ export async function handleGetSessionById(req: Request, url: URL): Promise<Resp
 
   const messagesWithPRT = await Promise.all(
     paginatedMessages.map(async (msg) => {
-      const prtFiles = await fileManager.loadPRTFiles(msg.id);
+      const prtFiles = await loadPRTFiles(msg.id);
       return {
         ...msg,
         prtFiles
@@ -146,7 +155,7 @@ export async function handleGetSessionById(req: Request, url: URL): Promise<Resp
  * @returns JSON response with recent session data
  */
 export async function handleGetMostRecent(req: Request): Promise<Response> {
-  const session = await fileManager.getMostRecentSession();
+  const session = await getMostRecentSession();
 
   if (!session) {
     return Response.json({
@@ -199,7 +208,7 @@ export async function handleGetAnalytics(req: Request, url: URL): Promise<Respon
 
   const weekStart = Math.min(Math.max(parseSafeInt(url.searchParams.get("weekStart"), 0), 0), 6);
 
-  const sessions = await fileManager.loadAllSessions();
+  const sessions = await loadAllSessions();
 
   switch (type) {
     case "daily": {
@@ -264,7 +273,7 @@ export async function handleGetAnalytics(req: Request, url: URL): Promise<Respon
  * @returns JSON response with total statistics
  */
 export async function handleGetSummary(req: Request): Promise<Response> {
-  const sessions = await fileManager.loadAllSessions();
+  const sessions = await loadAllSessions();
   const summary = await analyzer.generateSessionsSummary(sessions);
 
   return Response.json({
@@ -279,17 +288,17 @@ export async function handleGetSummary(req: Request): Promise<Response> {
  * @returns JSON response with validation status
  */
 export async function handleValidate(req: Request): Promise<Response> {
-  const path = fileManager.getOpenCodeStoragePath();
-  const isValid = await fileManager.validatePath(path);
+  const path = getOpenCodeStoragePath();
+  const isValid = await validatePath(path);
 
-  const sessionDirs = await fileManager.findSessions(1);
+  const sessionDirs = await findSessions(1);
   const hasSessions = sessionDirs.length > 0;
 
   let warnings: string[] = [];
   if (!hasSessions) {
     warnings.push("No sessions found in storage directory");
   } else {
-    const recent = await fileManager.loadSession(sessionDirs[0]);
+    const recent = await loadSession(sessionDirs[0]);
     if (!recent || recent.files.length === 0) {
       warnings.push("Most recent session has no valid interaction data");
     }
@@ -369,7 +378,7 @@ function getActivityStatus(end: Date | null): "active" | "recent" | "idle" | "in
  * @returns JSON response with OpenCode info, MCP servers, skills, plugins, version
  */
 export async function handleGetOpenCodeInfo(req: Request): Promise<Response> {
-  const info = await fileManager.getOpenCodeInfo();
+  const info = await getOpenCodeInfo();
 
   const home = info.homePath;
   const mcpPath = joinPath(home, ".config", "opencode", "mcp");

@@ -1,5 +1,5 @@
 import type { InteractionFile, SessionData, PricingData } from "./types";
-import { FileManager } from "./fileutil";
+import { loadPricing } from "./fileutil";
 
 export class CostCalculator {
     private pricingData: PricingData;
@@ -17,8 +17,7 @@ export class CostCalculator {
     // Load pricing configuration
     async init(): Promise<void> {
         try {
-            const fileManager = new FileManager();
-            this.pricingData = await fileManager.loadPricing();
+            this.pricingData = await loadPricing();
             this.initialized = true;
         } catch (error) {
             this.initializationError = error instanceof Error

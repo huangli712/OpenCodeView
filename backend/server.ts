@@ -1,16 +1,18 @@
 import { serve } from "bun";
 import { resolve, normalize } from "node:path";
-import { joinPath } from "./fileutil";
-import { 
-  handleGetSessions, 
-  handleGetSessionById, 
-  handleGetMostRecent, 
-  handleGetAnalytics, 
-  handleGetSummary, 
-  handleValidate, 
-  handleGetOpenCodeInfo 
+import {
+    joinPath,
+    getOpenCodeStoragePath
+} from "./fileutil";
+import {
+    handleGetSessions,
+    handleGetSessionById,
+    handleGetMostRecent,
+    handleGetAnalytics,
+    handleGetSummary,
+    handleValidate,
+    handleGetOpenCodeInfo
 } from "./routes";
-import { FileManager } from "./fileutil";
 
 const DEFAULT_PORT = 3000;
 const MAX_PORT = 65535;
@@ -189,7 +191,7 @@ const server = serve({
 });
 
 console.log(`🚀 OpenCodeView server running on http://localhost:${PORT}`);
-console.log(`📁 OpenCode storage path: ${new FileManager().getOpenCodeStoragePath()}`);
+console.log(`📁 OpenCode storage path: ${getOpenCodeStoragePath()}`);
 
 process.on("SIGINT", () => {
   console.log("\n👋 Shutting down gracefully...");
