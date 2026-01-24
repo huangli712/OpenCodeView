@@ -6,7 +6,7 @@ import type {
     MonthlyBreakdown,
     ModelBreakdown,
     ProjectBreakdown,
-    TokenUsage
+    TokenUsage,
 } from "./types";
 import { CostCalculator } from "./cost";
 
@@ -27,7 +27,7 @@ export class Sessions {
             input: 0,
             output: 0,
             cache_write: 0,
-            cache_read: 0
+            cache_read: 0,
         };
 
         for (const file of session.files) {
@@ -125,8 +125,9 @@ export class Sessions {
             pathCounts.set(path, count + 1);
         }
 
-        const mostCommon = Array.from(pathCounts.entries())
-            .sort((a, b) => b[1] - a[1])[0][0];
+        const mostCommon = Array.from(pathCounts.entries()).sort(
+            (a, b) => b[1] - a[1],
+        )[0][0];
 
         return mostCommon.split("/").pop() || "Unknown";
     }
@@ -147,12 +148,20 @@ export class Sessions {
             return 0;
         }
 
-        const cost = await this.costCalculator.calculateSessionCost(session);
+        const cost =
+            await this.costCalculator.calculateSessionCost(session);
         return cost / durationHours;
     }
 
     // Accumulate session statistics into summary aggregates
-    accumulateSessionStats(session: SessionData, totalTokens: TokenUsage, totalInteractionsRef: { value: number }, modelsUsed: Set<string>, startTimes: Date[], endTimes: Date[]): void {
+    accumulateSessionStats(
+        session: SessionData,
+        totalTokens: TokenUsage,
+        totalInteractionsRef: { value: number },
+        modelsUsed: Set<string>,
+        startTimes: Date[],
+        endTimes: Date[],
+    ): void {
         const tokens = this.computeTotalTokens(session);
         totalTokens.input += tokens.input;
         totalTokens.output += tokens.output;
@@ -178,7 +187,9 @@ export class Sessions {
     }
 
     // Generate summary statistics from all sessions
-    async generateSessionsSummary(sessions: SessionData[]): Promise<SessionSummary> {
+    async generateSessionsSummary(
+        sessions: SessionData[],
+    ): Promise<SessionSummary> {
         if (sessions.length === 0) {
             return {
                 totalSessions: 0,
@@ -188,11 +199,11 @@ export class Sessions {
                     output: 0,
                     cache_write: 0,
                     cache_read: 0,
-                    total: 0
+                    total: 0,
                 },
                 totalCost: 0,
                 modelsUsed: [],
-                dateRange: "No sessions"
+                dateRange: "No sessions",
             };
         }
 
@@ -201,7 +212,7 @@ export class Sessions {
             output: 0,
             cache_write: 0,
             cache_read: 0,
-            total: 0
+            total: 0,
         };
         const totalInteractionsRef = { value: 0 };
         const modelsUsed = new Set<string>();
@@ -209,23 +220,36 @@ export class Sessions {
         const endTimes: Date[] = [];
 
         for (const session of sessions) {
-            this.accumulateSessionStats(session, totalTokens, totalInteractionsRef, modelsUsed, startTimes, endTimes);
+            this.accumulateSessionStats(
+                session,
+                totalTokens,
+                totalInteractionsRef,
+                modelsUsed,
+                startTimes,
+                endTimes,
+            );
         }
 
         const totalInteractions = totalInteractionsRef.value;
-        const totalCost = await this.costCalculator.calculateSessionsCost(sessions);
+        const totalCost =
+            await this.costCalculator.calculateSessionsCost(sessions);
 
         let dateRange = "Unknown";
         if (startTimes.length > 0 && endTimes.length > 0) {
-            const earliest = new Date(Math.min(...startTimes.map((t) => t.getTime())));
-            const latest = new Date(Math.max(...endTimes.map((t) => t.getTime())));
+            const earliest = new Date(
+                Math.min(...startTimes.map((t) => t.getTime())),
+            );
+            const latest = new Date(
+                Math.max(...endTimes.map((t) => t.getTime())),
+            );
 
             const earliestDate = earliest.toISOString().split("T")[0];
             const latestDate = latest.toISOString().split("T")[0];
 
-            dateRange = earliestDate === latestDate
-                ? earliestDate
-                : `${earliestDate} to ${latestDate}`;
+            dateRange =
+                earliestDate === latestDate
+                    ? earliestDate
+                    : `${earliestDate} to ${latestDate}`;
         }
 
         return {
@@ -233,16 +257,22 @@ export class Sessions {
             totalInteractions,
             totalTokens: {
                 ...totalTokens,
-                total: totalTokens.input + totalTokens.output + totalTokens.cache_write + totalTokens.cache_read
+                total:
+                    totalTokens.input +
+                    totalTokens.output +
+                    totalTokens.cache_write +
+                    totalTokens.cache_read,
             },
             totalCost,
             modelsUsed: Array.from(modelsUsed).sort(),
-            dateRange
+            dateRange,
         };
     }
 
     // Group sessions by date for daily stats
-    async createDailyBreakdown(sessions: SessionData[]): Promise<Map<string, DailyBreakdown>> {
+    async createDailyBreakdown(
+        sessions: SessionData[],
+    ): Promise<Map<string, DailyBreakdown>> {
         const dailyMap = new Map<string, DailyBreakdown>();
 
         for (const session of sessions) {
@@ -251,15 +281,19 @@ export class Sessions {
                 continue;
             }
 
-            const dateKey = start.toLocaleDateString('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit' });
+            const dateKey = start.toLocaleDateString("en-CA", {
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+            });
 
-        if (!dailyMap.has(dateKey)) {
+            if (!dailyMap.has(dateKey)) {
                 dailyMap.set(dateKey, {
                     date: dateKey,
                     sessions: 0,
                     interactions: 0,
                     tokens: 0,
-                    cost: 0
+                    cost: 0,
                 });
             }
 
@@ -268,22 +302,39 @@ export class Sessions {
             day.interactions += this.getInteractionCount(session);
 
             const tokens = this.computeTotalTokens(session);
-            day.tokens += tokens.input + tokens.output + tokens.cache_write + tokens.cache_read;
+            day.tokens +=
+                tokens.input +
+                tokens.output +
+                tokens.cache_write +
+                tokens.cache_read;
         }
 
         for (const [dateStr, day] of dailyMap) {
             const sessionsInDay = sessions.filter((s) => {
                 const start = this.getStartTime(s);
-                return start && start.toLocaleDateString('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit' }) === dateStr;
+                return (
+                    start &&
+                    start.toLocaleDateString("en-CA", {
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                    }) === dateStr
+                );
             });
-            day.cost = await this.costCalculator.calculateSessionsCost(sessionsInDay);
+            day.cost =
+                await this.costCalculator.calculateSessionsCost(
+                    sessionsInDay,
+                );
         }
 
         return dailyMap;
     }
 
     // Group sessions by week for weekly stats
-    async createWeeklyBreakdown(sessions: SessionData[], weekStartDay: number): Promise<Map<string, WeeklyBreakdown>> {
+    async createWeeklyBreakdown(
+        sessions: SessionData[],
+        weekStartDay: number,
+    ): Promise<Map<string, WeeklyBreakdown>> {
         const weeklyMap = new Map<string, WeeklyBreakdown>();
 
         for (const session of sessions) {
@@ -297,7 +348,11 @@ export class Sessions {
             const weekStartDate = new Date(start);
             weekStartDate.setDate(start.getDate() - daysFromWeekStart);
 
-            const weekKey = weekStartDate.toLocaleDateString('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit' });
+            const weekKey = weekStartDate.toLocaleDateString("en-CA", {
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+            });
 
             if (!weeklyMap.has(weekKey)) {
                 // Calculate all days in this week
@@ -314,7 +369,7 @@ export class Sessions {
                     sessions: 0,
                     interactions: 0,
                     tokens: 0,
-                    cost: 0
+                    cost: 0,
                 });
             }
 
@@ -323,7 +378,11 @@ export class Sessions {
             week.interactions += this.getInteractionCount(session);
 
             const tokens = this.computeTotalTokens(session);
-            week.tokens += tokens.input + tokens.output + tokens.cache_write + tokens.cache_read;
+            week.tokens +=
+                tokens.input +
+                tokens.output +
+                tokens.cache_write +
+                tokens.cache_read;
         }
 
         // Calculate costs for each week
@@ -335,21 +394,30 @@ export class Sessions {
                 }
 
                 const sessionDay = start.getDay();
-                const daysFromWeekStart = (sessionDay - weekStartDay + 7) % 7;
+                const daysFromWeekStart =
+                    (sessionDay - weekStartDay + 7) % 7;
                 const weekStartDate = new Date(start);
                 weekStartDate.setDate(start.getDate() - daysFromWeekStart);
-                const sessionWeekKey = weekStartDate.toLocaleDateString('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit' });
+                const sessionWeekKey = weekStartDate.toLocaleDateString(
+                    "en-CA",
+                    { year: "numeric", month: "2-digit", day: "2-digit" },
+                );
 
                 return sessionWeekKey === weekKey;
             });
-            week.cost = await this.costCalculator.calculateSessionsCost(sessionsInWeek);
+            week.cost =
+                await this.costCalculator.calculateSessionsCost(
+                    sessionsInWeek,
+                );
         }
 
         return weeklyMap;
     }
 
     // Group sessions by month for monthly stats
-    async createMonthlyBreakdown(sessions: SessionData[]): Promise<Map<string, MonthlyBreakdown>> {
+    async createMonthlyBreakdown(
+        sessions: SessionData[],
+    ): Promise<Map<string, MonthlyBreakdown>> {
         const monthlyMap = new Map<string, MonthlyBreakdown>();
 
         for (const session of sessions) {
@@ -358,7 +426,10 @@ export class Sessions {
                 continue;
             }
 
-            const monthKey = start.toLocaleDateString('en-CA', { year: 'numeric', month: '2-digit' }); // YYYY-MM
+            const monthKey = start.toLocaleDateString("en-CA", {
+                year: "numeric",
+                month: "2-digit",
+            }); // YYYY-MM
 
             if (!monthlyMap.has(monthKey)) {
                 monthlyMap.set(monthKey, {
@@ -366,7 +437,7 @@ export class Sessions {
                     sessions: 0,
                     interactions: 0,
                     tokens: 0,
-                    cost: 0
+                    cost: 0,
                 });
             }
 
@@ -375,23 +446,38 @@ export class Sessions {
             month.interactions += this.getInteractionCount(session);
 
             const tokens = this.computeTotalTokens(session);
-            month.tokens += tokens.input + tokens.output + tokens.cache_write + tokens.cache_read;
+            month.tokens +=
+                tokens.input +
+                tokens.output +
+                tokens.cache_write +
+                tokens.cache_read;
         }
 
         // Calculate costs for each month
         for (const [monthKey, month] of monthlyMap) {
             const sessionsInMonth = sessions.filter((s) => {
                 const start = this.getStartTime(s);
-                return start && start.toLocaleDateString('en-CA', { year: 'numeric', month: '2-digit' }) === monthKey;
+                return (
+                    start &&
+                    start.toLocaleDateString("en-CA", {
+                        year: "numeric",
+                        month: "2-digit",
+                    }) === monthKey
+                );
             });
-            month.cost = await this.costCalculator.calculateSessionsCost(sessionsInMonth);
+            month.cost =
+                await this.costCalculator.calculateSessionsCost(
+                    sessionsInMonth,
+                );
         }
 
         return monthlyMap;
     }
 
     // Group sessions by model for stats
-    async createModelBreakdown(sessions: SessionData[]): Promise<Map<string, ModelBreakdown>> {
+    async createModelBreakdown(
+        sessions: SessionData[],
+    ): Promise<Map<string, ModelBreakdown>> {
         const modelMap = new Map<string, ModelBreakdown>();
 
         for (const session of sessions) {
@@ -404,7 +490,7 @@ export class Sessions {
                         sessions: 0,
                         interactions: 0,
                         tokens: 0,
-                        cost: 0
+                        cost: 0,
                     });
                 }
 
@@ -413,8 +499,13 @@ export class Sessions {
                 model.interactions += this.getInteractionCount(session);
 
                 const tokens = this.computeTotalTokens(session);
-                // Distribute tokens evenly across models used in this session
-                model.tokens += tokens.input + tokens.output + tokens.cache_write + tokens.cache_read;
+                // Distribute tokens evenly across models
+                // used in this session
+                model.tokens +=
+                    tokens.input +
+                    tokens.output +
+                    tokens.cache_write +
+                    tokens.cache_read;
             }
         }
 
@@ -424,7 +515,10 @@ export class Sessions {
                 return this.getModelsUsed(s).includes(modelId);
             });
             // Calculate cost proportionally
-            const totalCost = await this.costCalculator.calculateSessionsCost(sessionsForModel);
+            const totalCost =
+                await this.costCalculator.calculateSessionsCost(
+                    sessionsForModel,
+                );
             model.cost = totalCost;
         }
 
@@ -432,7 +526,9 @@ export class Sessions {
     }
 
     // Group sessions by project for stats
-    async createProjectBreakdown(sessions: SessionData[]): Promise<Map<string, ProjectBreakdown>> {
+    async createProjectBreakdown(
+        sessions: SessionData[],
+    ): Promise<Map<string, ProjectBreakdown>> {
         const projectMap = new Map<string, ProjectBreakdown>();
 
         for (const session of sessions) {
@@ -445,7 +541,7 @@ export class Sessions {
                     interactions: 0,
                     tokens: 0,
                     cost: 0,
-                    modelsUsed: []
+                    modelsUsed: [],
                 });
             }
 
@@ -454,7 +550,11 @@ export class Sessions {
             project.interactions += this.getInteractionCount(session);
 
             const tokens = this.computeTotalTokens(session);
-            project.tokens += tokens.input + tokens.output + tokens.cache_write + tokens.cache_read;
+            project.tokens +=
+                tokens.input +
+                tokens.output +
+                tokens.cache_write +
+                tokens.cache_read;
 
             // Collect models used in this project
             const modelsUsed = this.getModelsUsed(session);
@@ -470,7 +570,10 @@ export class Sessions {
             const sessionsInProject = sessions.filter((s) => {
                 return this.getProjectName(s) === projectName;
             });
-            project.cost = await this.costCalculator.calculateSessionsCost(sessionsInProject);
+            project.cost =
+                await this.costCalculator.calculateSessionsCost(
+                    sessionsInProject,
+                );
         }
 
         return projectMap;
