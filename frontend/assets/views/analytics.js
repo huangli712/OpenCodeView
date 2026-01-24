@@ -8,7 +8,12 @@ export class AnalyticsView {
   }
 
   async load(type) {
-    const result = await this.api.getAnalytics(type);
+    // Load analytics data and summary stats
+    const [result, summary] = await Promise.all([
+      this.api.getAnalytics(type),
+      this.api.getSummary()
+    ]);
+
     const titles = {
       daily: "Daily Usage",
       weekly: "Weekly Usage",
@@ -22,6 +27,7 @@ export class AnalyticsView {
         <h2 class="section-title">${titles[type] || "Analysis"}</h2>
         ${this.renderTable(result.data, type)}
         ${this.renderChartsContainer(type)}
+        ${type === "projects" ? this.renderTotalStats(summary) : ""}
       `,
       data: result.data,
       type
@@ -120,6 +126,20 @@ export class AnalyticsView {
           `).join("")}
         </tbody>
       </table>
+    `;
+  }
+
+  // Render total statistics row at bottom of table
+  renderTotalStats(summary) {
+    return `
+      <tr class="total-stats-row">
+        <td colspan="3" class="total-stats-label">Total</td>
+        <td>${formatNumber(summary.totalSessions)}</td>
+        <td>${formatNumber(summary.totalInteractions)}</td>
+        <td>${formatNumber(summary.totalTokens?.total || 0)}</td>
+        <td>$${summary.totalCost?.toFixed(2)}</td>
+        <td>-</td>
+      </tr>
     `;
   }
 
