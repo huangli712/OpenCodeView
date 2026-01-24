@@ -5,7 +5,8 @@ import type {
   WeeklyBreakdown,
   MonthlyBreakdown,
   ModelBreakdown,
-  ProjectBreakdown
+  ProjectBreakdown,
+  TokenUsage
 } from "./types";
 import { CostCalculator } from "./cost";
 
@@ -129,6 +130,17 @@ export class Sessions {
       return title.length > 50 ? title.slice(0, 47) + "..." : title;
     }
     return session.sessionId;
+  }
+
+  async calculateBurnRate(session: SessionData): Promise<number> {
+    const durationHours = this.getDurationHours(session);
+
+    if (durationHours === 0) {
+      return 0;
+    }
+
+    const cost = await this.costCalculator.calculateSessionCost(session);
+    return cost / durationHours;
   }
 
   accumulateSessionStats(session: SessionData, totalTokens: TokenUsage, totalInteractionsRef: { value: number }, modelsUsed: Set<string>, startTimes: Date[], endTimes: Date[]): void {

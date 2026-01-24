@@ -85,7 +85,7 @@ function checkRateLimit(req: Request): boolean {
   const now = Date.now();
   const log = ipRequestLog.get(ip);
 
-  if (!log || now > log.resetTime + RATE_LIMIT_WINDOW_MS) {
+  if (!log || now >= log.resetTime + RATE_LIMIT_WINDOW_MS) {
     ipRequestLog.set(ip, { count: 1, resetTime: now });
     return true;
   }
