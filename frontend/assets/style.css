@@ -429,20 +429,7 @@ body {
 
 .data-table tr:last-child td {
   border-bottom: none;
-}
-
-.data-table .total-stats-row {
-  background: var(--surface-alt);
-  font-weight: 600;
-  color: var(--text);
-}
-
-.data-table .total-stats-label {
-  font-weight: 600;
-  color: var(--text);
-  text-align: right;
-  padding-right: 1rem;
-}
+ }
 
  .toast-container {
   position: fixed;
