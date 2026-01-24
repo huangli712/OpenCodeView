@@ -30,6 +30,7 @@ export function dirname(path: string): string {
   return parts.join("/") || "/";
 }
 
+// Resolve OpenCode storage path (try multiple locations)
 const OPENCODE_STORAGE_PATH = (() => {
   const home = process.env.HOME || process.env.USERPROFILE || "";
 
@@ -49,6 +50,7 @@ const OPENCODE_STORAGE_PATH = (() => {
   return paths[0];
 })();
 
+// Resolve OpenCode PRT/part storage path (try multiple locations)
 const PART_STORAGE_PATH = (() => {
   const home = process.env.HOME || process.env.USERPROFILE || "";
 

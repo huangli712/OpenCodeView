@@ -45,6 +45,7 @@ export class CostCalculator {
       return 0;
     }
 
+    // Pricing is per 1M tokens
     const million = 1_000_000;
     const tokens = interaction.tokens;
 

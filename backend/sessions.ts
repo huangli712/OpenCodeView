@@ -143,6 +143,7 @@ export class Sessions {
     return cost / durationHours;
   }
 
+  // Accumulate session statistics into summary aggregates
   accumulateSessionStats(session: SessionData, totalTokens: TokenUsage, totalInteractionsRef: { value: number }, modelsUsed: Set<string>, startTimes: Date[], endTimes: Date[]): void {
     const tokens = this.computeTotalTokens(session);
     totalTokens.input += tokens.input;

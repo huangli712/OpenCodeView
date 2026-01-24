@@ -348,13 +348,13 @@ function getActivityStatus(end: Date | null): "active" | "recent" | "idle" | "in
   const now = new Date();
   const secondsAgo = (now.getTime() - end.getTime()) / 1000;
 
-  if (secondsAgo < 60) {
+  if (secondsAgo < 60) { // < 1 min
     return "active";
   }
-  if (secondsAgo < 300) {
+  if (secondsAgo < 300) { // < 5 min
     return "recent";
   }
-  if (secondsAgo < 1800) {
+  if (secondsAgo < 1800) { // < 30 min
     return "idle";
   }
   return "inactive";
