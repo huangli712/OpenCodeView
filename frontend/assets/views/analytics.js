@@ -125,6 +125,7 @@ export class AnalyticsView {
             </tr>
           `).join("")}
         </tbody>
+        ${type === "projects" ? this.renderTotalStats(summary) : ""}
       </table>
     `;
   }
