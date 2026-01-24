@@ -131,7 +131,7 @@ export class Sessions {
     return mostCommon.split("/").pop() || "Unknown";
   }
 
-    getDisplayTitle(session: SessionData): string {
+  getDisplayTitle(session: SessionData): string {
     if (session.sessionTitle) {
       const title = session.sessionTitle;
       return title.length > 50 ? title.slice(0, 47) + "..." : title;
@@ -393,50 +393,20 @@ export class Sessions {
   // Group sessions by model for stats
   async createModelBreakdown(sessions: SessionData[]): Promise<Map<string, ModelBreakdown>> {
     const modelMap = new Map<string, ModelBreakdown>();
-    const countedSessions = new Set<string>(); // Track sessions already counted
 
     for (const session of sessions) {
       const modelsUsed = this.getModelsUsed(session);
 
-      // Only count this session once if it hasn't been counted yet
-      if (!countedSessions.has(session.sessionId)) {
-        countedSessions.add(session.sessionId);
-
-        for (const modelId of modelsUsed) {
-          if (!modelMap.has(modelId)) {
-            modelMap.set(modelId, {
-              modelId,
-              sessions: 0,
-              interactions: 0,
-              tokens: 0,
-              cost: 0,
-              modelsUsed: []
-            });
-          }
-
-          const model = modelMap.get(modelId)!;
-          model.sessions++;
-          model.interactions += this.getInteractionCount(session);
-
-          const tokens = this.computeTotalTokens(session);
-          // Distribute tokens evenly across models used in this session
-          model.tokens += tokens.input + tokens.output + tokens.cache_write + tokens.cache_read;
+      for (const modelId of modelsUsed) {
+        if (!modelMap.has(modelId)) {
+          modelMap.set(modelId, {
+            modelId,
+            sessions: 0,
+            interactions: 0,
+            tokens: 0,
+            cost: 0
+          });
         }
-      }
-    }
-
-    // Calculate costs for each model
-    for (const [modelId, model] of modelMap) {
-      const sessionsForModel = sessions.filter((s) => {
-        return this.getModelsUsed(s).includes(modelId);
-      });
-      // Calculate total cost for this model
-      const totalCost = await this.costCalculator.calculateSessionsCost(sessionsForModel);
-      model.cost = totalCost;
-    }
-
-    return modelMap;
-  }
 
         const model = modelMap.get(modelId)!;
         model.sessions++;
