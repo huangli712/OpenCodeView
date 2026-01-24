@@ -203,3 +203,12 @@ export interface MessageInfo {
     diffCount?: number;
     prtFiles?: PRTInfo[];
 }
+
+// OpenCode installation and configuration information
+export interface OpenCodeInfo {
+    storagePath: string;
+    configPath: string;
+    homePath: string;
+    hasOpenCode: boolean;
+    sessionCount: number;
+}
