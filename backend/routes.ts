@@ -52,6 +52,72 @@ analyzer.init().catch((error) => {
     );
 });
 
+// Format session files into message info
+function formatMessages(session: SessionData): MessageInfo[] {
+    return session.files.map((file, index) => {
+        const data = file.rawData;
+        const totalTokens =
+            file.tokens.input +
+            file.tokens.output +
+            file.tokens.cache_write +
+            file.tokens.cache_read;
+
+        let title: string | undefined;
+        let fileCount: number | undefined;
+        let diffCount: number | undefined;
+
+        if (data.role === "user" && data.summary) {
+            title = data.summary.title;
+            if (data.summary.diffs) {
+                fileCount = data.summary.diffs.length;
+                diffCount = data.summary.diffs.reduce(
+                    (sum, diff) =>
+                        sum + (diff.additions || 0) +
+                        (diff.deletions || 0),
+                    0
+                );
+            }
+        }
+
+        return {
+            id: data.id || `msg_${index}`,
+            role: data.role || "unknown",
+            modelId: data.modelID || data.model?.modelID,
+            providerID: data.providerID,
+            mode: data.mode,
+            agent: data.agent,
+            timestamp: data.time?.created || file.timeData?.created,
+            tokens: totalTokens,
+            cost: data.cost,
+            title,
+            fileCount,
+            diffCount
+        };
+    });
+}
+
+// Get activity status based on end time
+function getActivityStatus(end: Date | null):
+    "active" | "recent" | "idle" | "inactive" {
+    if (!end) {
+        return "unknown";
+    }
+
+    const now = new Date();
+    const secondsAgo = (now.getTime() - end.getTime()) / 1000;
+
+    if (secondsAgo < 60) { // < 1 min
+        return "active";
+    }
+    if (secondsAgo < 300) { // < 5 min
+        return "recent";
+    }
+    if (secondsAgo < 1800) { // < 30 min
+        return "idle";
+    }
+    return "inactive";
+}
+
 // GET /api/sessions - List all sessions with pagination
 // @param req - HTTP request
 // @param url - Request URL with query params (limit, offset)
@@ -373,72 +439,6 @@ export async function handleValidate(
         hasSessions,
         warnings
     });
-}
-
-// Format session files into message info
-function formatMessages(session: SessionData): MessageInfo[] {
-    return session.files.map((file, index) => {
-        const data = file.rawData;
-        const totalTokens =
-            file.tokens.input +
-            file.tokens.output +
-            file.tokens.cache_write +
-            file.tokens.cache_read;
-
-        let title: string | undefined;
-        let fileCount: number | undefined;
-        let diffCount: number | undefined;
-
-        if (data.role === "user" && data.summary) {
-            title = data.summary.title;
-            if (data.summary.diffs) {
-                fileCount = data.summary.diffs.length;
-                diffCount = data.summary.diffs.reduce(
-                    (sum, diff) =>
-                        sum + (diff.additions || 0) +
-                        (diff.deletions || 0),
-                    0
-                );
-            }
-        }
-
-        return {
-            id: data.id || `msg_${index}`,
-            role: data.role || "unknown",
-            modelId: data.modelID || data.model?.modelID,
-            providerID: data.providerID,
-            mode: data.mode,
-            agent: data.agent,
-            timestamp: data.time?.created || file.timeData?.created,
-            tokens: totalTokens,
-            cost: data.cost,
-            title,
-            fileCount,
-            diffCount
-        };
-    });
-}
-
-// Get activity status based on end time
-function getActivityStatus(end: Date | null):
-    "active" | "recent" | "idle" | "inactive" {
-    if (!end) {
-        return "unknown";
-    }
-
-    const now = new Date();
-    const secondsAgo = (now.getTime() - end.getTime()) / 1000;
-
-    if (secondsAgo < 60) { // < 1 min
-        return "active";
-    }
-    if (secondsAgo < 300) { // < 5 min
-        return "recent";
-    }
-    if (secondsAgo < 1800) { // < 30 min
-        return "idle";
-    }
-    return "inactive";
 }
 
 // GET /api/opencode - Get OpenCode installation information
