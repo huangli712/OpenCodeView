@@ -393,20 +393,50 @@ export class Sessions {
   // Group sessions by model for stats
   async createModelBreakdown(sessions: SessionData[]): Promise<Map<string, ModelBreakdown>> {
     const modelMap = new Map<string, ModelBreakdown>();
+    const countedSessions = new Set<string>(); // Track sessions already counted
 
     for (const session of sessions) {
       const modelsUsed = this.getModelsUsed(session);
 
-      for (const modelId of modelsUsed) {
-        if (!modelMap.has(modelId)) {
-          modelMap.set(modelId, {
-            modelId,
-            sessions: 0,
-            interactions: 0,
-            tokens: 0,
-            cost: 0
-          });
+      // Only count this session once if it hasn't been counted yet
+      if (!countedSessions.has(session.sessionId)) {
+        countedSessions.add(session.sessionId);
+
+        for (const modelId of modelsUsed) {
+          if (!modelMap.has(modelId)) {
+            modelMap.set(modelId, {
+              modelId,
+              sessions: 0,
+              interactions: 0,
+              tokens: 0,
+              cost: 0,
+              modelsUsed: []
+            });
+          }
+
+          const model = modelMap.get(modelId)!;
+          model.sessions++;
+          model.interactions += this.getInteractionCount(session);
+
+          const tokens = this.computeTotalTokens(session);
+          // Distribute tokens evenly across models used in this session
+          model.tokens += tokens.input + tokens.output + tokens.cache_write + tokens.cache_read;
         }
+      }
+    }
+
+    // Calculate costs for each model
+    for (const [modelId, model] of modelMap) {
+      const sessionsForModel = sessions.filter((s) => {
+        return this.getModelsUsed(s).includes(modelId);
+      });
+      // Calculate total cost for this model
+      const totalCost = await this.costCalculator.calculateSessionsCost(sessionsForModel);
+      model.cost = totalCost;
+    }
+
+    return modelMap;
+  }
 
         const model = modelMap.get(modelId)!;
         model.sessions++;
