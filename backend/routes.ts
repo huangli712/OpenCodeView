@@ -4,12 +4,13 @@ import { Sessions } from "./sessions";
 import { promises as fsPromises } from "node:fs";
 
 // Utility function for safe integer parsing
+// Parse integer safely with fallback
 function parseSafeInt(value: string | null, defaultValue: number): number {
   const parsed = parseInt(value || `${defaultValue}`, 10);
   return isNaN(parsed) ? defaultValue : parsed;
 }
 
-// Helper function to enrich session data with computed fields
+// Enrich session with computed stats
 async function enrichSession(session: SessionData, analyzer: Sessions) {
   const startTime = analyzer.getStartTime(session);
   const durationHours = analyzer.getDurationHours(session);
@@ -303,6 +304,7 @@ export async function handleValidate(req: Request): Promise<Response> {
   });
 }
 
+// Format session files into message info
 function formatMessages(session: SessionData): MessageInfo[] {
   return session.files.map((file, index) => {
     const data = file.rawData;
@@ -340,6 +342,7 @@ function formatMessages(session: SessionData): MessageInfo[] {
   });
 }
 
+// Get activity status based on end time
 function getActivityStatus(end: Date | null): "active" | "recent" | "idle" | "inactive" {
   if (!end) {
     return "unknown";

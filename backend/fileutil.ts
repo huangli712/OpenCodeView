@@ -72,6 +72,7 @@ const PART_STORAGE_PATH = (() => {
 
 const PRICING_PATH = joinPath(process.cwd(), "config", "models.json");
 
+// Check if directory name matches session pattern
 function isSessionDir(dirName: string): boolean {
   return dirName.startsWith("ses_");
 }
@@ -88,6 +89,7 @@ const SESSION_FETCH_MULTIPLIER = 3;
 const MAX_SESSIONS_TO_SCAN = 1000;
 
 export class FileManager {
+  // Find all session directories sorted by modification time
   async findSessions(limit?: number): Promise<string[]> {
     try {
       const sessions: string[] = [];
@@ -138,6 +140,7 @@ export class FileManager {
     }
   }
 
+  // Find JSON files sorted by modification time
   async findJSONFiles(directory: string): Promise<string[]> {
     try {
       const files: string[] = [];
@@ -180,6 +183,7 @@ export class FileManager {
     }
   }
 
+  // Load and parse JSON file
   async loadJSON<T = any>(filePath: string): Promise<T | null> {
     try {
       const file = Bun.file(filePath);
@@ -191,11 +195,13 @@ export class FileManager {
     }
   }
 
+  // Load pricing configuration from models.json
   async loadPricing(): Promise<PricingData> {
     const pricing = await this.loadJSON<PricingData>(PRICING_PATH);
     return pricing || {};
   }
 
+  // Extract token usage from interaction data
   parseTokenUsage(data: { tokens?: TokensData; }): TokenUsage {
     const tokensData = data.tokens || {};
     const cacheData = tokensData.cache || {};
@@ -208,6 +214,7 @@ export class FileManager {
     };
   }
 
+  // Extract time data from interaction
   parseTimeData(data: { time?: TimeFieldData; }): TimeData | undefined {
     if (!data.time) {
       return undefined;
@@ -219,6 +226,7 @@ export class FileManager {
     };
   }
 
+  // Normalize model ID for pricing lookup
   extractModelName(modelId: string): string {
     if (!modelId) {
       return "unknown";
@@ -233,6 +241,7 @@ export class FileManager {
     return normalized;
   }
 
+  // Parse interaction file into structured data
   async parseInteractionFile(filePath: string, sessionId: string): Promise<InteractionFile | null> {
     const data = await this.loadJSON<RawInteractionData>(filePath);
     if (!data) {
@@ -264,6 +273,7 @@ export class FileManager {
     }
   }
 
+  // Load session data from directory
   async loadSession(sessionPath: string): Promise<SessionData | null> {
     try {
       const sessionId = basename(sessionPath);
@@ -298,6 +308,7 @@ export class FileManager {
     }
   }
 
+  // Load sessions with optional limit
   async loadAllSessions(limit?: number): Promise<SessionData[]> {
     if (!limit) {
       const sessionPaths = await this.findSessions();
@@ -339,6 +350,7 @@ export class FileManager {
     return sessions;
   }
 
+  // Get most recently modified session
   async getMostRecentSession(): Promise<SessionData | null> {
     const sessionPaths = await this.findSessions(1);
 
@@ -353,6 +365,7 @@ export class FileManager {
     return OPENCODE_STORAGE_PATH;
   }
 
+  // Get OpenCode installation info
   async getOpenCodeInfo(): Promise<OpenCodeInfo> {
     const home = process.env.HOME || process.env.USERPROFILE || "";
     const storagePath = OPENCODE_STORAGE_PATH;
@@ -382,6 +395,7 @@ export class FileManager {
     };
   }
 
+  // Check if path exists
   async validatePath(pathStr: string): Promise<boolean> {
     try {
       await fsPromises.access(pathStr);
@@ -395,6 +409,7 @@ export class FileManager {
     }
   }
 
+  // Load PRT (part) files for message
   async loadPRTFiles(messageId: string): Promise<PRTInfo[]> {
     try {
       const messagePath = joinPath(PART_STORAGE_PATH, messageId);
@@ -444,6 +459,7 @@ export class FileManager {
     }
   }
 
+  // Get OpenCode part storage path
   getPartStoragePath(): string {
     return PART_STORAGE_PATH;
   }

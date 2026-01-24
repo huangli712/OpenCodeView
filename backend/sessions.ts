@@ -21,6 +21,7 @@ export class Sessions {
     await this.costCalculator.init();
   }
 
+  // Sum all tokens in a session
   computeTotalTokens(session: SessionData): TokenUsage {
     const total: TokenUsage = {
       input: 0,
@@ -39,6 +40,7 @@ export class Sessions {
     return total;
   }
 
+  // Get session start time (earliest created timestamp)
   getStartTime(session: SessionData): Date | null {
     const times: Date[] = [];
 
@@ -55,6 +57,7 @@ export class Sessions {
     return new Date(Math.min(...times.map((t) => t.getTime())));
   }
 
+  // Get session end time (latest completed timestamp)
   getEndTime(session: SessionData): Date | null {
     const times: Date[] = [];
 
@@ -71,6 +74,7 @@ export class Sessions {
     return new Date(Math.max(...times.map((t) => t.getTime())));
   }
 
+  // Calculate session duration in hours
   getDurationHours(session: SessionData): number {
     const start = this.getStartTime(session);
     const end = this.getEndTime(session);
@@ -82,6 +86,7 @@ export class Sessions {
     return (end.getTime() - start.getTime()) / (1000 * 60 * 60);
   }
 
+  // Get unique models used in session
   getModelsUsed(session: SessionData): string[] {
     const models = new Set<string>();
     const invalidModels = ["", "unknown", "undefined"];
@@ -95,10 +100,12 @@ export class Sessions {
     return Array.from(models);
   }
 
+  // Get number of interactions in session
   getInteractionCount(session: SessionData): number {
     return session.files.length;
   }
 
+  // Extract most common project name from session paths
   getProjectName(session: SessionData): string {
     if (session.files.length === 0) {
       return "Unknown";
@@ -132,6 +139,7 @@ export class Sessions {
     return session.sessionId;
   }
 
+  // Calculate cost per hour for session
   async calculateBurnRate(session: SessionData): Promise<number> {
     const durationHours = this.getDurationHours(session);
 
@@ -169,6 +177,7 @@ export class Sessions {
     }
   }
 
+  // Generate summary statistics from all sessions
   async generateSessionsSummary(sessions: SessionData[]): Promise<SessionSummary> {
     if (sessions.length === 0) {
       return {
@@ -232,6 +241,7 @@ export class Sessions {
     };
   }
 
+  // Group sessions by date for daily stats
   async createDailyBreakdown(sessions: SessionData[]): Promise<Map<string, DailyBreakdown>> {
     const dailyMap = new Map<string, DailyBreakdown>();
 
@@ -272,6 +282,7 @@ export class Sessions {
     return dailyMap;
   }
 
+  // Group sessions by week for weekly stats
   async createWeeklyBreakdown(sessions: SessionData[], weekStartDay: number): Promise<Map<string, WeeklyBreakdown>> {
     const weeklyMap = new Map<string, WeeklyBreakdown>();
 
@@ -337,6 +348,7 @@ export class Sessions {
     return weeklyMap;
   }
 
+  // Group sessions by month for monthly stats
   async createMonthlyBreakdown(sessions: SessionData[]): Promise<Map<string, MonthlyBreakdown>> {
     const monthlyMap = new Map<string, MonthlyBreakdown>();
 
@@ -378,6 +390,7 @@ export class Sessions {
     return monthlyMap;
   }
 
+  // Group sessions by model for stats
   async createModelBreakdown(sessions: SessionData[]): Promise<Map<string, ModelBreakdown>> {
     const modelMap = new Map<string, ModelBreakdown>();
 
@@ -418,6 +431,7 @@ export class Sessions {
     return modelMap;
   }
 
+  // Group sessions by project for stats
   async createProjectBreakdown(sessions: SessionData[]): Promise<Map<string, ProjectBreakdown>> {
     const projectMap = new Map<string, ProjectBreakdown>();
 

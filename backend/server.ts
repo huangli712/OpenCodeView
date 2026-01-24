@@ -31,6 +31,7 @@ const PORT = (() => {
   return port;
 })();
 
+// Serve static files from frontend directory
 async function handleStatic(req: Request, url: URL): Promise<Response> {
   let pathname = url.pathname;
   if (pathname === "/") {
@@ -62,6 +63,7 @@ async function handleStatic(req: Request, url: URL): Promise<Response> {
   }
 }
 
+// Get MIME content type based on file extension
 function getContentType(pathname: string): string {
   const ext = pathname.split(".").pop()?.toLowerCase();
 
@@ -80,6 +82,7 @@ function getContentType(pathname: string): string {
   return types[ext || ""] || "application/octet-stream";
 }
 
+// Check if request is within rate limit per IP
 function checkRateLimit(req: Request): boolean {
   const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
 
@@ -99,6 +102,7 @@ function checkRateLimit(req: Request): boolean {
   return true;
 }
 
+// Route API requests to appropriate handlers
 async function handleAPI(req: Request, url: URL): Promise<Response> {
   const pathname = url.pathname;
 

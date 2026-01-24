@@ -14,6 +14,7 @@ export class CostCalculator {
     this.sessionCostCache = new Map();
   }
 
+  // Load pricing configuration
   async init(): Promise<void> {
     try {
       const fileManager = new FileManager();
@@ -25,14 +26,17 @@ export class CostCalculator {
     }
   }
 
+  // Check if pricing data is loaded
   isInitialized(): boolean {
     return this.initialized;
   }
 
+  // Get initialization error message
   getInitializationError(): string | null {
     return this.initializationError;
   }
 
+  // Calculate cost for a single interaction
   calculateInteractionCost(interaction: InteractionFile): number {
     const pricing = this.pricingData[interaction.modelId];
 
@@ -57,6 +61,7 @@ export class CostCalculator {
     );
   }
 
+  // Calculate session cost with caching
   calculateSessionCost(session: SessionData): number {
     if (this.sessionCostCache.has(session.sessionId)) {
       return this.sessionCostCache.get(session.sessionId)!;
@@ -78,10 +83,12 @@ export class CostCalculator {
     return total;
   }
 
+  // Clear session cost cache
   clearCache(): void {
     this.sessionCostCache.clear();
   }
 
+  // Calculate total cost for multiple sessions
   async calculateSessionsCost(sessions: SessionData[]): Promise<number> {
     let total = 0;
 
