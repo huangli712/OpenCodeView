@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.7.3 (2026-01-23)
+- Added tech-themed SVG logo with hexagonal frame and circuit patterns
+- Implemented pulse animation for navigation logo
+- Fixed empty session directories being counted in session total
+- Fixed session pagination showing incorrect total (NaN/undefined)
+- Fixed interactionCount to count all message files including user and assistant roles
+- Updated logo size to 48x48px for better visibility
+
 ## v0.7.2 (2026-01-23)
 - Added config section display with JSON file count (excluding package.json)
 - Added MCP server count display in About modal
