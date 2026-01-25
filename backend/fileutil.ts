@@ -295,7 +295,7 @@ export async function parseInteractionFile(
 
     try {
         const modelId = extractModelName(
-            data.modelID || "unknown"
+            data.modelID || data.model?.modelID || "unknown"
         );
         const tokens = parseTokenUsage(data);
         const timeData = parseTimeData(data);
