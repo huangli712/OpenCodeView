@@ -1,5 +1,18 @@
 # Changelog
-
+ 
+## v0.7.4 (2026-01-25)
+- Added support for OPCODE_STORAGE_PATH environment variable for custom OpenCode storage paths
+- Enhanced getProjectName() with console debug logging for project path analysis
+- Updated GUIDE.md with comprehensive frontend and backend architecture documentation
+- Added PRT file modal viewer with JSON content display
+- Documented rate limiting (100 req/min per IP, 10MB max request size)
+- Added cost calculation system documentation with caching behavior
+- Enhanced configuration documentation with environment variables
+- Created extract-projects utility scripts for API data export
+- Added activity status values (active, recent, idle, inactive) with time thresholds
+- Documented token types (input, output, cache_write, cache_read) in pricing system
+- Added session cost caching details (max 1000 entries, automatic eviction)
+ 
 ## v0.7.3 (2026-01-23)
 - Added tech-themed SVG logo with hexagonal frame and circuit patterns
 - Implemented pulse animation for navigation logo

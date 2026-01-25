@@ -1225,4 +1225,4 @@ This project is licensed under the MIT License.
 
 See [CHANGELOG.md](./CHANGELOG.md) for detailed version history.
 
-Current Version: **v0.7.3**
+Current Version: **v0.7.4**
