@@ -21,12 +21,18 @@ const MAX_SESSIONS_TO_SCAN = 1000;
 const OPENCODE_STORAGE_PATH = (() => {
     const home = process.env.HOME || process.env.USERPROFILE || "";
 
-    const paths = [
+    const paths: string[] = [];
+
+    if (process.env.OPCODE_STORAGE_PATH) {
+        paths.push(process.env.OPCODE_STORAGE_PATH);
+    }
+
+    paths.push(
         joinPath(home, ".local", "share", "opencode", "storage",
             "message"),
         joinPath(home, ".opencode", "storage", "message"),
         joinPath(home, ".config", "opencode", "storage", "message")
-    ];
+    );
 
     for (const p of paths) {
         const exists = existsSync(p);
