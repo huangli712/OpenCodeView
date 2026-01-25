@@ -186,14 +186,6 @@ export class SessionsView {
             <div class="loading"><div class="spinner"></div><p>Loading...</p></div>
           </div>
         </div>
-
-        ${msg.title ? `
-          <div class="message-content">
-            <div class="message-title">${escapeHtml(msg.title)}</div>
-            ${msg.fileCount ? `<div class="message-files">${msg.fileCount} file(s) modified</div>` : ""}
-            ${msg.diffCount ? `<div class="message-diffs">${formatNumber(msg.diffCount)} line changes</div>` : ""}
-          </div>
-        ` : ""}
       </div>
     `).join("");
   }

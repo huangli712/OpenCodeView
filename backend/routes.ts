@@ -83,7 +83,7 @@ function formatMessages(session: SessionData): MessageInfo[] {
             id: data.id || `msg_${index}`,
             role: data.role || "unknown",
             modelId: data.modelID || data.model?.modelID,
-            providerID: data.providerID,
+            providerID: data.providerID || data.model?.providerID,
             mode: data.mode,
             agent: data.agent,
             timestamp: data.time?.created || file.timeData?.created,
